@@ -1,6 +1,6 @@
 package ui
 
-import "github.com/bennicholls/delvetown/util"
+import "github.com/bennicholls/delveengine/util"
 import "strings"
 import "strconv"
 

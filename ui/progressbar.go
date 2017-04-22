@@ -1,6 +1,6 @@
 package ui
 
-import "github.com/bennicholls/delvetown/console"
+import "github.com/bennicholls/delveengine/console"
 
 //ProgressBar is a textbox whose background can be a progress bar. Yes.
 type ProgressBar struct {

@@ -1,6 +1,6 @@
 package ui
 
-import "github.com/bennicholls/delvetown/util"
+import "github.com/bennicholls/delveengine/util"
 
 //UIElem is the basic definition for all UI elements.
 type UIElem interface {

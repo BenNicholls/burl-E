@@ -1,7 +1,7 @@
 package ui
 
 import "strings"
-import "github.com/bennicholls/delvetown/console"
+import "github.com/bennicholls/delveengine/console"
 
 //UI Element for displaying text.
 type Textbox struct {

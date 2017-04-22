@@ -1,7 +1,7 @@
 package console
 
 import "github.com/veandco/go-sdl2/sdl"
-import "github.com/bennicholls/delvetown/util"
+import "github.com/bennicholls/delveengine/util"
 import "fmt"
 import "math/rand"
 import "errors"

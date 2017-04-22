@@ -1,6 +1,6 @@
 package ui
 
-import "github.com/bennicholls/delvetown/console"
+import "github.com/bennicholls/delveengine/console"
 
 //UI Element that acts as a way to group other elements. Allows for nesting of elements, etc.
 type Container struct {
