@@ -1,0 +1,4 @@
+*.sublime*
+.vscode/*
+debug
+log.txt
