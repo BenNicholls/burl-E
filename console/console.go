@@ -13,7 +13,7 @@ var format *sdl.PixelFormat
 
 var width, height, tileSize int
 
-var grid []GridCell
+var canvas []Cell
 var masterDirty bool //is this necessary?
 
 var frameTime, ticks, fps uint32
@@ -25,7 +25,7 @@ var showFPS bool
 var BorderColour1 uint32 //focused element colour
 var BorderColour2 uint32 //unfocused element colour
 
-type GridCell struct {
+type Cell struct {
 	Glyph      int
 	ForeColour uint32
 	BackColour uint32
@@ -33,7 +33,7 @@ type GridCell struct {
 	Dirty      bool
 }
 
-func (g *GridCell) Set(gl int, fore, back uint32, z int) {
+func (g *Cell) Set(gl int, fore, back uint32, z int) {
 	if g.Glyph != gl || g.ForeColour != fore || g.BackColour != back || g.Z != z {
 		g.Glyph = gl
 		g.ForeColour = fore
@@ -43,7 +43,7 @@ func (g *GridCell) Set(gl int, fore, back uint32, z int) {
 	}
 }
 
-func (g *GridCell) Clear() {
+func (g *Cell) Clear() {
 	g.Set(0, 0, 0, 0)
 }
 
@@ -74,7 +74,7 @@ func Setup(w, h int, spritesheet, title string) error {
 		return errors.New("No pixelformat: " + fmt.Sprint(sdl.GetError()))
 	}
 
-	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
+	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_SOFTWARE)
 	if err != nil {
 		return errors.New("Failed to create renderer: " + fmt.Sprint(sdl.GetError()))
 	}
@@ -89,7 +89,7 @@ func Setup(w, h int, spritesheet, title string) error {
 		return errors.New("Failed to set blendmode: " + fmt.Sprint(sdl.GetError()))
 	}
 
-	grid = make([]GridCell, width*height)
+	canvas = make([]Cell, width*height)
 	masterDirty = true
 
 	frames = 0
@@ -108,7 +108,7 @@ func Render() {
 	if showFPS {
 		fpsString := fmt.Sprintf("%d fps\n", frames*1000/int(sdl.GetTicks()))
 		for i, r := range fpsString {
-			ChangeGridPoint(i, 0, 10, int(r), 0xFF00FF00, 0xFFFF0000)
+			ChangeCell(i, 0, 10, int(r), 0xFF00FF00, 0xFFFF0000)
 		}
 	}
 
@@ -116,7 +116,7 @@ func Render() {
 	if masterDirty {
 		var src, dst sdl.Rect
 
-		for i, s := range grid {
+		for i, s := range canvas {
 			if s.Dirty {
 				dst = makeRect((i%width)*tileSize, (i/width)*tileSize, tileSize, tileSize)
 				src = makeRect((s.Glyph%16)*tileSize, (s.Glyph/16)*tileSize, tileSize, tileSize)
@@ -129,7 +129,7 @@ func Render() {
 				sprites.SetAlphaMod(a)
 				renderer.Copy(sprites, &src, &dst)
 
-				grid[i].Dirty = false
+				canvas[i].Dirty = false
 			}
 		}
 
@@ -163,25 +163,25 @@ func Cleanup() {
 }
 
 func ChangeGlyph(x, y, glyph int) {
-	if util.CheckBounds(x, y, width, height) && grid[y*width+x].Glyph != glyph {
-		grid[y*width+x].Glyph = glyph
-		grid[y*width+x].Dirty = true
+	if util.CheckBounds(x, y, width, height) && canvas[y*width+x].Glyph != glyph {
+		canvas[y*width+x].Glyph = glyph
+		canvas[y*width+x].Dirty = true
 		masterDirty = true
 	}
 }
 
 func ChangeForeColour(x, y int, fore uint32) {
-	if util.CheckBounds(x, y, width, height) && grid[y*width+x].ForeColour != fore {
-		grid[y*width+x].ForeColour = fore
-		grid[y*width+x].Dirty = true
+	if util.CheckBounds(x, y, width, height) && canvas[y*width+x].ForeColour != fore {
+		canvas[y*width+x].ForeColour = fore
+		canvas[y*width+x].Dirty = true
 		masterDirty = true
 	}
 }
 
 func ChangeBackColour(x, y int, back uint32) {
-	if util.CheckBounds(x, y, width, height) && grid[y*width+x].BackColour != back {
-		grid[y*width+x].BackColour = back
-		grid[y*width+x].Dirty = true
+	if util.CheckBounds(x, y, width, height) && canvas[y*width+x].BackColour != back {
+		canvas[y*width+x].BackColour = back
+		canvas[y*width+x].Dirty = true
 		masterDirty = true
 	}
 }
@@ -190,10 +190,10 @@ func ToggleFPS() {
 	showFPS = !showFPS
 }
 
-func ChangeGridPoint(x, y, z, glyph int, fore, back uint32) {
+func ChangeCell(x, y, z, glyph int, fore, back uint32) {
 	s := y*width + x
-	if util.CheckBounds(x, y, width, height) && grid[s].Z <= z {
-		grid[s].Set(glyph, fore, back, z)
+	if util.CheckBounds(x, y, width, height) && canvas[s].Z <= z {
+		canvas[s].Set(glyph, fore, back, z)
 		masterDirty = true
 	}
 }
@@ -205,21 +205,21 @@ func DrawBorder(x, y, z, w, h int, title string, focused bool) {
 		bc = BorderColour2
 	}
 	for i := 0; i < w; i++ {
-		ChangeGridPoint(x+i, y-1, z, 0xc4, bc, 0xFF000000)
-		ChangeGridPoint(x+i, y+h, z, 0xc4, bc, 0xFF000000)
+		ChangeCell(x+i, y-1, z, 0xc4, bc, 0xFF000000)
+		ChangeCell(x+i, y+h, z, 0xc4, bc, 0xFF000000)
 	}
 	for i := 0; i < h; i++ {
-		ChangeGridPoint(x-1, y+i, z, 0xb3, bc, 0xFF000000)
-		ChangeGridPoint(x+w, y+i, z, 0xb3, bc, 0xFF000000)
+		ChangeCell(x-1, y+i, z, 0xb3, bc, 0xFF000000)
+		ChangeCell(x+w, y+i, z, 0xb3, bc, 0xFF000000)
 	}
-	ChangeGridPoint(x-1, y-1, z, 0xda, bc, 0xFF000000)
-	ChangeGridPoint(x-1, y+h, z, 0xc0, bc, 0xFF000000)
-	ChangeGridPoint(x+w, y+h, z, 0xd9, bc, 0xFF000000)
-	ChangeGridPoint(x+w, y-1, z, 0xbf, bc, 0xFF000000)
+	ChangeCell(x-1, y-1, z, 0xda, bc, 0xFF000000)
+	ChangeCell(x-1, y+h, z, 0xc0, bc, 0xFF000000)
+	ChangeCell(x+w, y+h, z, 0xd9, bc, 0xFF000000)
+	ChangeCell(x+w, y-1, z, 0xbf, bc, 0xFF000000)
 
 	if len(title) < w && title != "" {
 		for i, r := range title {
-			ChangeGridPoint(x+(w/2-len(title)/2)+i, y-1, z, int(r), 0xFFFFFFFF, 0xFF000000)
+			ChangeCell(x+(w/2-len(title)/2)+i, y-1, z, int(r), 0xFFFFFFFF, 0xFF000000)
 		}
 	}
 }
@@ -236,7 +236,7 @@ func Clear(rect ...int) {
 	for i := 0; i < w*h; i++ {
 		x := offX + i%w
 		y := offY + i/w
-		grid[y*width+x].Clear()
+		canvas[y*width+x].Clear()
 	}
 }
 
@@ -249,7 +249,7 @@ func SpamGlyphs() {
 	for n := 0; n < 100; n++ {
 		x := rand.Intn(width)
 		y := rand.Intn(height)
-		ChangeGridPoint(x, y, 0, rand.Intn(255), sdl.MapRGBA(format, 0, 255, 0, 50), sdl.MapRGBA(format, 255, 0, 0, 255))
+		ChangeCell(x, y, 0, rand.Intn(255), sdl.MapRGBA(format, 0, 255, 0, 50), sdl.MapRGBA(format, 255, 0, 0, 255))
 	}
 }
 

@@ -12,11 +12,11 @@ type TileView struct {
 	visible       bool
 	focused       bool
 
-	grid []console.GridCell
+	grid []console.Cell
 }
 
 func NewTileView(w, h, x, y, z int, bord bool) *TileView {
-	return &TileView{w, h, x, y, z, bord, "", true, false, make([]console.GridCell, w*h)}
+	return &TileView{w, h, x, y, z, bord, "", true, false, make([]console.Cell, w*h)}
 }
 
 func (tv *TileView) SetTitle(s string) {
@@ -49,7 +49,7 @@ func (tv TileView) Render(offset ...int) {
 		offX, offY, offZ := processOffset(offset)
 		for i, p := range tv.grid {
 			if p.Dirty {
-				console.ChangeGridPoint(tv.x+offX+i%tv.Width, tv.y+offY+i/tv.Width, tv.z+offZ, p.Glyph, p.ForeColour, p.BackColour)
+				console.ChangeCell(tv.x+offX+i%tv.Width, tv.y+offY+i/tv.Width, tv.z+offZ, p.Glyph, p.ForeColour, p.BackColour)
 				p.Dirty = false
 			}
 		}

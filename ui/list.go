@@ -198,8 +198,8 @@ func (l *List) Render(offset ...int) {
 		//draw scrollbar
 		//TODO: scrollbar could be useful for lots of other UI Elems (ex. textboxes with paragraphs of text). find way to make more general.
 		if l.contentHeight > l.height {
-			console.ChangeGridPoint(offX+l.x+l.width, offY+l.y, offZ+l.z, 0x1e, 0xFFFFFFFF, 0xFF000000)
-			console.ChangeGridPoint(offX+l.x+l.width, offY+l.y+l.height-1, offZ+l.z, 0x1f, 0xFFFFFFFF, 0xFF000000)
+			console.ChangeCell(offX+l.x+l.width, offY+l.y, offZ+l.z, 0x1e, 0xFFFFFFFF, 0xFF000000)
+			console.ChangeCell(offX+l.x+l.width, offY+l.y+l.height-1, offZ+l.z, 0x1f, 0xFFFFFFFF, 0xFF000000)
 
 			sliderHeight := int(float32(l.height-2) * (float32(l.height) / float32(l.contentHeight)))
 			if sliderHeight < 1 {
@@ -213,7 +213,7 @@ func (l *List) Render(offset ...int) {
 			}
 
 			for i := 0; i < sliderHeight; i++ {
-				console.ChangeGridPoint(offX+l.x+l.width, offY+l.y+i+1+sliderPosition, offZ+l.z, 0xb1, 0xFFFFFFFF, 0xFF000000)
+				console.ChangeCell(offX+l.x+l.width, offY+l.y+i+1+sliderPosition, offZ+l.z, 0xb1, 0xFFFFFFFF, 0xFF000000)
 			}
 		}
 	}

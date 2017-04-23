@@ -92,7 +92,7 @@ func (t *Textbox) Render(offset ...int) {
 
 			//fill textbox with background colour
 			for i := 0; i < t.width*t.height; i++ {
-				console.ChangeGridPoint(offX+t.x+i%t.width, offY+t.y+l, t.z+offZ, 0, 0xFFFFFFFF, 0xFF000000)
+				console.ChangeCell(offX+t.x+i%t.width, offY+t.y+l, t.z+offZ, 0, 0xFFFFFFFF, 0xFF000000)
 			}
 
 			//offset if centerred
@@ -105,7 +105,7 @@ func (t *Textbox) Render(offset ...int) {
 				if i >= t.width {
 					break
 				}
-				console.ChangeGridPoint(offX+t.x+i%t.width, offY+t.y+l, t.z+offZ, int(r), 0xFFFFFFFF, 0xFF000000)
+				console.ChangeCell(offX+t.x+i%t.width, offY+t.y+l, t.z+offZ, int(r), 0xFFFFFFFF, 0xFF000000)
 			}
 		}
 
