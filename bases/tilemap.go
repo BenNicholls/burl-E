@@ -42,13 +42,13 @@ func (m *TileMap) SetTile(x, y int, t Tile) {
 func (m *TileMap) AddEntity(x, y int, e *BaseEntity) {
 	if util.CheckBounds(x, y, m.width, m.height) {
 		m.tiles[x+y*m.width].Entity = e
-		m.ShadowCast(x, y, e.EntityLight.Strength, Lighten)
+		m.ShadowCast(x, y, e.Light.Strength, Lighten)
 	}
 }
 
 func (m *TileMap) RemoveEntity(x, y int) {
 	if util.CheckBounds(x, y, m.width, m.height) {
-		m.ShadowCast(x, y, m.tiles[x+y*m.width].Entity.EntityLight.Strength, Darken)
+		m.ShadowCast(x, y, m.tiles[x+y*m.width].Entity.Light.Strength, Darken)
 		m.tiles[x+y*m.width].Entity = nil
 	}
 }
@@ -70,25 +70,25 @@ func (m TileMap) GetEntity(x, y int) *BaseEntity {
 	}
 }
 
-func (m *TileMap) AddItem(x, y int, i *Item) {
-	if util.CheckBounds(x, y, m.width, m.height) && i != nil {
-		m.tiles[x+y*m.width].Item = i
-	}
-}
+// func (m *TileMap) AddItem(x, y int, i *Item) {
+// 	if util.CheckBounds(x, y, m.width, m.height) && i != nil {
+// 		m.tiles[x+y*m.width].Item = i
+// 	}
+// }
 
-func (m *TileMap) RemoveItem(x, y int) {
-	if util.CheckBounds(x, y, m.width, m.height) {
-		m.tiles[x+y*m.width].Item = nil
-	}
-}
+// func (m *TileMap) RemoveItem(x, y int) {
+// 	if util.CheckBounds(x, y, m.width, m.height) {
+// 		m.tiles[x+y*m.width].Item = nil
+// 	}
+// }
 
-func (m *TileMap) GetItem(x, y int) *Item {
-	if util.CheckBounds(x, y, m.width, m.height) {
-		return m.tiles[x+y*m.width].Item
-	} else {
-		return nil
-	}
-}
+// func (m *TileMap) GetItem(x, y int) *Item {
+// 	if util.CheckBounds(x, y, m.width, m.height) {
+// 		return m.tiles[x+y*m.width].Item
+// 	} else {
+// 		return nil
+// 	}
+// }
 
 //For testing purposes.
 func (m *TileMap) ChangeTileColour(x, y int, c uint32) {
@@ -127,7 +127,7 @@ type Tile struct {
 	Entity            *BaseEntity
 	LastVisible       int // Records the last tick that this tile was seen
 	Light             TileLight
-	Item              *Item
+	//Item              *Item
 }
 
 func (t Tile) TileType() int {
@@ -143,7 +143,8 @@ func (t Tile) Transparent() bool {
 }
 
 func (t Tile) Empty() bool {
-	return t.Entity == nil && t.Item == nil && IsPassable(t.tileType)
+	//return t.Entity == nil && t.Item == nil && IsPassable(t.tileType)
+	return t.Entity == nil && IsPassable(t.tileType)
 }
 
 func (t Tile) GetVisuals() Visuals {

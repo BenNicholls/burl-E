@@ -27,7 +27,7 @@ func (e *BaseEntity) MoveTo(x, y int) {
 	e.Y = y
 }
 
-func (e BaseEntity) GetVisuals() Visuals {
+func (e BaseEntity) GetVisuals() console.Visuals {
 	return e.Visuals
 }
 
