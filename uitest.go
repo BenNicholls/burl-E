@@ -18,7 +18,7 @@ func main() {
 
 	var event sdl.Event
 
-	err := console.Setup(96, 54, "res/Dullard_Exponent_12x12.bmp", "UI Test")
+	err := console.Setup(96, 54, "res/curses.bmp", "res/DelveFont8x16.bmp", "UI Test")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -46,7 +46,7 @@ func main() {
 			case *sdl.KeyUpEvent:
 				//fmt.Printf("[%d ms] Keyboard\ttype:%d\tsym:%c\tmodifiers:%d\tstate:%d\trepeat:%d\n",
 				//	t.Timestamp, t.Type, t.Keysym.Sym, t.Keysym.Mod, t.State, t.Repeat)
-				running = false
+				console.ChangeFonts("res/Bisasam16x16.bmp", "res/DelveFont8x16.bmp")
 			}
 		}
 

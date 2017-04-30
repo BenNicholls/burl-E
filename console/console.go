@@ -70,19 +70,12 @@ func (c *Cell) Clear() {
 
 //Setup the game window, renderer, etc
 //TODO: extraact image loading to its own function, resizable window.
-func Setup(w, h int, spritesheet, title string) error {
+func Setup(w, h int, glyphPath, fontPath, title string) error {
 	width = w
 	height = h
 	var err error
 
-	//load spritesheet first so we can infer tileSize
-	image, err := sdl.LoadBMP(spritesheet)
-	if err != nil {
-		return errors.New("Failed to load image: " + fmt.Sprint(sdl.GetError()))
-	}
-	defer image.Free()
-	image.SetColorKey(1, 0xFF00FF)
-	tileSize = int(image.W / 16)
+	tileSize = 16
 
 	window, err = sdl.CreateWindow(title, sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, width*tileSize, height*tileSize, sdl.WINDOW_OPENGL)
 	if err != nil {
@@ -95,47 +88,80 @@ func Setup(w, h int, spritesheet, title string) error {
 		return errors.New("No pixelformat: " + fmt.Sprint(sdl.GetError()))
 	}
 
-	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_SOFTWARE)
+	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_SOFTWARE) //Software renderer because ACCELERATED borks my laptop for some reason.
 	if err != nil {
 		return errors.New("Failed to create renderer: " + fmt.Sprint(sdl.GetError()))
 	}
 	renderer.Clear()
 
-	glyphs, err = renderer.CreateTextureFromSurface(image)
-	if err != nil {
-		return errors.New("Failed to create sprite texture: " + fmt.Sprint(sdl.GetError()))
-	}
-	err = glyphs.SetBlendMode(sdl.BLENDMODE_BLEND)
-	if err != nil {
-		return errors.New("Failed to set blendmode: " + fmt.Sprint(sdl.GetError()))
-	}
-
-	//load text-mode font spritesheet
-	image, err = sdl.LoadBMP(spritesheet)
-	if err != nil {
-		return errors.New("Failed to load font: " + fmt.Sprint(sdl.GetError()))
-	}
-	image.SetColorKey(1, 0xFF00FF)
-	font, err = renderer.CreateTextureFromSurface(image)
-	if err != nil {
-		return errors.New("Failed to create sprite texture: " + fmt.Sprint(sdl.GetError()))
-	}
-	err = font.SetBlendMode(sdl.BLENDMODE_BLEND)
-	if err != nil {
-		return errors.New("Failed to set blendmode: " + fmt.Sprint(sdl.GetError()))
-	}
-
 	canvas = make([]Cell, width*height)
 	masterDirty = true
+
+	//init drawing fonts
+	err = ChangeFonts(glyphPath, fontPath)
+	if err != nil {
+		return nil
+	}
 
 	frames = 0
 	frameTime, ticks = 0, 0
 	fps = 17 //17ms = 60 FPS approx
-	showFPS = true
+	showFPS = false
 	BorderColour1 = 0xFFE28F00
 	BorderColour2 = 0xFF555555
 
 	return nil
+}
+
+func ChangeFonts(glyphPath, fontPath string) error {
+	var err error
+	if glyphs != nil {
+		glyphs.Destroy()
+	}
+	glyphs, err = LoadTexture(glyphPath)
+	if err != nil {
+		return err
+	}
+	if font != nil {
+		font.Destroy()
+	}
+	font, err = LoadTexture(fontPath)
+	if err != nil {
+		return err
+	}
+	Clear()
+
+	_, _, gw, _, _ := glyphs.Query()
+	
+	//reset window size if fontsize changed
+	if int(gw/16) != tileSize {
+		tileSize = int(gw/16)
+		window.SetSize(tileSize*width, tileSize*height)
+	}
+
+	return nil
+}
+
+//Loads a bmp font into the GPU using the current window renderer.
+//TODO: support more than bmps?
+func LoadTexture(path string) (*sdl.Texture, error) {
+	image, err := sdl.LoadBMP(path)
+	defer image.Free()
+	if err != nil {
+		return nil, errors.New("Failed to load image: " + fmt.Sprint(sdl.GetError()))
+	}
+	image.SetColorKey(1, 0xFF00FF)
+	texture, err := renderer.CreateTextureFromSurface(image)
+	if err != nil {
+		return nil, errors.New("Failed to create texture: " + fmt.Sprint(sdl.GetError()))
+	}
+	err = texture.SetBlendMode(sdl.BLENDMODE_BLEND)
+	if err != nil {
+		texture.Destroy()
+		return nil, errors.New("Failed to set blendmode: " + fmt.Sprint(sdl.GetError()))
+	}
+
+	return texture, nil
 }
 
 //Renders the canvas to the GPU and flips the buffer.
@@ -155,14 +181,11 @@ func Render() {
 		for i, s := range canvas {
 			if s.Dirty {
 				if s.TextMode {
-					//Left character
-					dst = makeRect((i%width)*tileSize, (i/width)*tileSize, tileSize/2, tileSize)
-					src = makeRect((s.Chars[0]%16)*tileSize, (s.Chars[0]/16)*tileSize, tileSize/2, tileSize)
-					CopyToRenderer(s, font, src, dst)
-					//Right character
-					dst = makeRect((i%width)*tileSize + tileSize/2, (i/width)*tileSize, tileSize/2, tileSize)
-					src = makeRect((s.Chars[1]%16)*tileSize, (s.Chars[1]/16)*tileSize, tileSize/2, tileSize)
-					CopyToRenderer(s, font, src, dst)
+					for c_i, c := range s.Chars {
+						dst = makeRect((i%width)*tileSize + c_i*tileSize/2, (i/width)*tileSize, tileSize/2, tileSize)
+						src = makeRect((c%32)*tileSize/2, (c/32)*tileSize, tileSize/2, tileSize)
+						CopyToRenderer(s, font, src, dst)
+					}
 				} else {
 					dst = makeRect((i%width)*tileSize, (i/width)*tileSize, tileSize, tileSize)
 					src = makeRect((s.Glyph%16)*tileSize, (s.Glyph/16)*tileSize, tileSize, tileSize)
@@ -239,6 +262,8 @@ func ChangeText(x, y, char1, char2 int) {
 		canvas[y*width+x].TextMode = true
 		canvas[y*width+x].Chars[0] = char1
 		canvas[y*width+x].Chars[1] = char2
+		canvas[y*width+x].Dirty = true
+
 	}
 }
 
@@ -270,6 +295,20 @@ func ChangeCell(x, y, z, glyph int, fore, back uint32) {
 	}
 }
 
+//Draws a string to the console in text mode.
+func DrawText(x, y, z int, txt string, fore, back uint32) {
+	for i, c := range txt {
+		cell := canvas[y*width + x + i/2]
+		if i % 2 == 0 {
+			ChangeText(x + i/2, y, int(c), cell.Chars[1])
+		} else {
+			ChangeText(x + i/2, y, cell.Chars[0], int(c))
+		}
+		ChangeForeColour(x + i/2, y, fore)
+		ChangeBackColour(x + i/2, y, back)
+	}
+}
+
 //TODO: custom colouring, multiple styles. 
 //NOTE: current border colouring thing is a bit of a hack. Need to add actual support for
 //border and ui styling. (Should this be in delveengine/ui??? hmmm.)
@@ -297,10 +336,7 @@ func DrawBorder(x, y, z, w, h int, title string, focused bool) {
 
 	//Write centered title.
 	if len(title) < w && title != "" {
-		for i, r := range title {
-			ChangeCell(x+(w/2-len(title)/2)+i, y-1, z, int(r), 0xFFFFFFFF, 0xFF000000)
-			ChangeText(x+(w/2-len(title)/2)+i, y-1, int(r), int(r))
-		}
+		DrawText(x+(w/2 - len(title)/4 - 1), y-1, z, title, 0xFFFFFFFF, 0xFF000000)
 	}
 }
 
