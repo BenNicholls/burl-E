@@ -26,7 +26,7 @@ func (tv *TileView) SetTitle(s string) {
 //Draws a glyph to the TileView.
 func (tv *TileView) Draw(x, y, glyph int, f, b uint32) {
 	if util.CheckBounds(x, y, tv.Width, tv.Height) {
-		tv.grid[y*tv.Width+x].Set(glyph, f, b, tv.z)
+		tv.grid[y*tv.Width+x].SetGlyph(glyph, f, b, tv.z)
 	}
 }
 
@@ -70,7 +70,7 @@ func (tv TileView) Pos() (int, int, int) {
 //Resets the TileView
 func (tv *TileView) Clear() {
 	for i, _ := range tv.grid {
-		tv.grid[i].Set(0, 0, 0, 0)
+		tv.grid[i].Clear()
 		tv.grid[i].Dirty = true
 	}
 }

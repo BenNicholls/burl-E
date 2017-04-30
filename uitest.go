@@ -57,7 +57,11 @@ func main() {
 
 func SetupUI() {
 	container = ui.NewContainer(40, 40, 1, 1, 0, true)
-	container.Add(ui.NewTextbox(10,1,2,2,0,true,true, "TESTING"))
+	textbox := ui.NewTextbox(10,1,2,2,0,true,true, "TESTING")
+	textbox.SetTitle("YAY")
+	container.Add(textbox)
+	container.SetTitle("FANCYTIMES")
+
 }
 
 func Render() {

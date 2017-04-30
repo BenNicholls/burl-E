@@ -8,7 +8,8 @@ import "errors"
 
 var window *sdl.Window
 var renderer *sdl.Renderer
-var sprites *sdl.Texture
+var glyphs *sdl.Texture
+var font *sdl.Texture
 var format *sdl.PixelFormat
 
 var width, height, tileSize int
@@ -31,25 +32,45 @@ type Cell struct {
 	BackColour uint32
 	Z          int
 	Dirty      bool
+
+	//for text rendering mode. TODO:multiple back and fore colours, one for each char
+	TextMode bool
+	Chars [2]int
 }
 
-func (g *Cell) Set(gl int, fore, back uint32, z int) {
-	if g.Glyph != gl || g.ForeColour != fore || g.BackColour != back || g.Z != z {
-		g.Glyph = gl
-		g.ForeColour = fore
-		g.BackColour = back
-		g.Z = z
-		g.Dirty = true
+//Sets the properties of a cell all at once for Glyph Mode.
+func (c *Cell) SetGlyph(gl int, fore, back uint32, z int) {
+	if c.Glyph != gl || c.ForeColour != fore || c.BackColour != back || c.Z != z || c.TextMode {
+		c.TextMode = false
+		c.Glyph = gl
+		c.ForeColour = fore
+		c.BackColour = back
+		c.Z = z
+		c.Dirty = true
 	}
 }
 
-func (g *Cell) Clear() {
-	g.Set(0, 0, 0, 0)
+//Sets the properties of a cell all at once for Text Mode.
+func (c *Cell) SetText(char1, char2 int, fore, back uint32, z int) {
+	if c.Chars[0] != char1 || c.Chars[1] != char2 || c.ForeColour != fore || c.BackColour != back || c.Z != z || c.TextMode == false {
+		c.TextMode = true
+		c.Chars[0] = char1
+		c.Chars[1] = char2 
+		c.ForeColour = fore
+		c.BackColour = back
+		c.Z = z
+		c.Dirty = true
+	}
+}
+
+//Re-inits a cell back to default. Defaults to Glyph Mode.
+func (c *Cell) Clear() {
+	c.SetGlyph(0, 0, 0, 0)
 }
 
 //Setup the game window, renderer, etc
+//TODO: extraact image loading to its own function, resizable window.
 func Setup(w, h int, spritesheet, title string) error {
-
 	width = w
 	height = h
 	var err error
@@ -80,11 +101,26 @@ func Setup(w, h int, spritesheet, title string) error {
 	}
 	renderer.Clear()
 
-	sprites, err = renderer.CreateTextureFromSurface(image)
+	glyphs, err = renderer.CreateTextureFromSurface(image)
 	if err != nil {
 		return errors.New("Failed to create sprite texture: " + fmt.Sprint(sdl.GetError()))
 	}
-	err = sprites.SetBlendMode(sdl.BLENDMODE_BLEND)
+	err = glyphs.SetBlendMode(sdl.BLENDMODE_BLEND)
+	if err != nil {
+		return errors.New("Failed to set blendmode: " + fmt.Sprint(sdl.GetError()))
+	}
+
+	//load text-mode font spritesheet
+	image, err = sdl.LoadBMP(spritesheet)
+	if err != nil {
+		return errors.New("Failed to load font: " + fmt.Sprint(sdl.GetError()))
+	}
+	image.SetColorKey(1, 0xFF00FF)
+	font, err = renderer.CreateTextureFromSurface(image)
+	if err != nil {
+		return errors.New("Failed to create sprite texture: " + fmt.Sprint(sdl.GetError()))
+	}
+	err = font.SetBlendMode(sdl.BLENDMODE_BLEND)
 	if err != nil {
 		return errors.New("Failed to set blendmode: " + fmt.Sprint(sdl.GetError()))
 	}
@@ -94,16 +130,16 @@ func Setup(w, h int, spritesheet, title string) error {
 
 	frames = 0
 	frameTime, ticks = 0, 0
-	fps = 35 //17ms = 60 FPS approx
-	showFPS = false
+	fps = 17 //17ms = 60 FPS approx
+	showFPS = true
 	BorderColour1 = 0xFFE28F00
 	BorderColour2 = 0xFF555555
 
 	return nil
 }
 
+//Renders the canvas to the GPU and flips the buffer.
 func Render() {
-
 	//render fps counter
 	if showFPS {
 		fpsString := fmt.Sprintf("%d fps\n", frames*1000/int(sdl.GetTicks()))
@@ -118,16 +154,20 @@ func Render() {
 
 		for i, s := range canvas {
 			if s.Dirty {
-				dst = makeRect((i%width)*tileSize, (i/width)*tileSize, tileSize, tileSize)
-				src = makeRect((s.Glyph%16)*tileSize, (s.Glyph/16)*tileSize, tileSize, tileSize)
-
-				renderer.SetDrawColor(sdl.GetRGBA(s.BackColour, format))
-				renderer.FillRect(&dst)
-
-				r, g, b, a := sdl.GetRGBA(s.ForeColour, format)
-				sprites.SetColorMod(r, g, b)
-				sprites.SetAlphaMod(a)
-				renderer.Copy(sprites, &src, &dst)
+				if s.TextMode {
+					//Left character
+					dst = makeRect((i%width)*tileSize, (i/width)*tileSize, tileSize/2, tileSize)
+					src = makeRect((s.Chars[0]%16)*tileSize, (s.Chars[0]/16)*tileSize, tileSize/2, tileSize)
+					CopyToRenderer(s, font, src, dst)
+					//Right character
+					dst = makeRect((i%width)*tileSize + tileSize/2, (i/width)*tileSize, tileSize/2, tileSize)
+					src = makeRect((s.Chars[1]%16)*tileSize, (s.Chars[1]/16)*tileSize, tileSize/2, tileSize)
+					CopyToRenderer(s, font, src, dst)
+				} else {
+					dst = makeRect((i%width)*tileSize, (i/width)*tileSize, tileSize, tileSize)
+					src = makeRect((s.Glyph%16)*tileSize, (s.Glyph/16)*tileSize, tileSize, tileSize)
+					CopyToRenderer(s, glyphs, src, dst)
+				}
 
 				canvas[i].Dirty = false
 			}
@@ -137,7 +177,9 @@ func Render() {
 		masterDirty = false
 	}
 
-	//framerate limiter, so my cpu doesn't implode
+	//framerate limiter, so the cpu doesn't implode
+	//TODO: option to turn this off? I guess you can set the fps arbitrarily high...
+	//NOTE: should this be the responsibility of the main game loop? 
 	ticks = sdl.GetTicks() - frameTime
 	if ticks < fps {
 		sdl.Delay(fps - ticks)
@@ -146,8 +188,25 @@ func Render() {
 	frames++
 }
 
-func SetFramerate(f uint32) {
-	fps = f
+//Copies a rect of pixeldata from a source texture to a rect on the renderer texture for the console.
+func CopyToRenderer(c Cell, tex *sdl.Texture, src, dst sdl.Rect) {
+	renderer.SetDrawColor(sdl.GetRGBA(c.BackColour, format)) //should NOT be doing this every cell.
+	renderer.FillRect(&dst)
+	r, g, b, a := sdl.GetRGBA(c.ForeColour, format) //should NOT be doing this every cell.
+	tex.SetColorMod(r, g, b)
+	tex.SetAlphaMod(a)
+	renderer.Copy(tex, &src, &dst)
+}
+
+//Sets maximum framerate as enforced by the framerate limiter. NOTE: cannot go higher than 1000 fps.
+func SetFramerate(f int) {
+	fps = uint32(1000/f) + 1
+}
+
+
+//Toggles rendering of the FPS meter.
+func ToggleFPS() {
+	showFPS = !showFPS
 }
 
 //int32 for rect arguments. what a world.
@@ -155,21 +214,35 @@ func makeRect(x, y, w, h int) sdl.Rect {
 	return sdl.Rect{int32(x), int32(y), int32(w), int32(h)}
 }
 
+//Deletes special graphics structures, closes files, etc. Defer this function!
 func Cleanup() {
 	format.Free()
-	sprites.Destroy()
+	glyphs.Destroy()
+	font.Destroy()
 	renderer.Destroy()
 	window.Destroy()
 }
 
+//Changes the glyph of a cell in the canvas at position (x, y).
 func ChangeGlyph(x, y, glyph int) {
 	if util.CheckBounds(x, y, width, height) && canvas[y*width+x].Glyph != glyph {
+		canvas[y*width+x].TextMode = false
 		canvas[y*width+x].Glyph = glyph
 		canvas[y*width+x].Dirty = true
 		masterDirty = true
 	}
 }
 
+//Changes text of a cell in the canvas at position (x, y).
+func ChangeText(x, y, char1, char2 int) {
+	if util.CheckBounds(x, y, width, height) {
+		canvas[y*width+x].TextMode = true
+		canvas[y*width+x].Chars[0] = char1
+		canvas[y*width+x].Chars[1] = char2
+	}
+}
+
+//Changes the foreground drawing colour of a cell in the canvas at position (x, y).
 func ChangeForeColour(x, y int, fore uint32) {
 	if util.CheckBounds(x, y, width, height) && canvas[y*width+x].ForeColour != fore {
 		canvas[y*width+x].ForeColour = fore
@@ -178,6 +251,7 @@ func ChangeForeColour(x, y int, fore uint32) {
 	}
 }
 
+//Changes the background colour of a cell in the canvas at position (x, y).
 func ChangeBackColour(x, y int, back uint32) {
 	if util.CheckBounds(x, y, width, height) && canvas[y*width+x].BackColour != back {
 		canvas[y*width+x].BackColour = back
@@ -186,45 +260,51 @@ func ChangeBackColour(x, y int, back uint32) {
 	}
 }
 
-func ToggleFPS() {
-	showFPS = !showFPS
-}
-
+//Simultaneously changes all characteristics of a glyph cell in the canvas at position (x, y).
+//TODO: change name of this to signify it is for changing glyph cells.
 func ChangeCell(x, y, z, glyph int, fore, back uint32) {
 	s := y*width + x
 	if util.CheckBounds(x, y, width, height) && canvas[s].Z <= z {
-		canvas[s].Set(glyph, fore, back, z)
+		canvas[s].SetGlyph(glyph, fore, back, z)
 		masterDirty = true
 	}
 }
 
-//TODO: custom colouring, multiple styles
+//TODO: custom colouring, multiple styles. 
+//NOTE: current border colouring thing is a bit of a hack. Need to add actual support for
+//border and ui styling. (Should this be in delveengine/ui??? hmmm.)
 func DrawBorder(x, y, z, w, h int, title string, focused bool) {
+	//set border colour.
 	bc := BorderColour1
 	if !focused {
 		bc = BorderColour2
 	}
+	//Top and bottom.
 	for i := 0; i < w; i++ {
 		ChangeCell(x+i, y-1, z, 0xc4, bc, 0xFF000000)
 		ChangeCell(x+i, y+h, z, 0xc4, bc, 0xFF000000)
 	}
+	//Sides
 	for i := 0; i < h; i++ {
 		ChangeCell(x-1, y+i, z, 0xb3, bc, 0xFF000000)
 		ChangeCell(x+w, y+i, z, 0xb3, bc, 0xFF000000)
 	}
+	//corners
 	ChangeCell(x-1, y-1, z, 0xda, bc, 0xFF000000)
 	ChangeCell(x-1, y+h, z, 0xc0, bc, 0xFF000000)
 	ChangeCell(x+w, y+h, z, 0xd9, bc, 0xFF000000)
 	ChangeCell(x+w, y-1, z, 0xbf, bc, 0xFF000000)
 
+	//Write centered title.
 	if len(title) < w && title != "" {
 		for i, r := range title {
 			ChangeCell(x+(w/2-len(title)/2)+i, y-1, z, int(r), 0xFFFFFFFF, 0xFF000000)
+			ChangeText(x+(w/2-len(title)/2)+i, y-1, int(r), int(r))
 		}
 	}
 }
 
-//Optionally takes a rect so you can clear specific areas of the console
+//Clears an area of the canvas. Optionally takes a rect (defined by 4 ints) so you can clear specific areas of the console
 func Clear(rect ...int) {
 
 	offX, offY, w, h := 0, 0, width, height
@@ -240,11 +320,12 @@ func Clear(rect ...int) {
 	}
 }
 
+//Returns the dimensions of the canvas.
 func Dims() (w, h int) {
 	return width, height
 }
 
-//Test function.
+//Test function. Changes 100 glyphs randomly each frame.
 func SpamGlyphs() {
 	for n := 0; n < 100; n++ {
 		x := rand.Intn(width)
@@ -253,10 +334,13 @@ func SpamGlyphs() {
 	}
 }
 
+//Takes r,g,b ints and creates a colour as defined by the pixelformat with alpha 255. 
+//TODO: rgba version of this function? variatic function that can optionally take an alpha? Hmm.
 func MakeColour(r, g, b int) uint32 {
 	return sdl.MapRGBA(format, uint8(r), uint8(g), uint8(b), 255)
 }
 
+//Changes alpha of a colour.
 func ChangeColourAlpha(c uint32, a uint8) uint32 {
 	r, g, b := sdl.GetRGB(c, format)
 	return sdl.MapRGBA(format, r, g, b, a)
