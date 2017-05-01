@@ -69,7 +69,6 @@ func (c *Cell) Clear() {
 }
 
 //Setup the game window, renderer, etc
-//TODO: extraact image loading to its own function, resizable window.
 func Setup(w, h int, glyphPath, fontPath, title string) error {
 	width = w
 	height = h
@@ -113,6 +112,13 @@ func Setup(w, h int, glyphPath, fontPath, title string) error {
 	return nil
 }
 
+//Enables fullscreen.
+//TODO: the opposite??? do this later when resolution/window mode polish goes in.
+func SetFullscreen() {
+	window.SetFullscreen(sdl.WINDOW_FULLSCREEN)
+}
+
+//Loads new fonts to the renderer and changes the tilesize (and by entension, the window size)
 func ChangeFonts(glyphPath, fontPath string) error {
 	var err error
 	if glyphs != nil {
