@@ -18,7 +18,7 @@ func main() {
 
 	var event sdl.Event
 
-	err := console.Setup(96, 54, "res/curses.bmp", "res/DelveFont8x16.bmp", "UI Test")
+	err := console.Setup(80, 45, "res/curses.bmp", "res/DelveFont8x16.bmp", "UI Test")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -46,7 +46,7 @@ func main() {
 			case *sdl.KeyUpEvent:
 				//fmt.Printf("[%d ms] Keyboard\ttype:%d\tsym:%c\tmodifiers:%d\tstate:%d\trepeat:%d\n",
 				//	t.Timestamp, t.Type, t.Keysym.Sym, t.Keysym.Mod, t.State, t.Repeat)
-				console.ChangeFonts("res/Bisasam16x16.bmp", "res/DelveFont8x16.bmp")
+				running = false
 			}
 		}
 
@@ -57,7 +57,8 @@ func main() {
 
 func SetupUI() {
 	container = ui.NewContainer(40, 40, 1, 1, 0, true)
-	textbox := ui.NewTextbox(10,1,2,2,0,true,true, "TESTING")
+	textbox := ui.NewTextbox(30,20,2,2,0,true,false, "TESTING")
+	textbox.ChangeText("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae nibh risus. Quisque consectetur lacus eu velit viverra convallis. In at mattis orci. Suspendisse rhoncus lacinia elit ac ullamcorper. Donec id mattis velit, in condimentum massa. Nam non dui eu urna lacinia varius ut nec justo. Suspendisse consequat ornare neque, sit amet cursus enim volutpat in. Proin nibh ante, tempus in laoreet luctus, tempus in eros.")
 	textbox.SetTitle("YAY")
 	container.Add(textbox)
 	container.SetTitle("FANCYTIMES")

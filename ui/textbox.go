@@ -22,6 +22,7 @@ func NewTextbox(w, h, x, y, z int, bord, cent bool, txt string) *Textbox {
 
 //Returns the height required to fit a string after it has been wrapped. Reimplements the word wrapper but cruder.
 func CalcWrapHeight(s string, width int) int {
+	width = width*2
 	line := ""
 	n := 0
 	for _, word := range strings.Split(s, " ") {
@@ -69,11 +70,11 @@ func (t *Textbox) Render(offset ...int) {
 		n := 0
 		for _, s := range strings.Split(t.text, " ") {
 			//super long word make-it-not-break hack.
-			if len(s) > t.width {
+			if len(s) > t.width*2 {
 				continue
 			}
 
-			if len(lines[n])+len(s) > t.width {
+			if len(lines[n])+len(s) > t.width*2 {
 				//make sure we don't overflow the textbox
 				if n < len(lines)-1 {
 					n++
@@ -82,7 +83,7 @@ func (t *Textbox) Render(offset ...int) {
 				}
 			}
 			lines[n] += s
-			if len(lines[n]) != t.width {
+			if len(lines[n]) != t.width*2 {
 				lines[n] += " "
 			}
 		}
@@ -97,16 +98,18 @@ func (t *Textbox) Render(offset ...int) {
 
 			//offset if centerred
 			if t.centered {
-				offX += (t.width - len(lines[l])) / 2
+				offX += (t.width /2 - len(lines[l])/4) 
 			}
 
 			//print text
-			for i, r := range lines[l] {
-				if i >= t.width {
-					break
-				}
-				console.ChangeCell(offX+t.x+i%t.width, offY+t.y+l, t.z+offZ, int(r), 0xFFFFFFFF, 0xFF000000)
-			}
+			console.DrawText(offX+t.x, offY+t.y+l, offZ+t.z, lines[l], 0xFFFFFFFF, 0xFF000000)
+
+			// for i, r := range lines[l] {
+			// 	if i >= t.width {
+			// 		break
+			// 	}
+			// 	console.ChangeCell(offX+t.x+i%t.width, offY+t.y+l, t.z+offZ, int(r), 0xFFFFFFFF, 0xFF000000)
+			// }
 		}
 
 		for i, _ := range t.anims {

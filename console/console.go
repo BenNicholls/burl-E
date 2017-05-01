@@ -298,14 +298,16 @@ func ChangeCell(x, y, z, glyph int, fore, back uint32) {
 //Draws a string to the console in text mode.
 func DrawText(x, y, z int, txt string, fore, back uint32) {
 	for i, c := range txt {
-		cell := canvas[y*width + x + i/2]
-		if i % 2 == 0 {
-			ChangeText(x + i/2, y, int(c), cell.Chars[1])
-		} else {
-			ChangeText(x + i/2, y, cell.Chars[0], int(c))
+		if util.CheckBounds(x + i/2, y, width, height) {
+			cell := canvas[y*width + x + i/2]
+			if i % 2 == 0 {
+				ChangeText(x + i/2, y, int(c), cell.Chars[1])
+			} else {
+				ChangeText(x + i/2, y, cell.Chars[0], int(c))
+			}
+			ChangeForeColour(x + i/2, y, fore)
+			ChangeBackColour(x + i/2, y, back)
 		}
-		ChangeForeColour(x + i/2, y, fore)
-		ChangeBackColour(x + i/2, y, back)
 	}
 }
 
@@ -352,7 +354,9 @@ func Clear(rect ...int) {
 	for i := 0; i < w*h; i++ {
 		x := offX + i%w
 		y := offY + i/w
-		canvas[y*width+x].Clear()
+		if util.CheckBounds(x, y, width, height) {
+			canvas[y*width+x].Clear()
+		}
 	}
 }
 
