@@ -91,9 +91,9 @@ func (t *Textbox) Render(offset ...int) {
 		for l := 0; l < len(lines); l++ {
 			offX := offX //so we can modify the offset separately for each line
 
-			//fill textbox with background colour
+			//clear texbox (fill with spaces).
 			for i := 0; i < t.width*t.height; i++ {
-				console.ChangeCell(offX+t.x+i%t.width, offY+t.y+l, t.z+offZ, 0, 0xFFFFFFFF, 0xFF000000)
+				console.ChangeText(offX+t.x+i%t.width, offY+t.y+l, offZ+t.z, int(' '), int(' '))
 			}
 
 			//offset if centerred
@@ -103,20 +103,12 @@ func (t *Textbox) Render(offset ...int) {
 
 			//print text
 			console.DrawText(offX+t.x, offY+t.y+l, offZ+t.z, lines[l], 0xFFFFFFFF, 0xFF000000)
-
-			// for i, r := range lines[l] {
-			// 	if i >= t.width {
-			// 		break
-			// 	}
-			// 	console.ChangeCell(offX+t.x+i%t.width, offY+t.y+l, t.z+offZ, int(r), 0xFFFFFFFF, 0xFF000000)
-			// }
 		}
 
 		for i, _ := range t.anims {
 			t.anims[i].Tick()
 			t.anims[i].Render(t.x+offX, t.y+offY, t.z+offZ)
 		}
-
 	}
 }
 

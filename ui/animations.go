@@ -13,33 +13,40 @@ type Animator interface {
 }
 
 //BlinkAnimation inverts the fore/back colours of a single cell. Speed controls frequency.
-type BlinkAnimation struct {
+type BlinkCharAnimation struct {
 	tick    int
 	speed   int //number of frames between blinks
 	x, y    int //position (possibly relative to element or container)
 	enabled bool
+	state bool
 }
 
-func NewBlinkAnimation(x, y, speed int) *BlinkAnimation {
-	return &BlinkAnimation{0, speed, x, y, false}
+func NewBlinkCharAnimation(x, y, speed int) *BlinkCharAnimation {
+	return &BlinkCharAnimation{0, speed, x, y, false, false}
 }
 
-func (ba *BlinkAnimation) Toggle() {
+func (ba *BlinkCharAnimation) Toggle() {
 	ba.enabled = !ba.enabled
 	ba.tick = 0
 }
 
-func (ba *BlinkAnimation) Tick() {
+func (ba *BlinkCharAnimation) Tick() {
 	if ba.enabled {
 		ba.tick++
+		if ba.tick%ba.speed == 0 {
+			ba.state = !ba.state
+		}
 	}
 }
 
-func (ba *BlinkAnimation) Render(offset ...int) {
+//charnum: 0 = left, 1 = right char
+func (ba *BlinkCharAnimation) Render(charNum int, offset ...int) {
 	if ba.enabled {
-		if ba.tick%(ba.speed*2) < ba.speed {
-			offX, offY, offZ := processOffset(offset)
-			console.Invert(ba.x+offX, ba.y+offY, offZ)
+		offX, offY, offZ := processOffset(offset)
+		if ba.state {
+			console.ChangeChar(ba.x+offX, ba.y+offY, offZ, 31, charNum)
+		} else {
+			console.ChangeChar(ba.x+offX, ba.y+offY, offZ, 32, charNum)
 		}
 	}
 }

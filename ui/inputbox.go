@@ -9,11 +9,11 @@ import "strconv"
 type Inputbox struct {
 	Textbox
 	cursor          int
-	cursorAnimation *BlinkAnimation
+	cursorAnimation *BlinkCharAnimation
 }
 
 func NewInputbox(w, h, x, y, z int, bord bool) *Inputbox {
-	ib := &Inputbox{*NewTextbox(w, h, x, y, z, bord, false, ""), 0, NewBlinkAnimation(0, 0, 20)}
+	ib := &Inputbox{*NewTextbox(w, h, x, y, z, bord, false, ""), 0, NewBlinkCharAnimation(0, 0, 20)}
 	return ib
 }
 
@@ -23,18 +23,18 @@ func (ib *Inputbox) MoveCursor(dx, dy int) {
 	ib.cursor += dy * ib.width
 	if ib.cursor < 0 {
 		ib.cursor = 0
-	} else if ib.cursor > len(ib.text)+1 || ib.cursor >= ib.width*ib.height {
-		ib.cursor = ib.width*ib.height - 1
+	} else if ib.cursor > len(ib.text)+1 || ib.cursor >= ib.width*ib.height*2 {
+		ib.cursor = ib.width*ib.height*2 - 1
 	}
 }
 
-//Inserts a character s. TODO: s could be a rune or char or something?
+//Inserts a character s.
 func (ib *Inputbox) Insert(s string) {
-	if len(ib.text)+len(s) > ib.width*ib.height {
+	if len(ib.text)+len(s) > ib.width*ib.height*2 {
 		return
 	}
 	if ib.cursor == len(ib.text) {
-		if ib.cursor < ib.width*ib.height-1 {
+		if ib.cursor < ib.width*ib.height*2-1 {
 			ib.ChangeText(ib.text + s)
 		}
 	} else {
@@ -92,6 +92,6 @@ func (ib *Inputbox) Render(offset ...int) {
 
 		ib.Textbox.Render(offX, offY, offZ)
 		ib.cursorAnimation.Tick()
-		ib.cursorAnimation.Render(ib.x+ib.cursor+offX, ib.y+offY, ib.z+offZ)
+		ib.cursorAnimation.Render(ib.cursor%2, ib.x+ib.cursor/2+offX, ib.y+offY, ib.z+offZ)
 	}
 }

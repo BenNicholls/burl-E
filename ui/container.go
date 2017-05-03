@@ -65,10 +65,12 @@ func (c Container) Pos() (int, int, int) {
 
 func (c *Container) ToggleVisible() {
 	c.visible = !c.visible
+	console.Clear()
 }
 
 func (c *Container) SetVisibility(v bool) {
 	c.visible = v
+	console.Clear()
 }
 
 func (c *Container) ToggleFocus() {
@@ -79,4 +81,8 @@ func (c *Container) MoveTo(x, y, z int) {
 	c.x = x
 	c.y = y
 	c.z = z
+}
+
+func (c Container) IsVisible() bool {
+	return c.visible
 }

@@ -263,13 +263,30 @@ func ChangeGlyph(x, y, glyph int) {
 }
 
 //Changes text of a cell in the canvas at position (x, y).
-func ChangeText(x, y, char1, char2 int) {
-	if util.CheckBounds(x, y, width, height) {
-		canvas[y*width+x].TextMode = true
-		canvas[y*width+x].Chars[0] = char1
-		canvas[y*width+x].Chars[1] = char2
-		canvas[y*width+x].Dirty = true
+func ChangeText(x, y, z, char1, char2 int) {
+	s := y*width+x
+	if util.CheckBounds(x, y, width, height) && canvas[s].Z <= z {
+		canvas[s].TextMode = true
+		if canvas[s].Chars[0] != char1 || canvas[s].Chars[1] != char2 {
+			canvas[s].Chars[0] = char1
+			canvas[s].Chars[1] = char2
+			canvas[s].Z = z
+			canvas[s].Dirty = true
+		}
+	}
+}
 
+//Changes a single character on the canvas at position (x,y) in text mode.
+//charNum: 0 = Left, 1 = Right (for ease with modulo operations). Throw whatever in here though, it gets modulo 2'd anyways just in case.
+func ChangeChar(x, y, z, char, charNum int) {
+	s := y*width+x
+	if util.CheckBounds(x, y, width, height) && charNum >= 0 && canvas[s].Z <= z  {
+		canvas[s].TextMode = true
+		if canvas[s].Chars[charNum%2] != char {
+			canvas[s].Chars[charNum%2] = char
+			canvas[s].Z = z
+			canvas[s].Dirty = true
+		}
 	}
 }
 
@@ -305,14 +322,12 @@ func ChangeCell(x, y, z, glyph int, fore, back uint32) {
 func DrawText(x, y, z int, txt string, fore, back uint32) {
 	for i, c := range txt {
 		if util.CheckBounds(x + i/2, y, width, height) {
-			cell := canvas[y*width + x + i/2]
-			if i % 2 == 0 {
-				ChangeText(x + i/2, y, int(c), cell.Chars[1])
-			} else {
-				ChangeText(x + i/2, y, cell.Chars[0], int(c))
+			ChangeChar(x + i/2, y, z, int(c), i%2)
+			if i%2 == 0 {
+				//only need to change colour each cell, not each character
+				ChangeForeColour(x + i/2, y, fore)
+				ChangeBackColour(x + i/2, y, back)
 			}
-			ChangeForeColour(x + i/2, y, fore)
-			ChangeBackColour(x + i/2, y, back)
 		}
 	}
 }
