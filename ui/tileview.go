@@ -30,20 +30,6 @@ func (tv *TileView) Draw(x, y, glyph int, f, b uint32) {
 	}
 }
 
-//Apply light level. 0-255. TODO: add colour mask (soft orange glow??)
-//TODO: This should not be here at all... move this to delvetown.render(), and add a tv.DrawAlpha() that can take an alpha value.
-func (tv *TileView) ApplyLight(x, y, b int) {
-	if util.CheckBounds(x, y, tv.Width, tv.Height) {
-		s := y*tv.Width + x
-		if b > 255 {
-			b = 255
-		} else if b < 80 && b > 0 {
-			b = 80 //Baseline brightness for memory... TODO: implement this less magically.
-		}
-		tv.grid[s].ForeColour = console.ChangeColourAlpha(tv.grid[s].ForeColour, uint8(b))
-	}
-}
-
 func (tv TileView) Render(offset ...int) {
 	if tv.visible {
 		offX, offY, offZ := processOffset(offset)

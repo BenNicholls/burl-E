@@ -8,7 +8,7 @@ type Button struct {
 	focusPulse *PulseAnimation
 }
 
-//Creates a new button. Defaults to non-focussed state.
+//Creates a new button. Defaults to non-focused state.
 func NewButton(w, h, x, y, z int, bord, cent bool, txt string) *Button {
 	p := NewPulseAnimation(0, 0, w, h, 20, 0, true)
 	return &Button{*NewTextbox(w, h, x, y, z, bord, cent, txt), nil, p}

@@ -12,13 +12,13 @@ type Animator interface {
 	Toggle()
 }
 
-//BlinkAnimation inverts the fore/back colours of a single cell. Speed controls frequency.
+//BlinkCharAnimation draws a blinking cursor character. Speed controls frequency.
 type BlinkCharAnimation struct {
 	tick    int
 	speed   int //number of frames between blinks
 	x, y    int //position (possibly relative to element or container)
 	enabled bool
-	state bool
+	state   bool
 }
 
 func NewBlinkCharAnimation(x, y, speed int) *BlinkCharAnimation {
@@ -40,6 +40,7 @@ func (ba *BlinkCharAnimation) Tick() {
 }
 
 //charnum: 0 = left, 1 = right char
+//TODO: charNum makes this class NOT an animator. problem???
 func (ba *BlinkCharAnimation) Render(charNum int, offset ...int) {
 	if ba.enabled {
 		offX, offY, offZ := processOffset(offset)
@@ -88,7 +89,6 @@ func (pa *PulseAnimation) Tick() {
 func (pa *PulseAnimation) Render(offset ...int) {
 	if pa.enabled {
 		//interpolate for correct pulse colour
-
 		n := pa.tick % pa.dur
 		if n > pa.dur/2 {
 			n = pa.dur - n

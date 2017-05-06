@@ -22,7 +22,7 @@ func NewTextbox(w, h, x, y, z int, bord, cent bool, txt string) *Textbox {
 
 //Returns the height required to fit a string after it has been wrapped. Reimplements the word wrapper but cruder.
 func CalcWrapHeight(s string, width int) int {
-	width = width*2
+	width = width * 2
 	line := ""
 	n := 0
 	for _, word := range strings.Split(s, " ") {
@@ -48,7 +48,7 @@ func (t *Textbox) SetTitle(s string) {
 	t.title = s
 }
 
-//TODO: validate that 't' only includes ascii characters (rune < 255 i think)
+//Replaces the string for the textbox.
 func (t *Textbox) ChangeText(txt string) {
 	if t.text != txt {
 		t.text = txt
@@ -98,7 +98,7 @@ func (t *Textbox) Render(offset ...int) {
 
 			//offset if centerred
 			if t.centered {
-				offX += (t.width /2 - len(lines[l])/4) 
+				offX += (t.width/2 - len(lines[l])/4)
 			}
 
 			//print text

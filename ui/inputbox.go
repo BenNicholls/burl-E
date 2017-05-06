@@ -66,7 +66,7 @@ func (ib *Inputbox) Reset() {
 	ib.cursor = 0
 }
 
-//takes a key representing a letter and inserts. TODO: capital support
+//takes a key representing a letter and inserts.
 func (ib *Inputbox) InsertText(key rune) {
 	if !util.ValidText(key) {
 		return
