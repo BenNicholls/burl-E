@@ -11,6 +11,10 @@ func NewMap(w, h int) *TileMap {
 	return &TileMap{width: w, height: h, tiles: make([]Tile, w*h)}
 }
 
+func (m TileMap) Dims() (int, int) {
+	return m.width, m.height
+}
+
 func (m *TileMap) ChangeTileType(x, y, tile int) {
 	if util.CheckBounds(x, y, m.width, m.height) {
 		m.tiles[y*m.width+x].tileType = tile
