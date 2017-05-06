@@ -2,12 +2,6 @@ package core
 
 var tiledata []tileTypeData
 
-//default tiletypes POSSIBLE TODO: dynamic changing tile properties? Think about this.
-const (
-	TILE_NOTHING = iota
-	MAX_TILETYPES
-)
-
 type tileTypeData struct {
 	name        string
 	passable    bool
@@ -20,28 +14,50 @@ type Visuals struct {
 	ForeColour uint32
 }
 
+//Inits the tile data repository, which for now is just a slice of datas.
+//Also loads a NOTHING entry, 
 func init() {
-
 	//tiledata[TILETYPE]
-	tiledata = make([]tileTypeData, MAX_TILETYPES)
+	tiledata = make([]tileTypeData, 1)
 
 	//tiledata definitions go here. TODO: some kind of data loading function, load from file.
-	tiledata[TILE_NOTHING] = tileTypeData{"Nothing", false, true, Visuals{0, 0x000000}}
+	LoadTileData("Nothing", false, true, 0, 0x000000)
 }
 
-//takes tiletype, returns glyph
+//Adds a new entry to the tile data respoitory. Returns the index for the data in the repo.
+func LoadTileData(name string, pass, trans bool, glyph int, c uint32) int {
+	tiledata = append(tiledata, tileTypeData{name, pass, trans, Visuals{glyph, c}})
+	return len(tiledata) - 1
+}
+
 func GetName(t int) string {
-	return tiledata[t].name
+	if t < len(tiledata) {
+		return tiledata[t].name
+	} else {
+		return "no tile"
+	}
 }
 
 func IsPassable(t int) bool {
-	return tiledata[t].passable
+	if t < len(tiledata) {
+		return tiledata[t].passable
+	} else {
+		return false
+	}
 }
 
 func IsTransparent(t int) bool {
-	return tiledata[t].transparent
+	if t < len(tiledata) {
+		return tiledata[t].transparent
+	} else {
+		return false
+	}
 }
 
 func GetTileVisuals(t int) Visuals {
-	return tiledata[t].vis
+	if t < len(tiledata) {
+		return tiledata[t].vis
+	} else {
+		return Visuals{0, 0}
+	}
 }
