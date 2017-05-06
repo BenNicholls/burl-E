@@ -1,6 +1,6 @@
 package console
 
-import "github.com/bennicholls/delveengine/util"
+import "github.com/bennicholls/burl/util"
 
 //Inverts the foreground and background colours
 func Invert(x, y, z int) {

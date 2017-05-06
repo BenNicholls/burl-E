@@ -1,4 +1,4 @@
-package bases
+package core
 
 var tiledata []tileTypeData
 

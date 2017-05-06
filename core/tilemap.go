@@ -1,6 +1,6 @@
-package bases
+package core
 
-import "github.com/bennicholls/delveengine/util"
+import "github.com/bennicholls/burl/util"
 
 type TileMap struct {
 	width, height int

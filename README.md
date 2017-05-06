@@ -1,7 +1,7 @@
-# Delve Engine
-## A Roguelike Engine Thing
+# burl - Ben's Upcoming Roguelike Library
+## A Roguelike Engine/Library Thing
 
-This is all the engine stuff pulled out of Delvetown so I can re-use it in my spaceship game. With any luck it'll evolve into something usable in Delvetown again, although I'm not looking forward to that refactor.
+I pulled all the common roguelike stuff out of Delvetown so I could re-use it in my spaceship game. Hopefully it someday turns into something that can be used by people?? That would be nice. Depends on www.github.com/veandco/go-sdl2 for drawing and input handling, someday sound too I guess.
 
 Thanks for looking!
 

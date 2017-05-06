@@ -1,6 +1,6 @@
 package ui
 
-import "github.com/bennicholls/delveengine/console"
+import "github.com/bennicholls/burl/console"
 
 //List UI Elem is a special kind of container that arranges it's nested elements as a vertical list,
 //supporting scrollbars, scrolling, selection of list elements, etc.

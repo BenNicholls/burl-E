@@ -1,6 +1,6 @@
 package ui
 
-import "github.com/bennicholls/delveengine/console"
+import "github.com/bennicholls/burl/console"
 
 //Animations! Animations have a initalized state, then they evolve for a time, and then are garbaged.
 //Some animations will naturally be specific to some ui elements and not others, those limitations

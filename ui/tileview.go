@@ -1,7 +1,7 @@
 package ui
 
-import "github.com/bennicholls/delveengine/console"
-import "github.com/bennicholls/delveengine/util"
+import "github.com/bennicholls/burl/console"
+import "github.com/bennicholls/burl/util"
 
 //View object for drawing tiles. (eg. maps). Effectively a buffer for drawing before the console grabs it.
 type TileView struct {

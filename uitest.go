@@ -1,7 +1,7 @@
 package main   
 
-import "github.com/bennicholls/delveengine/console"
-import "github.com/bennicholls/delveengine/ui"
+import "github.com/bennicholls/burl/console"
+import "github.com/bennicholls/burl/ui"
 import "runtime"
 import "math/rand"
 import "github.com/veandco/go-sdl2/sdl"

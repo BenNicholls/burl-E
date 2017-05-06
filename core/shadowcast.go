@@ -1,6 +1,6 @@
-package bases
+package core
 
-import "github.com/bennicholls/delveengine/util"
+import "github.com/bennicholls/burl/util"
 
 //Shadowcatser runs 8 times over different quadrants. rMatrix supplies
 //rotation coefficients. Linear algebra to the rescue.

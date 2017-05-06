@@ -1,11 +1,11 @@
-package bases
+package core
 
-import "github.com/bennicholls/delveengine/console"
+import "github.com/bennicholls/burl/console"
 
 //Basic entity definition. Entities have position, an ID, and a name. Anything that occupies 
 //space on a TileMap is an entity. Players and enemies, furniture, doors, whatever. More specific things can be added to this class
 //to give all possible entites these features.
-type BaseEntity struct {
+type BurlEntity struct {
 	Name     string
 	ID       int //Unique ID to this specific entity
 	X, Y     int //Position on the TileMap
@@ -13,21 +13,21 @@ type BaseEntity struct {
 	Light EntityLight
 }
 
-func NewBaseEntity(x, y, id int, name string, v console.Visuals) *BaseEntity {
-	return &BaseEntity{name, id, x, y, v, EntityLight{}}
+func NewBURLEntity(x, y, id int, name string, v console.Visuals) *BaseEntity {
+	return &BurlEntity{name, id, x, y, v, EntityLight{}}
 }
 
-func (e *BaseEntity) Move(dx, dy int) {
+func (e *BurlEntity) Move(dx, dy int) {
 	e.X += dx
 	e.Y += dy
 }
 
-func (e *BaseEntity) MoveTo(x, y int) {
+func (e *BurlEntity) MoveTo(x, y int) {
 	e.X = x
 	e.Y = y
 }
 
-func (e BaseEntity) GetVisuals() console.Visuals {
+func (e BurlEntity) GetVisuals() console.Visuals {
 	return e.Visuals
 }
 
