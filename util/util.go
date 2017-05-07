@@ -17,6 +17,11 @@ func GenerateDirection() (int, int) {
 	}
 }
 
+//generates a random (x,y) pair within a box defined by (x, y, w, h)
+func GenerateCoord(x, y, w, h int) (int, int) {
+	return rand.Intn(w)+x, rand.Intn(h)+y
+}
+
 //reports distance squared (sqrt unnecessary usually)
 func Distance(x1, x2, y1, y2 int) int {
 	return (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)

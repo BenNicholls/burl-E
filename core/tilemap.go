@@ -43,22 +43,22 @@ func (m *TileMap) SetTile(x, y int, t Tile) {
 	}
 }
 
-func (m *TileMap) AddEntity(x, y int, e *BurlEntity) {
+func (m *TileMap) AddEntity(x, y int, e Entity) {
 	if util.CheckBounds(x, y, m.width, m.height) {
-		m.tiles[x+y*m.width].Entity = e
-		m.ShadowCast(x, y, e.Light.Strength, Lighten)
+		m.tiles[x+y*m.width].entity = e
+		m.ShadowCast(x, y, e.GetLight().Strength, Lighten)
 	}
 }
 
 func (m *TileMap) RemoveEntity(x, y int) {
 	if util.CheckBounds(x, y, m.width, m.height) {
-		m.ShadowCast(x, y, m.tiles[x+y*m.width].Entity.Light.Strength, Darken)
-		m.tiles[x+y*m.width].Entity = nil
+		m.ShadowCast(x, y, m.tiles[x+y*m.width].entity.GetLight().Strength, Darken)
+		m.tiles[x+y*m.width].entity = nil
 	}
 }
 
 func (m *TileMap) MoveEntity(x, y, dx, dy int) {
-	e := m.tiles[x+y*m.width].Entity
+	e := m.tiles[x+y*m.width].entity
 	if e != nil {
 		m.RemoveEntity(x, y)
 		m.AddEntity(x+dx, y+dy, e)
@@ -66,9 +66,9 @@ func (m *TileMap) MoveEntity(x, y, dx, dy int) {
 	}
 }
 
-func (m TileMap) GetEntity(x, y int) *BurlEntity {
+func (m TileMap) GetEntity(x, y int) Entity {
 	if util.CheckBounds(x, y, m.width, m.height) {
-		return m.tiles[x+y*m.width].Entity
+		return m.tiles[x+y*m.width].entity
 	} else {
 		return nil
 	}
@@ -128,7 +128,7 @@ func (m *TileMap) ClearLights() {
 type Tile struct {
 	tileType, variant int //
 	passable          bool
-	Entity            *BurlEntity
+	entity            Entity
 	LastVisible       int // Records the last tick that this tile was seen
 	Light             TileLight
 	//Item              *Item
@@ -139,7 +139,7 @@ func (t Tile) TileType() int {
 }
 
 func (t Tile) Passable() bool {
-	return IsPassable(t.tileType) && t.Entity == nil
+	return IsPassable(t.tileType) && t.entity == nil
 }
 
 func (t Tile) Transparent() bool {
@@ -148,7 +148,7 @@ func (t Tile) Transparent() bool {
 
 func (t Tile) Empty() bool {
 	//return t.Entity == nil && t.Item == nil && IsPassable(t.tileType)
-	return t.Entity == nil && IsPassable(t.tileType)
+	return t.entity == nil && IsPassable(t.tileType)
 }
 
 func (t Tile) GetVisuals() Visuals {
