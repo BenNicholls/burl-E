@@ -26,3 +26,12 @@ func Distance(x1, x2, y1, y2 int) int {
 func CheckBounds(x, y, w, h int) bool {
 	return x >= 0 && x < w && y >= 0 && y < h
 }
+
+//Returns the max of two integers. Duh. If tied, returns the first argument.
+func Max(i, j int) int {
+	if i < j {
+		return j
+	} else {
+		return i
+	}
+}
