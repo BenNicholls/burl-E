@@ -35,3 +35,12 @@ func Max(i, j int) int {
 		return i
 	}
 }
+
+//Opposite of max. If tied, returns first argument.
+func Min(i, j int) int {
+	if i > j {
+		return j
+	} else {
+		return i
+	}
+}
