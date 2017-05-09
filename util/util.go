@@ -2,6 +2,11 @@ package util
 
 import "math/rand"
 
+//Interface for objects that can report a bounding box of some kind.
+type Bounded interface {
+	Rect() (int, int, int, int) 
+}
+
 //checks if key is a letter or number (ASCII-encoded)
 func ValidText(key rune) bool {
 	return (key >= 93 && key < 123) || (key >= 48 && key < 58)
@@ -48,4 +53,25 @@ func Min(i, j int) int {
 	} else {
 		return i
 	}
+}
+
+//returns the intersection of two rectangularly-bound objects as a rect
+//if no intersection, returns 0,0,0,0
+func FindIntersectionRect(r1, r2 Bounded) (x, y, w, h int) {
+	x1,y1,w1,h1 := r1.Rect()
+	x2,y2,w2,h2 := r2.Rect()
+
+	x,y,w,h = 0, 0, 0, 0
+
+	//check for intersection
+	if x1 >= x2 + w2 || x2 >= x1 + w1 || y1 >= y2 + h2 || y2 >= y1 + h1 {
+		return
+	}
+
+	x = Max(x1, x2)
+	y = Max(y1, y2)
+	w = Min(x1 + w1, x2 + w2) - x
+	h = Min(y1 + h1, y2 + h2) - y
+
+	return 
 }
