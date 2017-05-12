@@ -308,6 +308,17 @@ func ChangeBackColour(x, y int, back uint32) {
 	}
 }
 
+func ChangeColours(x, y, z int, fore, back uint32) {
+	s := y*width+x
+	if util.CheckBounds(x, y, width, height) && canvas[s].Z <= z {
+		if canvas[s].TextMode {
+			canvas[s].SetText(canvas[s].Chars[0], canvas[s].Chars[1], fore, back, z)
+		} else {
+			canvas[s].SetGlyph(canvas[s].Glyph, fore, back, z)
+		}
+	}
+}
+
 //Simultaneously changes all characteristics of a glyph cell in the canvas at position (x, y).
 //TODO: change name of this to signify it is for changing glyph cells.
 func ChangeCell(x, y, z, glyph int, fore, back uint32) {
