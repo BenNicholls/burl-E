@@ -41,10 +41,16 @@ func (c *Container) Render(offset ...int) {
 	if c.visible {
 		offX, offY, offZ := processOffset(offset)
 
-		if c.redraw {
-			console.Clear(c.x+offX, c.y+offY, c.width, c.height)
-			c.redraw = false
-		}
+		//previously was just clearing on special occasions, but it has come to my attention that
+		//containers floating above other content need to blank the screen or else they appear transparent.
+		//in the future, maybe we can have a transparency setting? would that be useful? who knows.
+		// if c.redraw {
+		// 	console.Clear(c.x+offX, c.y+offY, c.width, c.height)
+		// 	c.redraw = false
+		// }
+
+		console.Clear(c.x+offX, c.y+offY, c.width, c.height)
+
 		for i := 0; i < len(c.Elements); i++ {
 			c.Elements[i].Render(c.x+offX, c.y+offY, c.z+offZ)
 		}

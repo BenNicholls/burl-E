@@ -33,11 +33,18 @@ func (pb ProgressBar) Render(offset ...int) {
 		barWidth := int(float32(pb.progress) * float32(pb.width) / float32(100))
 		if barWidth == 0 && pb.progress != 0 {
 			barWidth = 1
+		} else if pb.progress == 100 {
+			barWidth = pb.width
 		}
 
-		for i := 0; i < barWidth; i++ {
+		for i := 0; i < pb.width; i++ {
 			for j := 0; j < pb.height; j++ {
-				console.ChangeBackColour(i+offX, j+offY, pb.progresscolour)
+				if i < barWidth {
+					console.ChangeBackColour(i+offX+pb.x, j+offY+pb.y, pb.progresscolour)
+				} else {
+					//set to black for now (bgcolor support coming later I assume)
+					console.ChangeBackColour(i+offX+pb.x, j+offY+pb.y, 0xFF000000)
+				}
 			}
 		}
 	}
