@@ -16,6 +16,7 @@ var width, height, tileSize int
 
 var canvas []Cell
 var masterDirty bool //is this necessary?
+var forceRedraw bool
 
 var frameTime, ticks, fps uint32
 var frames int
@@ -185,7 +186,7 @@ func Render() {
 		var src, dst sdl.Rect
 
 		for i, s := range canvas {
-			if s.Dirty {
+			if s.Dirty || forceRedraw {
 				if s.TextMode {
 					for c_i, c := range s.Chars {
 						dst = makeRect((i%width)*tileSize + c_i*tileSize/2, (i/width)*tileSize, tileSize/2, tileSize)
@@ -204,6 +205,7 @@ func Render() {
 
 		renderer.Present()
 		masterDirty = false
+		forceRedraw = false
 	}
 
 	//framerate limiter, so the cpu doesn't implode
@@ -236,6 +238,10 @@ func SetFramerate(f int) {
 //Toggles rendering of the FPS meter.
 func ToggleFPS() {
 	showFPS = !showFPS
+}
+
+func ForceRedraw() {
+	forceRedraw = true
 }
 
 //int32 for rect arguments. what a world.
