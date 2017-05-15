@@ -5,19 +5,13 @@ import "github.com/bennicholls/burl/console"
 
 //UI Element for displaying text.
 type Textbox struct {
-	width, height int
-	x, y, z       int
-	bordered      bool
-	centered      bool
-	title         string
+	UIElement
 	text          string
-	visible       bool
-	anims         []Animator
-	focused       bool
+	centered      bool
 }
 
 func NewTextbox(w, h, x, y, z int, bord, cent bool, txt string) *Textbox {
-	return &Textbox{w, h, x, y, z, bord, cent, "", txt, true, make([]Animator, 0, 20), false}
+	return &Textbox{NewUIElement(x,y,z,w,h,bord), txt, cent}
 }
 
 //Returns the height required to fit a string after it has been wrapped. Reimplements the word wrapper but cruder.
@@ -44,10 +38,6 @@ func CalcWrapHeight(s string, width int) int {
 	return n + 1
 }
 
-func (t *Textbox) SetTitle(s string) {
-	t.title = s
-}
-
 //Replaces the string for the textbox.
 func (t *Textbox) ChangeText(txt string) {
 	if t.text != txt {
@@ -59,10 +49,6 @@ func (t *Textbox) ChangeText(txt string) {
 func (t *Textbox) Render(offset ...int) {
 	if t.visible {
 		offX, offY, offZ := processOffset(offset)
-
-		if t.bordered {
-			console.DrawBorder(offX+t.x, offY+t.y, t.z+offZ, t.width, t.height, t.title, t.focused)
-		}
 
 		//word wrap calculatrix. a mighty sinful thing.
 		//TODO: support for breaking super long words. right now it just skips the word.
@@ -96,7 +82,7 @@ func (t *Textbox) Render(offset ...int) {
 				console.ChangeText(offX+t.x+i%t.width, offY+t.y+l, offZ+t.z, int(' '), int(' '))
 			}
 
-			//offset if centerred
+			//offset if centered
 			if t.centered {
 				offX += (t.width/2 - len(lines[l])/4)
 			}
@@ -105,41 +91,11 @@ func (t *Textbox) Render(offset ...int) {
 			console.DrawText(offX+t.x, offY+t.y+l, offZ+t.z, lines[l], 0xFFFFFFFF, 0xFF000000)
 		}
 
-		for i, _ := range t.anims {
-			t.anims[i].Tick()
-			t.anims[i].Render(t.x+offX, t.y+offY, t.z+offZ)
-		}
+		t.UIElement.Render(offX, offY, offZ)
 	}
-}
-
-func (t Textbox) Dims() (int, int) {
-	return t.width, t.height
-}
-
-func (t Textbox) Pos() (int, int, int) {
-	return t.x, t.y, t.z
-}
-
-func (t *Textbox) ToggleVisible() {
-	t.visible = !t.visible
-	console.Clear()
-}
-
-func (t *Textbox) SetVisibility(v bool) {
-	t.visible = v
-	console.Clear()
-}
-
-func (t *Textbox) ToggleFocus() {
-	t.focused = !t.focused
 }
 
 func (t *Textbox) SetCentered(c bool) {
 	t.centered = c
 }
 
-func (t *Textbox) MoveTo(x, y, z int) {
-	t.x = x
-	t.y = y
-	t.z = z
-}

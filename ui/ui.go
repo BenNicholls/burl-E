@@ -1,6 +1,6 @@
 package ui
 
-import "github.com/bennicholls/burl/util"
+import "github.com/bennicholls/burl/console"
 
 //UIElem is the basic definition for all UI elements.
 type UIElem interface {
@@ -10,7 +10,81 @@ type UIElem interface {
 	SetTitle(title string)
 	ToggleVisible()
 	SetVisibility(v bool)
+	IsVisible() bool
 	MoveTo(x, y, z int)
+	Rect() (int, int, int, int)
+}
+
+type UIElement struct {
+	x, y, z int
+	width, height int
+	bordered bool
+	title string
+	visible bool
+	focused bool
+
+	anims []Animator
+}
+
+func NewUIElement(x,y,z, width,height int, bord bool) UIElement {
+	return UIElement{x, y, z, width, height, bord, "", true, false, make([]Animator, 0, 20)}
+}
+
+//basic render function for all elements.
+func (u *UIElement) Render(offset ...int) {
+	if u.visible {
+		offX, offY, offZ := processOffset(offset)
+
+		if u.bordered {
+			console.DrawBorder(u.x+offX, u.y+offY, u.z+offZ, u.width, u.height, u.title, u.focused)
+		}
+
+		for i, _ := range u.anims {
+			u.anims[i].Tick()
+			u.anims[i].Render(u.x+offX, u.y+offY, u.z+offZ)
+		}
+	}
+}
+
+func (u UIElement) Dims() (int, int) {
+	return u.width, u.height
+}
+
+func (u UIElement) Pos() (int, int, int) {
+	return u.x, u.y, u.z
+}
+
+func (u *UIElement) SetTitle(txt string) {
+	u.title = txt
+}
+
+func (u *UIElement) ToggleVisible() {
+	u.visible = !u.visible
+	console.Clear()
+}
+
+func (u *UIElement) SetVisibility(v bool) {
+	if u.visible != v {
+		u.ToggleVisible()
+	}
+}
+
+func (u *UIElement) ToggleFocus() {
+	u.focused = !u.focused
+}
+
+func (u *UIElement) MoveTo(x, y, z int) {
+	u.x = x
+	u.y = y
+	u.z = z
+}
+
+func (u UIElement) Rect() (int, int, int, int) {
+	return u.x, u.y, u.width, u.height
+}
+
+func (u UIElement) IsVisible() bool {
+	return u.visible
 }
 
 //Helper funtion for unpacking optional offsets passed to UI render functions. Required to allow for nesting of elements.
@@ -23,52 +97,4 @@ func processOffset(offset []int) (x, y, z int) {
 		}
 	}
 	return
-}
-
-//event IDs
-const (
-	NONE     int = iota
-	ACTIVATE     //used for buttons I guess?
-	CHANGE       //used when a UIelem is changed
-)
-
-//Event is the basic unit of the EventStream, which is used to record input and interaction events.
-type Event struct {
-	Caller  UIElem
-	ID      int
-	Message string
-}
-
-//EventStream is the queue of UI Events to be (optionally) consumed by the application.
-var EventStream chan *Event
-
-//Allocate event buffer. TODO: is 100 overkill? Not enough? Test this once it is used ever.
-func init() {
-	EventStream = make(chan *Event, 100)
-}
-
-//Emits an event into the EventStream. If the stream is full we flush the whole buffer.
-//TODO: Is flushing the buffer a little barbaric? We could maybe just consume half of them or something.
-func PushEvent(c UIElem, id int, m string) {
-	if len(EventStream) == cap(EventStream) {
-		ClearEvents()
-		util.LogError("UI Eventstream limit reached! FLUSHY FLUSHY.")
-	}
-
-	EventStream <- &Event{c, id, m}
-}
-
-//Reallocates the eventstream.
-func ClearEvents() {
-	EventStream = make(chan *Event, 100)
-}
-
-//Grabs a UI event from the stream for consumption purposes.
-func PopEvent() *Event {
-	if len(EventStream) > 0 {
-		e := <-EventStream
-		return e
-	} else {
-		return nil
-	}
 }
