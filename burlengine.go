@@ -5,13 +5,6 @@ import "runtime"
 import "github.com/veandco/go-sdl2/sdl"
 import "github.com/bennicholls/burl/console"
 
-//Defines a game state (level, menu, anything that can take input, update itself, render to screen.)
-type State interface {
-	HandleKeypress(sdl.Keycode)
-	Update()
-	Render()
-}
-
 var gameState State
 
 //Initializes the game State. Call before running the game loop.
@@ -68,4 +61,28 @@ func GameLoop() error {
 	}
 
 	return nil
+}
+
+//Defines a game state (level, menu, anything that can take input, update itself, render to screen.)
+type State interface {
+	HandleKeypress(sdl.Keycode)
+	Update()
+	Render()
+}
+
+//base state object, compose states around this if you want
+type BurlState struct {
+	tick int //update ticks since init
+}
+
+func (b BurlState) HandleKeypress(key sdl.Keycode) {
+
+}
+
+func (b *BurlState) Update() {
+	b.tick++
+}
+
+func (b BurlState) Render() {
+
 }
