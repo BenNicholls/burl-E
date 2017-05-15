@@ -10,6 +10,7 @@ type Animator interface {
 	Tick()
 	Render(offset ...int)
 	Toggle()
+	Activate() //Activates the animation. If it's already running, restarts it.
 }
 
 //BlinkCharAnimation draws a blinking cursor character. Speed controls frequency.
@@ -39,8 +40,16 @@ func (ba *BlinkCharAnimation) Tick() {
 	}
 }
 
+func (ba *BlinkCharAnimation) Activate() {
+	if ba.enabled {
+		ba.tick = 0
+		ba.state = false
+	} else {
+		ba.enabled = true
+	}
+}
+
 //charnum: 0 = left, 1 = right char
-//TODO: charNum makes this class NOT an animator. problem???
 func (ba *BlinkCharAnimation) Render(charNum int, offset ...int) {
 	if ba.enabled {
 		offX, offY, offZ := processOffset(offset)
@@ -61,11 +70,10 @@ type PulseAnimation struct {
 	x, y, w, h int
 	enabled    bool
 	repeat     bool
-	done       bool
 }
 
 func NewPulseAnimation(x, y, w, h, dur, num int, repeat bool) *PulseAnimation {
-	return &PulseAnimation{0, dur, num, x, y, w, h, false, repeat, false}
+	return &PulseAnimation{0, dur, num, x, y, w, h, false, repeat}
 }
 
 func (pa *PulseAnimation) Toggle() {
@@ -80,10 +88,15 @@ func (pa *PulseAnimation) Tick() {
 		pa.tick++
 		if !pa.repeat {
 			if pa.tick == pa.dur*pa.num {
-				pa.done = true
+				pa.enabled = false
 			}
 		}
 	}
+}
+
+func (pa *PulseAnimation) Activate() {
+	pa.tick = 0
+	pa.enabled = true
 }
 
 func (pa *PulseAnimation) Render(offset ...int) {

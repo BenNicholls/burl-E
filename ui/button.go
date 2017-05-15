@@ -1,16 +1,15 @@
 package ui
 
 //Buttons are textboxes that can fire an event when "pressed". Event goes into the ui.EventStream
-//Currently the only button in the game uses a hardcoded PulseAnimation, this should probably be modifiable.
 type Button struct {
 	Textbox
 	press      *Event
-	focusPulse *PulseAnimation
+	pressPulse *PulseAnimation //animation that plays when pressed. TODO: make this modifiable. not always going to want a pulseanimation.
 }
 
 //Creates a new button. Defaults to non-focused state.
 func NewButton(w, h, x, y, z int, bord, cent bool, txt string) *Button {
-	p := NewPulseAnimation(0, 0, w, h, 20, 0, true)
+	p := NewPulseAnimation(0, 0, w, h, 20, 1, false)
 	return &Button{*NewTextbox(w, h, x, y, z, bord, cent, txt), nil, p}
 }
 
@@ -19,8 +18,9 @@ func (b *Button) Register(e *Event) {
 	b.press = e
 }
 
-//fires the registered event
+//fires the registered event, plays press animation.
 func (b Button) Press() {
+	b.pressPulse.Activate()
 	if b.press != nil {
 		EventStream <- b.press
 	}
@@ -28,7 +28,6 @@ func (b Button) Press() {
 
 func (b *Button) ToggleFocus() {
 	b.focused = !b.focused
-	b.focusPulse.Toggle()
 }
 
 func (b Button) Render(offset ...int) {
@@ -36,7 +35,7 @@ func (b Button) Render(offset ...int) {
 		offX, offY, offZ := processOffset(offset)
 
 		b.Textbox.Render(offX, offY, offZ)
-		b.focusPulse.Tick()
-		b.focusPulse.Render(b.x+offX, b.y+offY, b.z+offZ)
+		b.pressPulse.Tick()
+		b.pressPulse.Render(b.x+offX, b.y+offY, b.z+offZ)
 	}
 }
