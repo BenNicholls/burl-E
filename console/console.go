@@ -21,6 +21,7 @@ var forceRedraw bool
 var frameTime, ticks, fps uint32
 var frames int
 var showFPS bool
+var Ready bool //true when console is ready for drawing and stuff!
 
 //Border colours are defined here so we can change them program-wide,
 //for reasons that I hope will come in handy later.
@@ -109,6 +110,7 @@ func Setup(w, h int, glyphPath, fontPath, title string) error {
 	showFPS = false
 	BorderColour1 = 0xFFE28F00
 	BorderColour2 = 0xFF555555
+	Ready = true
 
 	return nil
 }
