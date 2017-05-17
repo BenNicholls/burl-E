@@ -13,27 +13,53 @@ type Animator interface {
 	Activate() //Activates the animation. If it's already running, restarts it.
 }
 
+type Animation struct {
+	x, y int
+	tick int
+	enabled bool
+	repeat bool
+	done bool
+}
+
+func NewAnimation(x, y int, repeat bool) Animation {
+	return Animation{x, y, 0, false, repeat, false}
+}
+
+func (a *Animation) Tick() {
+	if a.enabled {
+		a.tick++
+	}
+}
+
+func (a Animation) Render() {
+
+}
+
+//Turns on animation. Does not restart animation (can be used as pause button).
+func (a *Animation) Toggle() {
+	a.enabled = !a.enabled
+}
+
+//plays the animation from the beginning. if it's already going, restarts it.
+func (a *Animation) Activate() {
+	a.tick = 0
+	a.enabled = true
+}
+
 //BlinkCharAnimation draws a blinking cursor character. Speed controls frequency.
 type BlinkCharAnimation struct {
-	tick    int
+	Animation
 	speed   int //number of frames between blinks
-	x, y    int //position (possibly relative to element or container)
-	enabled bool
-	state   bool
+	state   bool //cursor shown or not shown
 }
 
 func NewBlinkCharAnimation(x, y, speed int) *BlinkCharAnimation {
-	return &BlinkCharAnimation{0, speed, x, y, false, false}
-}
-
-func (ba *BlinkCharAnimation) Toggle() {
-	ba.enabled = !ba.enabled
-	ba.tick = 0
+	return &BlinkCharAnimation{NewAnimation(x, y, true), speed, true}
 }
 
 func (ba *BlinkCharAnimation) Tick() {
 	if ba.enabled {
-		ba.tick++
+		ba.Animation.Tick()
 		if ba.tick%ba.speed == 0 {
 			ba.state = !ba.state
 		}
@@ -42,11 +68,10 @@ func (ba *BlinkCharAnimation) Tick() {
 
 func (ba *BlinkCharAnimation) Activate() {
 	if ba.enabled {
-		ba.tick = 0
 		ba.state = false
-	} else {
-		ba.enabled = true
 	}
+
+	ba.Animation.Activate()
 }
 
 //charnum: 0 = left, 1 = right char
@@ -64,39 +89,26 @@ func (ba *BlinkCharAnimation) Render(charNum int, offset ...int) {
 //PulseAnimation make a rectangular area pulse with colour.
 //TODO: Support for fun colours!!!!!!!!!!YES!!!!
 type PulseAnimation struct {
-	tick       int
+	Animation
 	dur        int //duration of a pulse
 	num        int //number of pulses to do
-	x, y, w, h int
-	enabled    bool
-	repeat     bool
+	w, h int
 }
 
 func NewPulseAnimation(x, y, w, h, dur, num int, repeat bool) *PulseAnimation {
-	return &PulseAnimation{0, dur, num, x, y, w, h, false, repeat}
-}
-
-func (pa *PulseAnimation) Toggle() {
-	pa.enabled = !pa.enabled
-	if pa.repeat {
-		pa.tick = 0
-	}
+	return &PulseAnimation{NewAnimation(x, y, repeat), dur, num, w, h}
 }
 
 func (pa *PulseAnimation) Tick() {
 	if pa.enabled {
-		pa.tick++
+		pa.Animation.Tick()
 		if !pa.repeat {
 			if pa.tick == pa.dur*pa.num {
 				pa.enabled = false
+				pa.done = true
 			}
 		}
 	}
-}
-
-func (pa *PulseAnimation) Activate() {
-	pa.tick = 0
-	pa.enabled = true
 }
 
 func (pa *PulseAnimation) Render(offset ...int) {

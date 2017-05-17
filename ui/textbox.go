@@ -98,4 +98,3 @@ func (t *Textbox) Render(offset ...int) {
 func (t *Textbox) SetCentered(c bool) {
 	t.centered = c
 }
-
