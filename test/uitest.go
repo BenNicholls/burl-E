@@ -41,6 +41,6 @@ func (t *TestUI) SetupUI() {
 
 }
 
-func(t *TestUI) Render() {
+func (t *TestUI) Render() {
 	t.container.Render()
 }

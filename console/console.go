@@ -37,7 +37,7 @@ type Cell struct {
 
 	//for text rendering mode. TODO:multiple back and fore colours, one for each char
 	TextMode bool
-	Chars [2]int
+	Chars    [2]int
 }
 
 //Sets the properties of a cell all at once for Glyph Mode.
@@ -57,7 +57,7 @@ func (c *Cell) SetText(char1, char2 int, fore, back uint32, z int) {
 	if c.Chars[0] != char1 || c.Chars[1] != char2 || c.ForeColour != fore || c.BackColour != back || c.Z != z || c.TextMode == false {
 		c.TextMode = true
 		c.Chars[0] = char1
-		c.Chars[1] = char2 
+		c.Chars[1] = char2
 		c.ForeColour = fore
 		c.BackColour = back
 		c.Z = z
@@ -141,10 +141,10 @@ func ChangeFonts(glyphPath, fontPath string) error {
 	Clear()
 
 	_, _, gw, _, _ := glyphs.Query()
-	
+
 	//reset window size if fontsize changed
 	if int(gw/16) != tileSize {
-		tileSize = int(gw/16)
+		tileSize = int(gw / 16)
 		window.SetSize(tileSize*width, tileSize*height)
 	}
 
@@ -191,7 +191,7 @@ func Render() {
 			if s.Dirty || forceRedraw {
 				if s.TextMode {
 					for c_i, c := range s.Chars {
-						dst = makeRect((i%width)*tileSize + c_i*tileSize/2, (i/width)*tileSize, tileSize/2, tileSize)
+						dst = makeRect((i%width)*tileSize+c_i*tileSize/2, (i/width)*tileSize, tileSize/2, tileSize)
 						src = makeRect((c%32)*tileSize/2, (c/32)*tileSize, tileSize/2, tileSize)
 						CopyToRenderer(s, font, src, dst)
 					}
@@ -212,7 +212,7 @@ func Render() {
 
 	//framerate limiter, so the cpu doesn't implode
 	//TODO: option to turn this off? I guess you can set the fps arbitrarily high...
-	//NOTE: should this be the responsibility of the main game loop? 
+	//NOTE: should this be the responsibility of the main game loop?
 	ticks = sdl.GetTicks() - frameTime
 	if ticks < fps {
 		sdl.Delay(fps - ticks)
@@ -235,7 +235,6 @@ func CopyToRenderer(c Cell, tex *sdl.Texture, src, dst sdl.Rect) {
 func SetFramerate(f int) {
 	fps = uint32(1000/f) + 1
 }
-
 
 //Toggles rendering of the FPS meter.
 func ToggleFPS() {
@@ -272,7 +271,7 @@ func ChangeGlyph(x, y, glyph int) {
 
 //Changes text of a cell in the canvas at position (x, y).
 func ChangeText(x, y, z, char1, char2 int) {
-	s := y*width+x
+	s := y*width + x
 	if util.CheckBounds(x, y, width, height) && canvas[s].Z <= z {
 		canvas[s].TextMode = true
 		if canvas[s].Chars[0] != char1 || canvas[s].Chars[1] != char2 {
@@ -287,8 +286,8 @@ func ChangeText(x, y, z, char1, char2 int) {
 //Changes a single character on the canvas at position (x,y) in text mode.
 //charNum: 0 = Left, 1 = Right (for ease with modulo operations). Throw whatever in here though, it gets modulo 2'd anyways just in case.
 func ChangeChar(x, y, z, char, charNum int) {
-	s := y*width+x
-	if util.CheckBounds(x, y, width, height) && charNum >= 0 && canvas[s].Z <= z  {
+	s := y*width + x
+	if util.CheckBounds(x, y, width, height) && charNum >= 0 && canvas[s].Z <= z {
 		canvas[s].TextMode = true
 		if canvas[s].Chars[charNum%2] != char {
 			canvas[s].Chars[charNum%2] = char
@@ -317,7 +316,7 @@ func ChangeBackColour(x, y int, back uint32) {
 }
 
 func ChangeColours(x, y, z int, fore, back uint32) {
-	s := y*width+x
+	s := y*width + x
 	if util.CheckBounds(x, y, width, height) && canvas[s].Z <= z {
 		if canvas[s].TextMode {
 			canvas[s].SetText(canvas[s].Chars[0], canvas[s].Chars[1], fore, back, z)
@@ -340,18 +339,18 @@ func ChangeCell(x, y, z, glyph int, fore, back uint32) {
 //Draws a string to the console in text mode.
 func DrawText(x, y, z int, txt string, fore, back uint32) {
 	for i, c := range txt {
-		if util.CheckBounds(x + i/2, y, width, height) {
-			ChangeChar(x + i/2, y, z, int(c), i%2)
+		if util.CheckBounds(x+i/2, y, width, height) {
+			ChangeChar(x+i/2, y, z, int(c), i%2)
 			if i%2 == 0 {
 				//only need to change colour each cell, not each character
-				ChangeForeColour(x + i/2, y, fore)
-				ChangeBackColour(x + i/2, y, back)
+				ChangeForeColour(x+i/2, y, fore)
+				ChangeBackColour(x+i/2, y, back)
 			}
 		}
 	}
 }
 
-//TODO: custom colouring, multiple styles. 
+//TODO: custom colouring, multiple styles.
 //NOTE: current border colouring thing is a bit of a hack. Need to add actual support for
 //border and ui styling. (Should this be in delveengine/ui??? hmmm.)
 func DrawBorder(x, y, z, w, h int, title string, focused bool) {
@@ -378,7 +377,7 @@ func DrawBorder(x, y, z, w, h int, title string, focused bool) {
 
 	//Write centered title.
 	if len(title) < w && title != "" {
-		DrawText(x+(w/2 - len(title)/4 - 1), y-1, z, title, 0xFFFFFFFF, 0xFF000000)
+		DrawText(x+(w/2-len(title)/4-1), y-1, z, title, 0xFFFFFFFF, 0xFF000000)
 	}
 }
 
@@ -414,7 +413,7 @@ func SpamGlyphs() {
 	}
 }
 
-//Takes r,g,b ints and creates a colour as defined by the pixelformat with alpha 255. 
+//Takes r,g,b ints and creates a colour as defined by the pixelformat with alpha 255.
 //TODO: rgba version of this function? variatic function that can optionally take an alpha? Hmm.
 func MakeColour(r, g, b int) uint32 {
 	return sdl.MapRGBA(format, uint8(r), uint8(g), uint8(b), 255)

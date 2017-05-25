@@ -16,17 +16,17 @@ type UIElem interface {
 }
 
 type UIElement struct {
-	x, y, z int
+	x, y, z       int
 	width, height int
-	bordered bool
-	title string
-	visible bool
-	focused bool
+	bordered      bool
+	title         string
+	visible       bool
+	focused       bool
 
 	anims []Animator
 }
 
-func NewUIElement(x,y,z, width,height int, bord bool) UIElement {
+func NewUIElement(x, y, z, width, height int, bord bool) UIElement {
 	return UIElement{x, y, z, width, height, bord, "", true, false, make([]Animator, 0, 20)}
 }
 

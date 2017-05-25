@@ -45,7 +45,7 @@ func (s Stat) Min() int {
 
 //Sets a new minimum. If this would make min > max, does nothing.
 func (s *Stat) SetMin(m int) {
-	if m <= s.max {	
+	if m <= s.max {
 		s.min = m
 		s.Mod(0) //ensures min <= val <= max
 	}
@@ -82,6 +82,6 @@ func (s Stat) GetPct() int {
 	if s.min == s.max {
 		return 0
 	} else {
-		return int(100 * (float32(s.val - s.min) / float32(s.max - s.min)))
+		return int(100 * (float32(s.val-s.min) / float32(s.max-s.min)))
 	}
 }

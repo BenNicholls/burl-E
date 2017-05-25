@@ -1,4 +1,4 @@
-package burl 
+package burl
 
 import "errors"
 import "runtime"
@@ -34,9 +34,9 @@ func GameLoop() error {
 			case *sdl.QuitEvent:
 				running = false
 			case *sdl.WindowEvent:
-			 	if t.Event == sdl.WINDOWEVENT_RESTORED {
-					 console.ForceRedraw()
-				 }
+				if t.Event == sdl.WINDOWEVENT_RESTORED {
+					console.ForceRedraw()
+				}
 			// case *sdl.MouseMotionEvent:
 			// 	fmt.Printf("[%d ms] MouseMotion\ttype:%d\tid:%d\tx:%d\ty:%d\txrel:%d\tyrel:%d\n",
 			// 		t.Timestamp, t.Type, t.Which, t.X, t.Y, t.XRel, t.YRel)

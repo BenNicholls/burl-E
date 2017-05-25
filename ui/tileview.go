@@ -11,7 +11,7 @@ type TileView struct {
 }
 
 func NewTileView(w, h, x, y, z int, bord bool) *TileView {
-	return &TileView{NewUIElement(x,y,z,w,h,bord), make([]console.Cell, w*h)}
+	return &TileView{NewUIElement(x, y, z, w, h, bord), make([]console.Cell, w*h)}
 }
 
 func (tv *TileView) SetTitle(s string) {

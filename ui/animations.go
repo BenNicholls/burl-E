@@ -14,11 +14,11 @@ type Animator interface {
 }
 
 type Animation struct {
-	x, y int
-	tick int
+	x, y    int
+	tick    int
 	enabled bool
-	repeat bool
-	done bool
+	repeat  bool
+	done    bool
 }
 
 func NewAnimation(x, y int, repeat bool) Animation {
@@ -49,8 +49,8 @@ func (a *Animation) Activate() {
 //BlinkCharAnimation draws a blinking cursor character. Speed controls frequency.
 type BlinkCharAnimation struct {
 	Animation
-	speed   int //number of frames between blinks
-	state   bool //cursor shown or not shown
+	speed int  //number of frames between blinks
+	state bool //cursor shown or not shown
 }
 
 func NewBlinkCharAnimation(x, y, speed int) *BlinkCharAnimation {
@@ -90,8 +90,8 @@ func (ba *BlinkCharAnimation) Render(charNum int, offset ...int) {
 //TODO: Support for fun colours!!!!!!!!!!YES!!!!
 type PulseAnimation struct {
 	Animation
-	dur        int //duration of a pulse
-	num        int //number of pulses to do
+	dur  int //duration of a pulse
+	num  int //number of pulses to do
 	w, h int
 }
 

@@ -9,16 +9,15 @@ type Entity interface {
 	GetLight() EntityLight
 }
 
-
 //Basic entity definition. Entities have position, an ID, and a name. Anything that occupies
 //space on a TileMap is an entity. Players and enemies, furniture, doors, whatever. More specific things can be added to this class
 //to give all possible entites these features.
 type BurlEntity struct {
-	Name    string
-	ID      int             //Unique ID to this specific entity
-	X, Y    int             //Position on a TileMap
-	Vis     Visuals //Visual information for rendering to the TileMap
-	Light   EntityLight
+	Name  string
+	ID    int     //Unique ID to this specific entity
+	X, Y  int     //Position on a TileMap
+	Vis   Visuals //Visual information for rendering to the TileMap
+	Light EntityLight
 }
 
 func NewBurlEntity(x, y, id int, name string, v Visuals) *BurlEntity {

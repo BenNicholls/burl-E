@@ -5,13 +5,13 @@ import "github.com/bennicholls/burl/console"
 //UI Element that acts as a way to group other elements. Allows for nesting of elements, etc.
 type Container struct {
 	UIElement
-	redraw        bool
+	redraw bool
 
 	Elements []UIElem
 }
 
 func NewContainer(w, h, x, y, z int, bord bool) *Container {
-	return &Container{NewUIElement(x,y,z,w,h,bord), true, make([]UIElem, 0, 20)}
+	return &Container{NewUIElement(x, y, z, w, h, bord), true, make([]UIElem, 0, 20)}
 }
 
 //Adds any number of UIElem to the container.
@@ -38,8 +38,8 @@ func (c *Container) Render(offset ...int) {
 		}
 
 		//draw over container, so we don't appear transparent.
-		for i:= 0; i < c.width*c.height; i++ {
-			console.ChangeColours(c.x+offX+(i%c.width),c.y+offY+(i/c.width), c.z+offZ, 0xFF000000, 0xFF000000)
+		for i := 0; i < c.width*c.height; i++ {
+			console.ChangeColours(c.x+offX+(i%c.width), c.y+offY+(i/c.width), c.z+offZ, 0xFF000000, 0xFF000000)
 		}
 
 		for i := 0; i < len(c.Elements); i++ {

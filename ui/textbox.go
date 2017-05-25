@@ -6,13 +6,13 @@ import "github.com/bennicholls/burl/util"
 //UI Element for displaying text.
 type Textbox struct {
 	UIElement
-	text          string
-	centered      bool
-	lines []string
+	text     string
+	centered bool
+	lines    []string
 }
 
 func NewTextbox(w, h, x, y, z int, bord, cent bool, txt string) *Textbox {
-	return &Textbox{NewUIElement(x,y,z,w,h,bord), txt, cent, util.WrapText(txt, w*2, h)}
+	return &Textbox{NewUIElement(x, y, z, w, h, bord), txt, cent, util.WrapText(txt, w*2, h)}
 }
 
 //Returns the height required to fit a string after it has been wrapped.
