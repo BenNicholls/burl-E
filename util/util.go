@@ -1,6 +1,7 @@
 package util
 
 import "math/rand"
+import "strings"
 
 //Interface for objects that can report a bounding box of some kind.
 type Bounded interface {
@@ -74,4 +75,48 @@ func FindIntersectionRect(r1, r2 Bounded) (x, y, w, h int) {
 	h = Min(y1 + h1, y2 + h2) - y
 
 	return 
+}
+
+//wraps the provided string at WIDTH characters. optionally takes another int, used to determine the maximum number of lines.
+//returns a slice of strings, each element a wrapped line.
+//for words longer than width, just brutally cuts them off. no mercy.
+func WrapText(str string, width int, maxlines ...int) (lines []string) {
+	capped := false
+	if len(maxlines) == 1 {
+		lines = make([]string, 0, maxlines[0])
+		capped = true
+	} else {
+		lines = make([]string, 0)
+	}
+
+	currentLine := ""
+
+	for _, s := range strings.Split(str, " ") {
+		//super long word make-it-not-break hack.
+		if len(s) > width {
+			s = s[:width]
+		}
+
+		//add a line if current word won't fit
+		if len(currentLine)+len(s) > width {
+			lines = append(lines, currentLine)
+			currentLine = ""
+
+			//break if number of lines == height
+			if capped && len(lines) == cap(lines) {
+				break
+			} 
+
+		}
+		currentLine += s
+		if len(currentLine) != width {
+			currentLine += " "
+		}
+	}
+	//append last line if needed after we're done looping through text
+	if currentLine != "" {
+		lines = append(lines, currentLine)
+	}
+
+	return
 }

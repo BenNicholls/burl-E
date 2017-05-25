@@ -34,7 +34,7 @@ type TestUI struct {
 func (t *TestUI) SetupUI() {
 	t.container = ui.NewContainer(40, 40, 1, 1, 0, true)
 	textbox := ui.NewTextbox(30, 20, 2, 2, 0, true, false, "TESTING")
-	textbox.ChangeText("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae nibh risus. Quisque consectetur lacus eu velit viverra convallis. In at mattis orci. Suspendisse rhoncus lacinia elit ac ullamcorper. Donec id mattis velit, in condimentum massa. Nam non dui eu urna lacinia varius ut nec justo. Suspendisse consequat ornare neque, sit amet cursus enim volutpat in. Proin nibh ante, tempus in laoreet luctus, tempus in eros.")
+	textbox.ChangeText("Loremipsumdolorsitamet,consecteturadipiscingelit.Donecvitaenibhrisus. Quisque consectetur lacus eu velit viverra convallis. In at mattis orci. Suspendisse rhoncus lacinia elit ac ullamcorper. Donec id mattis velit, in condimentum massa. Nam non dui eu urna lacinia varius ut nec justo. Suspendisse consequat ornare neque, sit amet cursus enim volutpat in. Proin nibh ante, tempus in laoreet luctus, tempus in eros.")
 	textbox.SetTitle("YAY")
 	t.container.Add(textbox)
 	t.container.SetTitle("FANCYTIMES")
