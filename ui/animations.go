@@ -11,6 +11,7 @@ type Animator interface {
 	Render(offset ...int)
 	Toggle()
 	Activate() //Activates the animation. If it's already running, restarts it.
+	IsFinished() bool
 }
 
 type Animation struct {
@@ -44,6 +45,10 @@ func (a *Animation) Toggle() {
 func (a *Animation) Activate() {
 	a.tick = 0
 	a.enabled = true
+}
+
+func (a Animation) IsFinished() bool {
+	return a.done
 }
 
 //BlinkCharAnimation draws a blinking cursor character. Speed controls frequency.

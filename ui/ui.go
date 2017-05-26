@@ -42,6 +42,10 @@ func (u *UIElement) Render(offset ...int) {
 		for i, _ := range u.anims {
 			u.anims[i].Tick()
 			u.anims[i].Render(u.x+offX, u.y+offY, u.z+offZ)
+			//remove animation if it is done
+			if u.anims[i].IsFinished() {
+				u.anims = append(u.anims[:i], u.anims[i+1:]...)
+			}
 		}
 	}
 }
@@ -85,6 +89,18 @@ func (u UIElement) Rect() (int, int, int, int) {
 
 func (u UIElement) IsVisible() bool {
 	return u.visible
+}
+
+func (u *UIElement) AddAnimation(a Animator) {
+	u.anims = append(u.anims, a)
+}
+
+func (u *UIElement) RemoveAnimation(a Animator) {
+	for i, anim := range u.anims {
+		if anim == a {
+			u.anims = append(u.anims[:i], u.anims[i+1:]...)
+		}
+	}
 }
 
 //Helper funtion for unpacking optional offsets passed to UI render functions. Required to allow for nesting of elements.
