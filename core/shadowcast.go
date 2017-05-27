@@ -45,7 +45,7 @@ func (m *TileMap) Scan(x, y, row int, slope1, slope2 float32, radius int, r [4]i
 			} else if slope2 > lSlope {
 				break
 			} else {
-				if d := util.Distance(0, dx, 0, dy); d < radius*radius {
+				if d := util.Distance(0, 0, dx, dy); d < radius*radius {
 					if !cull || !(dx == 0 || dy == 0 || dx == dy) {
 						fn(m, mx, my, d, radius)
 					}

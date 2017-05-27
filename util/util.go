@@ -29,7 +29,7 @@ func GenerateCoord(x, y, w, h int) (int, int) {
 }
 
 //reports distance squared (sqrt unnecessary usually)
-func Distance(x1, x2, y1, y2 int) int {
+func Distance(x1, y1, x2, y2 int) int {
 	return (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)
 }
 
