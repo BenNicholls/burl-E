@@ -56,6 +56,16 @@ func Min(i, j int) int {
 	}
 }
 
+func Clamp(val, min, max int) int {
+	if val <= min {
+		return min
+	} else if val >= max {
+		return max
+	} else {
+		return val
+	}
+}
+
 //returns the intersection of two rectangularly-bound objects as a rect
 //if no intersection, returns 0,0,0,0
 func FindIntersectionRect(r1, r2 Bounded) (x, y, w, h int) {
@@ -75,6 +85,19 @@ func FindIntersectionRect(r1, r2 Bounded) (x, y, w, h int) {
 	h = Min(y1+h1, y2+h2) - y
 
 	return
+}
+
+//Linearly interpolates a range (min-max) over (steps) intervals, and returns the (val)th step.
+func Lerp(min, max, val, steps int) int {
+	if val >= steps {
+		return max
+	} else if val <= 0 {
+		return min
+	}
+
+	stepVal := float64(max - min)/float64(steps)
+	return int(float64(min) + stepVal*float64(val))
+
 }
 
 //wraps the provided string at WIDTH characters. optionally takes another int, used to determine the maximum number of lines.
