@@ -10,7 +10,7 @@ type Bounded interface {
 
 //checks if key is a letter or number (ASCII-encoded)
 func ValidText(key rune) bool {
-	return (key >= 93 && key < 123) || (key >= 48 && key < 58)
+	return (key >= 93 && key < 123) || (key >= 37 && key < 58)
 }
 
 //generates a tuple of cartesian directions (cannot be 0,0)
