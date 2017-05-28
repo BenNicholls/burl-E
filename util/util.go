@@ -3,18 +3,19 @@ package util
 import "math/rand"
 import "strings"
 
-//Interface for objects that can report a bounding box of some kind.
+//Bounded defines objects that can report a bounding box of some kind.
 type Bounded interface {
 	Rect() (int, int, int, int)
 }
 
-//checks if key is a letter or number (ASCII-encoded)
+//ValidText checks if key is a letter or number or basic punctuation (ASCII-encoded)
+//TODO: this is NOT comprehensive. Improve this later.
 func ValidText(key rune) bool {
 	return (key >= 93 && key < 123) || (key >= 37 && key < 58)
 }
 
-//generates a tuple of cartesian directions (cannot be 0,0)
-func GenerateDirection() (int, int) {
+//RandomDirection generates a tuple of cartesian directions (cannot be 0,0)
+func RandomDirection() (int, int) {
 	for {
 		dx, dy := rand.Intn(3)-1, rand.Intn(3)-1
 		if dx != 0 || dy != 0 {
@@ -23,22 +24,35 @@ func GenerateDirection() (int, int) {
 	}
 }
 
-//generates a random (x,y) pair within a box defined by (x, y, w, h)
+//GenerateCoord generates a random (x,y) pair within a box defined by (x, y, w, h)
 func GenerateCoord(x, y, w, h int) (int, int) {
 	return rand.Intn(w) + x, rand.Intn(h) + y
 }
 
-//reports distance squared (sqrt unnecessary usually)
+//Distance calculates the distance squared (sqrt unnecessary usually)
 func Distance(x1, y1, x2, y2 int) int {
 	return (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)
 }
 
-//Ensure (x,y) are inside (0, 0, w, h)
+//ManhattanDistance calculates the manhattan (or taxicab) distance on a square grid.
+func ManhattanDistance(x1, y1, x2, y2 int) int {
+	return Abs(x2-x1) + Abs(y2-y1)
+}
+
+//CheckBounds ensures (x,y) is inside (0, 0, w, h)
 func CheckBounds(x, y, w, h int) bool {
 	return x >= 0 && x < w && y >= 0 && y < h
 }
 
-//Returns the max of two integers. Duh. If tied, returns the first argument.
+//Abs returns the absolute value of val
+func Abs(val int) int {
+	if val < 0 {
+		return val * (-1)
+	}
+	return val
+}
+
+//Max returns the max of two integers. Duh.
 func Max(i, j int) int {
 	if i < j {
 		return j
@@ -47,7 +61,7 @@ func Max(i, j int) int {
 	}
 }
 
-//Opposite of max. If tied, returns first argument.
+//Min is the opposite of max.
 func Min(i, j int) int {
 	if i > j {
 		return j
@@ -56,6 +70,8 @@ func Min(i, j int) int {
 	}
 }
 
+//Clamp checks if min <= val <= max.
+//If val < min, returns min. If val > max, returns max. Otherwise returns val.
 func Clamp(val, min, max int) int {
 	if val <= min {
 		return min
@@ -66,8 +82,8 @@ func Clamp(val, min, max int) int {
 	}
 }
 
-//returns the intersection of two rectangularly-bound objects as a rect
-//if no intersection, returns 0,0,0,0
+//FindIntersectionRect calculates the intersection of two rectangularly-bound objects as a rect
+//if no intersection, returns (0,0,0,0)
 func FindIntersectionRect(r1, r2 Bounded) (x, y, w, h int) {
 	x1, y1, w1, h1 := r1.Rect()
 	x2, y2, w2, h2 := r2.Rect()
@@ -87,7 +103,8 @@ func FindIntersectionRect(r1, r2 Bounded) (x, y, w, h int) {
 	return
 }
 
-//Linearly interpolates a range (min-max) over (steps) intervals, and returns the (val)th step.
+//Lerp linearly interpolates a range (min-max) over (steps) intervals, and returns the (val)th step.
+//Currently does this via a conversion to float64, so there might be some rounding errors in here I don't know about.
 func Lerp(min, max, val, steps int) int {
 	if val >= steps {
 		return max
@@ -95,14 +112,13 @@ func Lerp(min, max, val, steps int) int {
 		return min
 	}
 
-	stepVal := float64(max - min)/float64(steps)
+	stepVal := float64(max-min) / float64(steps)
 	return int(float64(min) + stepVal*float64(val))
-
 }
 
-//wraps the provided string at WIDTH characters. optionally takes another int, used to determine the maximum number of lines.
+//WrapText wraps the provided string at WIDTH characters. optionally takes another int, used to determine the maximum number of lines.
 //returns a slice of strings, each element a wrapped line.
-//for words longer than width, just brutally cuts them off. no mercy.
+//for words longer than width it just brutally cuts them off. no mercy.
 func WrapText(str string, width int, maxlines ...int) (lines []string) {
 	capped := false
 	if len(maxlines) == 1 {
@@ -129,7 +145,6 @@ func WrapText(str string, width int, maxlines ...int) (lines []string) {
 			if capped && len(lines) == cap(lines) {
 				break
 			}
-
 		}
 		currentLine += s
 		if len(currentLine) != width {
