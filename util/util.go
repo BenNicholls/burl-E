@@ -82,6 +82,18 @@ func Clamp(val, min, max int) int {
 	}
 }
 
+//ModularClamp is like clamp but instead of clamping at the endpoints, it overflows/underflows back to the other side of the range.
+//This kind of function probably has an actual name but hell if I know what it is.
+func ModularClamp(val, min, max int) int {
+	if val < min {
+		return max - (min - val - 1)
+	} else if val > max {
+		return (val - max - 1) + min
+	} else {
+		return val
+	}
+}
+
 //FindIntersectionRect calculates the intersection of two rectangularly-bound objects as a rect
 //if no intersection, returns (0,0,0,0)
 func FindIntersectionRect(r1, r2 Bounded) (x, y, w, h int) {
