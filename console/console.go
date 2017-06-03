@@ -71,27 +71,28 @@ func (c *Cell) Clear() {
 }
 
 //Setup the game window, renderer, etc
-func Setup(w, h int, glyphPath, fontPath, title string) error {
+func Setup(w, h int, glyphPath, fontPath, title string) (err error) {
 	width = w
 	height = h
-	var err error
-
 	tileSize = 16
 
 	window, err = sdl.CreateWindow(title, sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, width*tileSize, height*tileSize, sdl.WINDOW_OPENGL)
 	if err != nil {
-		return errors.New("Failed to create window: " + fmt.Sprint(sdl.GetError()))
+		util.LogError("CONSOLE: Failed to create window. sdl:" + fmt.Sprint(sdl.GetError()))
+		return errors.New("Failed to create window.")
 	}
 
 	//manually set pixelformat to ARGB (window defaults to RGB for some reason)
 	format, err = sdl.AllocFormat(uint(sdl.PIXELFORMAT_ARGB8888))
 	if err != nil {
-		return errors.New("No pixelformat: " + fmt.Sprint(sdl.GetError()))
+		util.LogError("CONSOLE: Failed to allocate pixelformat. sdl:" + fmt.Sprint(sdl.GetError()))
+		return errors.New("No pixelformat.")
 	}
 
 	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_SOFTWARE) //Software renderer because ACCELERATED borks my laptop for some reason.
 	if err != nil {
-		return errors.New("Failed to create renderer: " + fmt.Sprint(sdl.GetError()))
+		util.LogError("CONSOLE: Failed to create renderer. sdl:"  + fmt.Sprint(sdl.GetError()))
+		return errors.New("Failed to create renderer.")
 	}
 	renderer.Clear()
 
@@ -122,23 +123,25 @@ func SetFullscreen() {
 }
 
 //Loads new fonts to the renderer and changes the tilesize (and by entension, the window size)
-func ChangeFonts(glyphPath, fontPath string) error {
-	var err error
+func ChangeFonts(glyphPath, fontPath string) (err error) {
 	if glyphs != nil {
 		glyphs.Destroy()
 	}
 	glyphs, err = LoadTexture(glyphPath)
 	if err != nil {
-		return err
+		util.LogError("CONSOLE: Could not load font at " + glyphPath)
+		return
 	}
 	if font != nil {
 		font.Destroy()
 	}
 	font, err = LoadTexture(fontPath)
 	if err != nil {
-		return err
+		util.LogError("CONSOLE: Could not load font at " + fontPath)
+		return
 	}
 	Clear()
+	util.LogInfo("CONSOLE: Loaded fonts! Glyph: " + glyphPath + ", Text:" + fontPath)
 
 	_, _, gw, _, _ := glyphs.Query()
 
@@ -146,9 +149,10 @@ func ChangeFonts(glyphPath, fontPath string) error {
 	if int(gw/16) != tileSize {
 		tileSize = int(gw / 16)
 		window.SetSize(tileSize*width, tileSize*height)
+		util.LogInfo("CONSOLE: resized window.")
 	}
 
-	return nil
+	return
 }
 
 //Loads a bmp font into the GPU using the current window renderer.
@@ -178,9 +182,7 @@ func Render() {
 	//render fps counter
 	if showFPS {
 		fpsString := fmt.Sprintf("%d fps\n", frames*1000/int(sdl.GetTicks()))
-		for i, r := range fpsString {
-			ChangeCell(i, 0, 10, int(r), 0xFF00FF00, 0xFFFF0000)
-		}
+		DrawText(0, 0, 10, fpsString, 0xFFFFFFFF, 0x00000000)
 	}
 
 	//render the scene!
@@ -211,8 +213,6 @@ func Render() {
 	}
 
 	//framerate limiter, so the cpu doesn't implode
-	//TODO: option to turn this off? I guess you can set the fps arbitrarily high...
-	//NOTE: should this be the responsibility of the main game loop?
 	ticks = sdl.GetTicks() - frameTime
 	if ticks < fps {
 		sdl.Delay(fps - ticks)
@@ -247,7 +247,7 @@ func ForceRedraw() {
 
 //int32 for rect arguments. what a world.
 func makeRect(x, y, w, h int) sdl.Rect {
-	return sdl.Rect{int32(x), int32(y), int32(w), int32(h)}
+	return sdl.Rect{X:int32(x), Y:int32(y), W:int32(w), H:int32(h)}
 }
 
 //Deletes special graphics structures, closes files, etc. Defer this function!
@@ -383,7 +383,6 @@ func DrawBorder(x, y, z, w, h int, title string, focused bool) {
 
 //Clears an area of the canvas. Optionally takes a rect (defined by 4 ints) so you can clear specific areas of the console
 func Clear(rect ...int) {
-
 	offX, offY, w, h := 0, 0, width, height
 
 	if len(rect) == 4 {
@@ -404,7 +403,7 @@ func Dims() (w, h int) {
 	return width, height
 }
 
-//Test function. Changes 100 glyphs randomly each frame.
+//Test function. Changes 100 glyphs randomly.
 func SpamGlyphs() {
 	for n := 0; n < 100; n++ {
 		x := rand.Intn(width)

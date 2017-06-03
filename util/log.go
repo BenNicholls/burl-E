@@ -14,9 +14,17 @@ func init() {
 		//Who logs the errors from the error logger??? -_-
 		os.Exit(1) //TODO: Make the program not just crash here.
 	}
+	LogInfo("BURL Engine Online!")
 }
 
-//Logs an error to log.txt. TODO: Functions for more levels. Lumber supports 6 levels.
+func LogInfo(m string) {
+	log.Info(m)
+}
+
+func LogWarning(m string) {
+	log.Warn(m)
+}
+
 func LogError(m string) {
 	log.Error(m)
 }

@@ -21,6 +21,7 @@ func main() {
 
 	t := new(TestUI)
 	t.SetupUI()
+	console.ToggleFPS()
 	burl.InitState(t)
 	burl.GameLoop()
 
