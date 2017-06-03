@@ -83,14 +83,19 @@ func Clamp(val, min, max int) int {
 }
 
 //ModularClamp is like clamp but instead of clamping at the endpoints, it overflows/underflows back to the other side of the range.
+//The second argument is the number of overflow cycles. negative for underflow, 0 for none, positive for overflow.
 //This kind of function probably has an actual name but hell if I know what it is.
-func ModularClamp(val, min, max int) int {
+func ModularClamp(val, min, max int) (int, int) {
 	if val < min {
-		return max - (min - val - 1)
+		r := max - min + 1
+		underflows := (min - val - 1)/r + 1
+		return val + r*underflows, -underflows
 	} else if val > max {
-		return (val - max - 1) + min
+		r := max - min + 1
+		overflows := (val - max - 1)/r + 1
+		return val - r*overflows, overflows
 	} else {
-		return val
+		return val, 0
 	}
 }
 

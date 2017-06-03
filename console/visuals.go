@@ -14,6 +14,6 @@ func (v *Visuals) ChangeForeColour(f uint32) {
 	v.ForeColour = f
 }
 
-func (v *Visuals) ChangebackColour(b uint32) {
+func (v *Visuals) ChangeBackColour(b uint32) {
 	v.BackColour = b
 }
