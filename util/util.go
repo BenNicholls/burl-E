@@ -44,6 +44,11 @@ func CheckBounds(x, y, w, h int) bool {
 	return x >= 0 && x < w && y >= 0 && y < h
 }
 
+//IsInside checks if the point (px, py) is within the rect (x, y, w h).
+func IsInside(px, py, x, y, w, h int) bool {
+	return px >= x && px < x + w && py >= y && py < y + h
+}
+
 //Abs returns the absolute value of val
 func Abs(val int) int {
 	if val < 0 {
