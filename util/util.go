@@ -49,6 +49,15 @@ func IsInside(px, py, x, y, w, h int) bool {
 	return px >= x && px < x + w && py >= y && py < y + h
 }
 
+//Pow is an integer power function. Doesn't ~~do~~ negative exponents. Totally does 0 though.
+func Pow(val, exp int) int {
+	v := 1
+	for i := 0; i < exp; i++ {
+		v = v*val
+	}
+	return v
+}
+
 //Abs returns the absolute value of val
 func Abs(val int) int {
 	if val < 0 {
