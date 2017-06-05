@@ -25,6 +25,7 @@ func (t *Textbox) ChangeText(txt string) {
 	if t.text != txt {
 		t.text = txt
 		t.lines = util.WrapText(txt, t.width*2, t.height)
+
 	}
 }
 
@@ -38,7 +39,7 @@ func (t *Textbox) Render(offset ...int) {
 
 			//clear texbox (fill with spaces).
 			for i := 0; i < t.width*t.height; i++ {
-				console.ChangeText(offX+t.x+i%t.width, offY+t.y+l, offZ+t.z, int(' '), int(' '))
+				console.ChangeText(offX+t.x+i%t.width, offY+t.y+i/t.width+l, offZ+t.z, int(' '), int(' '))
 			}
 
 			//offset if centered
