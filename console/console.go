@@ -28,6 +28,11 @@ var Ready bool //true when console is ready for drawing and stuff!
 var BorderColour1 uint32 //focused element colour
 var BorderColour2 uint32 //unfocused element colour
 
+//store render colours so we don't have to set them for every renderer.Copy()
+var backDrawColour uint32
+var foreDrawColourText uint32
+var foreDrawColourGlyph uint32
+
 type Cell struct {
 	Glyph      int
 	ForeColour uint32
@@ -89,7 +94,7 @@ func Setup(w, h int, glyphPath, fontPath, title string) (err error) {
 		return errors.New("No pixelformat.")
 	}
 
-	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_SOFTWARE) //Software renderer because ACCELERATED borks my laptop for some reason.
+	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED) //Software renderer because ACCELERATED borks my laptop for some reason.
 	if err != nil {
 		util.LogError("CONSOLE: Failed to create renderer. sdl:"  + fmt.Sprint(sdl.GetError()))
 		return errors.New("Failed to create renderer.")
@@ -208,6 +213,7 @@ func Render() {
 		}
 
 		renderer.Present()
+		renderer.Clear()
 		masterDirty = false
 		forceRedraw = false
 	}
@@ -223,12 +229,28 @@ func Render() {
 
 //Copies a rect of pixeldata from a source texture to a rect on the renderer texture for the console.
 func CopyToRenderer(c Cell, tex *sdl.Texture, src, dst sdl.Rect) {
-	renderer.SetDrawColor(sdl.GetRGBA(c.BackColour, format)) //should NOT be doing this every cell.
+	if c.BackColour != backDrawColour {
+		backDrawColour = c.BackColour
+		renderer.SetDrawColor(sdl.GetRGBA(c.BackColour, format)) //should NOT be doing this every cell.
+	}
 	renderer.FillRect(&dst)
-	r, g, b, a := sdl.GetRGBA(c.ForeColour, format) //should NOT be doing this every cell.
+	
+	//reset texture color mod if it has changed since last draw
+	if (tex == glyphs && c.ForeColour != foreDrawColourGlyph) {
+		foreDrawColourGlyph = c.ForeColour
+		SetTextureColour(glyphs, c.ForeColour)
+	} else if (tex == font && c.ForeColour != foreDrawColourText) {
+		foreDrawColourText = c.ForeColour
+		SetTextureColour(font, c.ForeColour)
+	}
+	
+	renderer.Copy(tex, &src, &dst)
+}
+
+func SetTextureColour(tex *sdl.Texture, c uint32) {
+	r, g, b, a := sdl.GetRGBA(c, format)
 	tex.SetColorMod(r, g, b)
 	tex.SetAlphaMod(a)
-	renderer.Copy(tex, &src, &dst)
 }
 
 //Sets maximum framerate as enforced by the framerate limiter. NOTE: cannot go higher than 1000 fps.
