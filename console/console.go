@@ -10,6 +10,7 @@ var window *sdl.Window
 var renderer *sdl.Renderer
 var glyphs *sdl.Texture
 var font *sdl.Texture
+var canvasBuffer *sdl.Texture
 var format *sdl.PixelFormat
 
 var width, height, tileSize int
@@ -79,7 +80,7 @@ func (c *Cell) Clear() {
 func Setup(w, h int, glyphPath, fontPath, title string) (err error) {
 	width = w
 	height = h
-	tileSize = 16
+	tileSize = 24
 
 	window, err = sdl.CreateWindow(title, sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, width*tileSize, height*tileSize, sdl.WINDOW_OPENGL)
 	if err != nil {
@@ -101,13 +102,18 @@ func Setup(w, h int, glyphPath, fontPath, title string) (err error) {
 	}
 	renderer.Clear()
 
+	err = CreateCanvasBuffer()
+	if err != nil {
+		return errors.New("Failed to create canvas buffer.")
+	}
+
 	canvas = make([]Cell, width*height)
 	masterDirty = true
 
 	//init drawing fonts
 	err = ChangeFonts(glyphPath, fontPath)
 	if err != nil {
-		return nil
+		return errors.New("Could not load fonts.")
 	}
 
 	frames = 0
@@ -154,9 +160,21 @@ func ChangeFonts(glyphPath, fontPath string) (err error) {
 	if int(gw/16) != tileSize {
 		tileSize = int(gw / 16)
 		window.SetSize(tileSize*width, tileSize*height)
+		_ = CreateCanvasBuffer() //TODO: handle this error?
 		util.LogInfo("CONSOLE: resized window.")
 	}
 
+	return
+}
+
+func CreateCanvasBuffer() (err error) {
+	if canvasBuffer != nil {
+		canvasBuffer.Destroy()
+	}
+	canvasBuffer, err = renderer.CreateTexture(sdl.PIXELFORMAT_ARGB8888, sdl.TEXTUREACCESS_TARGET, width*tileSize, height*tileSize)
+	if err != nil {
+		util.LogError("CONSOLE: Failed to create buffer texture. sdl:" + fmt.Sprint(sdl.GetError()))
+	}
 	return
 }
 
@@ -193,7 +211,8 @@ func Render() {
 	//render the scene!
 	if masterDirty {
 		var src, dst sdl.Rect
-
+		t := renderer.GetRenderTarget() //store window texture, we'll switch back to it once we're done with the buffer.
+		renderer.SetRenderTarget(canvasBuffer) //point renderer at buffer texture, we'll draw there
 		for i, s := range canvas {
 			if s.Dirty || forceRedraw {
 				if s.TextMode {
@@ -212,6 +231,9 @@ func Render() {
 			}
 		}
 
+		renderer.SetRenderTarget(t) //point renderer at window again
+		r := makeRect(0,0,width*tileSize,height*tileSize)
+		renderer.Copy(canvasBuffer, &r, &r)
 		renderer.Present()
 		renderer.Clear()
 		masterDirty = false
@@ -227,15 +249,16 @@ func Render() {
 	frames++
 }
 
-//Copies a rect of pixeldata from a source texture to a rect on the renderer texture for the console.
+//Copies a rect of pixeldata from a source texture to a rect on the renderer's target.
 func CopyToRenderer(c Cell, tex *sdl.Texture, src, dst sdl.Rect) {
+	//change backcolour if it is different from previous draw
 	if c.BackColour != backDrawColour {
 		backDrawColour = c.BackColour
-		renderer.SetDrawColor(sdl.GetRGBA(c.BackColour, format)) //should NOT be doing this every cell.
+		renderer.SetDrawColor(sdl.GetRGBA(c.BackColour, format))
 	}
 	renderer.FillRect(&dst)
 	
-	//reset texture color mod if it has changed since last draw
+	//change texture color mod if it is different from previous draw
 	if (tex == glyphs && c.ForeColour != foreDrawColourGlyph) {
 		foreDrawColourGlyph = c.ForeColour
 		SetTextureColour(glyphs, c.ForeColour)
@@ -277,6 +300,7 @@ func Cleanup() {
 	format.Free()
 	glyphs.Destroy()
 	font.Destroy()
+	canvasBuffer.Destroy()
 	renderer.Destroy()
 	window.Destroy()
 }
