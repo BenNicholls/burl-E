@@ -1,6 +1,7 @@
 package ui
 
 import "github.com/bennicholls/burl/console"
+import "github.com/bennicholls/burl/util"
 
 //List UI Elem is a special kind of container that arranges it's nested elements as a vertical list,
 //supporting scrollbars, scrolling, selection of list elements, etc.
@@ -9,14 +10,13 @@ type List struct {
 	selected      int
 	Highlight     bool
 	scrollOffset  int
-	empty         bool
 	emptyElem     UIElem
 	contentHeight int
 }
 
 func NewList(w, h, x, y, z int, bord bool, empty string) *List {
 	c := NewContainer(w, h, x, y, z, bord)
-	return &List{*c, 0, true, 0, true, NewTextbox(w, CalcWrapHeight(empty, w), 0, h/2-CalcWrapHeight(empty, w)/2, z, false, true, empty), 0}
+	return &List{*c, 0, true, 0, NewTextbox(w, CalcWrapHeight(empty, w), 0, h/2-CalcWrapHeight(empty, w)/2, z, false, true, empty), 0}
 }
 
 func (l *List) Select(s int) {
@@ -31,11 +31,7 @@ func (l List) GetSelection() int {
 
 //Ensures Selected item is not out of bounds.
 func (l *List) CheckSelection() {
-	if l.selected < 0 {
-		l.selected = 0
-	} else if l.selected >= len(l.Elements) {
-		l.selected = len(l.Elements) - 1
-	}
+	l.selected = util.Clamp(l.selected, 0, len(l.Elements) - 1)
 }
 
 //Selects next item in the List, keeping selection in view.
@@ -46,12 +42,7 @@ func (l *List) Next() {
 		return
 	}
 
-	if l.selected >= len(l.Elements)-1 {
-		l.selected = 0
-	} else {
-		l.selected++
-	}
-
+	l.selected, _ = util.ModularClamp(l.selected + 1, 0, len(l.Elements)-1)
 	l.ScrollToSelection()
 
 	PushEvent(l, CHANGE, "List Cycled +")
@@ -65,12 +56,7 @@ func (l *List) Prev() {
 		return
 	}
 
-	if l.selected == 0 {
-		l.selected = len(l.Elements) - 1
-	} else {
-		l.selected--
-	}
-
+	l.selected, _ = util.ModularClamp(l.selected - 1, 0, len(l.Elements)-1)
 	l.ScrollToSelection()
 
 	PushEvent(l, CHANGE, "List Cycled -")
@@ -136,14 +122,13 @@ func (l *List) Remove(i int) {
 //Ensures list element y values are correct after the list has been tampered with. Also recalculates
 //contentHeight
 func (l *List) Calibrate() {
-	y := 0
+	l.contentHeight = 0
 	h := 0
 	for i := range l.Elements {
-		l.Elements[i].MoveTo(0, y, 0)
+		l.Elements[i].MoveTo(0, l.contentHeight, 0)
 		_, h = l.Elements[i].Dims()
-		y += h
+		l.contentHeight += h
 	}
-	l.contentHeight = y
 }
 
 //Changes the text of the ith item in the internal list of items.
@@ -171,7 +156,6 @@ func (l *List) Render(offset ...int) {
 		if len(l.Elements) <= 0 {
 			l.emptyElem.Render(l.x+offX, l.y+offY, l.z+offZ)
 		} else {
-
 			for _, e := range l.Elements {
 				_, y, _ := e.Pos()
 				_, h := e.Dims()
@@ -191,21 +175,13 @@ func (l *List) Render(offset ...int) {
 			}
 		}
 
-		if l.bordered {
-			console.DrawBorder(l.x+offX, l.y+offY, l.z+offZ, l.width, l.height, l.title, l.focused)
-		}
-
 		//draw scrollbar
 		//TODO: scrollbar could be useful for lots of other UI Elems (ex. textboxes with paragraphs of text). find way to make more general.
 		if l.contentHeight > l.height {
 			console.ChangeCell(offX+l.x+l.width, offY+l.y, offZ+l.z, 0x1e, 0xFFFFFFFF, 0xFF000000)
 			console.ChangeCell(offX+l.x+l.width, offY+l.y+l.height-1, offZ+l.z, 0x1f, 0xFFFFFFFF, 0xFF000000)
 
-			sliderHeight := int(float32(l.height-2) * (float32(l.height) / float32(l.contentHeight)))
-			if sliderHeight < 1 {
-				sliderHeight = 1
-			}
-
+			sliderHeight := util.Max(int(float32(l.height-2) * (float32(l.height) / float32(l.contentHeight))), 1) //ensures sliderheight is at least 1
 			sliderPosition := int((float32(l.height - 2 - sliderHeight)) * (float32(l.scrollOffset) / float32(l.contentHeight-l.height)))
 			if sliderPosition == 0 && l.scrollOffset != 0 {
 				//ensure that slider is not at top unless top of list is visible
@@ -216,5 +192,7 @@ func (l *List) Render(offset ...int) {
 				console.ChangeCell(offX+l.x+l.width, offY+l.y+i+1+sliderPosition, offZ+l.z, 0xb1, 0xFFFFFFFF, 0xFF000000)
 			}
 		}
+
+		l.Container.UIElement.Render(offX, offY, offZ)
 	}
 }
