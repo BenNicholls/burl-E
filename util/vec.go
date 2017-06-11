@@ -35,3 +35,23 @@ func (v Vec2) MagFloat() float64 {
 func (v Vec2) Mag() int {
 	return int(v.MagFloat())
 }
+
+func (v Vec2) ToPolar() Vec2Polar {
+	return Vec2Polar{v.MagFloat(), math.Atan2(float64(v.Y), float64(v.X))}
+}
+
+type Vec2Polar struct {
+	R, Phi float64
+}
+
+func (v *Vec2Polar) Set(r, phi float64) {
+	v.R, v.Phi = r, phi
+}
+
+func (v Vec2Polar) Get() (float64, float64) {
+	return v.R, v.Phi
+}
+
+func (v Vec2Polar) ToRect() Vec2 {
+	return Vec2{int(v.R*math.Cos(v.Phi)), int(v.R*math.Sin(v.Phi))}
+}

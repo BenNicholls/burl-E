@@ -1,6 +1,7 @@
 package core
 
 import "github.com/bennicholls/burl/util"
+import "strconv"
 
 //Stat struct holds the value of a modifiable statistic, always an int.
 //Enforces a max and min value, other nice things. Eventually will support
@@ -80,4 +81,8 @@ func (s Stat) GetPct() int {
 	} else {
 		return int(100 * (float32(s.val-s.min) / float32(s.max-s.min)))
 	}
+}
+
+func (s Stat) String() string {
+	return strconv.Itoa(s.val) + "/" + strconv.Itoa(s.max)
 }
