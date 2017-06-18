@@ -46,14 +46,14 @@ func CheckBounds(x, y, w, h int) bool {
 
 //IsInside checks if the point (px, py) is within the rect (x, y, w h).
 func IsInside(px, py, x, y, w, h int) bool {
-	return px >= x && px < x + w && py >= y && py < y + h
+	return px >= x && px < x+w && py >= y && py < y+h
 }
 
 //Pow is an integer power function. Doesn't ~~do~~ negative exponents. Totally does 0 though.
 func Pow(val, exp int) int {
 	v := 1
 	for i := 0; i < exp; i++ {
-		v = v*val
+		v = v * val
 	}
 	return v
 }
@@ -102,11 +102,11 @@ func Clamp(val, min, max int) int {
 func ModularClamp(val, min, max int) (int, int) {
 	if val < min {
 		r := max - min + 1
-		underflows := (min - val - 1)/r + 1
+		underflows := (min-val-1)/r + 1
 		return val + r*underflows, -underflows
 	} else if val > max {
 		r := max - min + 1
-		overflows := (val - max - 1)/r + 1
+		overflows := (val-max-1)/r + 1
 		return val - r*overflows, overflows
 	} else {
 		return val, 0

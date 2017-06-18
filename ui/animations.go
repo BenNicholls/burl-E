@@ -12,7 +12,7 @@ type Animator interface {
 	Toggle()
 	Activate() //Activates the animation. If it's already running, restarts it.
 	IsFinished() bool
-	Move(dx, dy int) 
+	Move(dx, dy int)
 	MoveTo(x, y int)
 }
 
@@ -120,7 +120,7 @@ func (pa *PulseAnimation) Tick() {
 	if pa.enabled {
 		pa.Animation.Tick()
 		if !pa.repeat {
-			if pa.tick == pa.dur*pa.num {
+			if pa.tick == pa.dur*pa.num+1 {
 				pa.enabled = false
 				pa.done = true
 			}
@@ -137,10 +137,10 @@ func (pa *PulseAnimation) Render(offset ...int) {
 		}
 		c := int(255 * (float32(n) / float32((pa.dur / 2))))
 
-		offX, offY, _ := processOffset(offset)
+		offX, offY, offZ := processOffset(offset)
 
 		for i := 0; i < pa.w*pa.h; i++ {
-			console.ChangeBackColour(pa.x+offX+i%pa.w, pa.y+offY+i/pa.w, console.MakeColour(c, c, c))
+			console.ChangeBackColour(pa.x+offX+i%pa.w, pa.y+offY+i/pa.w, offZ, console.MakeColour(c, c, c))
 		}
 	}
 }

@@ -21,7 +21,7 @@ func init() {
 	tiledata = make([]tileTypeData, 1)
 
 	//tiledata definitions go here. TODO: some kind of data loading function, load from file.
-	LoadTileData("Nothing", false, true, 0, 0x000000)
+	LoadTileData("Nothing", false, true, 0, 0xFF000000)
 }
 
 //Adds a new entry to the tile data respoitory. Returns the index for the data in the repo.
@@ -58,6 +58,6 @@ func GetTileVisuals(t int) Visuals {
 	if t < len(tiledata) {
 		return tiledata[t].vis
 	} else {
-		return Visuals{0, 0}
+		return Visuals{0, 0xFF000000}
 	}
 }

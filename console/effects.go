@@ -10,7 +10,7 @@ func Invert(x, y, z int) {
 			return
 		}
 		f, b := canvas[s].ForeColour, canvas[s].BackColour
-		ChangeBackColour(x, y, f)
-		ChangeForeColour(x, y, b)
+		ChangeBackColour(x, y, z, f)
+		ChangeForeColour(x, y, z, b)
 	}
 }

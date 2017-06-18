@@ -16,12 +16,11 @@ var format *sdl.PixelFormat
 var width, height, tileSize int
 
 var canvas []Cell
-var masterDirty bool //is this necessary?
 var forceRedraw bool
-
 var frameTime, ticks, fps uint32
 var frames int
 var showFPS bool
+var showChanges bool
 var Ready bool //true when console is ready for drawing and stuff!
 
 //Border colours are defined here so we can change them program-wide,
@@ -71,9 +70,13 @@ func (c *Cell) SetText(char1, char2 int, fore, back uint32, z int) {
 	}
 }
 
-//Re-inits a cell back to default. Defaults to Glyph Mode.
+//Re-inits a cell back to default blankness.
 func (c *Cell) Clear() {
-	c.SetGlyph(0, 0, 0, 0)
+	if c.TextMode {
+		c.SetText(32, 32, 0xFF000000, 0xFF000000, 0)
+	} else {
+		c.SetGlyph(0, 0xFF000000, 0xFF000000, 0)
+	}
 }
 
 //Setup the game window, renderer, etc
@@ -95,9 +98,9 @@ func Setup(w, h int, glyphPath, fontPath, title string) (err error) {
 		return errors.New("No pixelformat.")
 	}
 
-	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED) //Software renderer because ACCELERATED borks my laptop for some reason.
+	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
 	if err != nil {
-		util.LogError("CONSOLE: Failed to create renderer. sdl:"  + fmt.Sprint(sdl.GetError()))
+		util.LogError("CONSOLE: Failed to create renderer. sdl:" + fmt.Sprint(sdl.GetError()))
 		return errors.New("Failed to create renderer.")
 	}
 	renderer.Clear()
@@ -108,7 +111,6 @@ func Setup(w, h int, glyphPath, fontPath, title string) (err error) {
 	}
 
 	canvas = make([]Cell, width*height)
-	masterDirty = true
 
 	//init drawing fonts
 	err = ChangeFonts(glyphPath, fontPath)
@@ -186,7 +188,7 @@ func LoadTexture(path string) (*sdl.Texture, error) {
 	if err != nil {
 		return nil, errors.New("Failed to load image: " + fmt.Sprint(sdl.GetError()))
 	}
-	image.SetColorKey(1, 0xFF00FF)
+	image.SetColorKey(1, 0xFFFF00FF)
 	texture, err := renderer.CreateTextureFromSurface(image)
 	if err != nil {
 		return nil, errors.New("Failed to create texture: " + fmt.Sprint(sdl.GetError()))
@@ -203,42 +205,39 @@ func LoadTexture(path string) (*sdl.Texture, error) {
 //Renders the canvas to the GPU and flips the buffer.
 func Render() {
 	//render fps counter
-	if showFPS {
-		fpsString := fmt.Sprintf("%d fps\n", frames*1000/int(sdl.GetTicks()))
-		DrawText(0, 0, 10, fpsString, 0xFFFFFFFF, 0x00000000)
+	if showFPS && frames%(30) == 0 {
+		fpsString := fmt.Sprintf("%d fps", frames*1000/int(sdl.GetTicks()))
+		DrawText(0, 0, 10, fpsString, 0xFFFFFFFF, 0xFF000000)
 	}
 
 	//render the scene!
-	if masterDirty {
-		var src, dst sdl.Rect
-		t := renderer.GetRenderTarget() //store window texture, we'll switch back to it once we're done with the buffer.
-		renderer.SetRenderTarget(canvasBuffer) //point renderer at buffer texture, we'll draw there
-		for i, s := range canvas {
-			if s.Dirty || forceRedraw {
-				if s.TextMode {
-					for c_i, c := range s.Chars {
-						dst = makeRect((i%width)*tileSize+c_i*tileSize/2, (i/width)*tileSize, tileSize/2, tileSize)
-						src = makeRect((c%32)*tileSize/2, (c/32)*tileSize, tileSize/2, tileSize)
-						CopyToRenderer(s, font, src, dst)
-					}
-				} else {
-					dst = makeRect((i%width)*tileSize, (i/width)*tileSize, tileSize, tileSize)
-					src = makeRect((s.Glyph%16)*tileSize, (s.Glyph/16)*tileSize, tileSize, tileSize)
-					CopyToRenderer(s, glyphs, src, dst)
+	var src, dst sdl.Rect
+	t := renderer.GetRenderTarget()        //store window texture, we'll switch back to it once we're done with the buffer.
+	renderer.SetRenderTarget(canvasBuffer) //point renderer at buffer texture, we'll draw there
+	for i, s := range canvas {
+		if s.Dirty || forceRedraw {
+			if s.TextMode {
+				for c_i, c := range s.Chars {
+					dst = makeRect((i%width)*tileSize+c_i*tileSize/2, (i/width)*tileSize, tileSize/2, tileSize)
+					src = makeRect((c%32)*tileSize/2, (c/32)*tileSize, tileSize/2, tileSize)
+					CopyToRenderer(font, src, dst, s.ForeColour, s.BackColour, c)
 				}
-
-				canvas[i].Dirty = false
+			} else {
+				dst = makeRect((i%width)*tileSize, (i/width)*tileSize, tileSize, tileSize)
+				src = makeRect((s.Glyph%16)*tileSize, (s.Glyph/16)*tileSize, tileSize, tileSize)
+				CopyToRenderer(glyphs, src, dst, s.ForeColour, s.BackColour, s.Glyph)
 			}
-		}
 
-		renderer.SetRenderTarget(t) //point renderer at window again
-		r := makeRect(0,0,width*tileSize,height*tileSize)
-		renderer.Copy(canvasBuffer, &r, &r)
-		renderer.Present()
-		renderer.Clear()
-		masterDirty = false
-		forceRedraw = false
+			canvas[i].Dirty = false
+		}
 	}
+
+	renderer.SetRenderTarget(t) //point renderer at window again
+	r := makeRect(0, 0, width*tileSize, height*tileSize)
+	renderer.Copy(canvasBuffer, &r, &r)
+	renderer.Present()
+	renderer.Clear()
+	forceRedraw = false
 
 	//framerate limiter, so the cpu doesn't implode
 	ticks = sdl.GetTicks() - frameTime
@@ -250,23 +249,35 @@ func Render() {
 }
 
 //Copies a rect of pixeldata from a source texture to a rect on the renderer's target.
-func CopyToRenderer(c Cell, tex *sdl.Texture, src, dst sdl.Rect) {
+func CopyToRenderer(tex *sdl.Texture, src, dst sdl.Rect, fore, back uint32, c int) {
 	//change backcolour if it is different from previous draw
-	if c.BackColour != backDrawColour {
-		backDrawColour = c.BackColour
-		renderer.SetDrawColor(sdl.GetRGBA(c.BackColour, format))
+	if back != backDrawColour {
+		backDrawColour = back
+		renderer.SetDrawColor(sdl.GetRGBA(back, format))
 	}
+
+	if showChanges {
+		renderer.SetDrawColor(sdl.GetRGBA(MakeColour((frames*10)%255, ((frames+100)*10)%255, ((frames+200)*10)%255), format)) //Test Function
+	}
+
 	renderer.FillRect(&dst)
-	
-	//change texture color mod if it is different from previous draw
-	if (tex == glyphs && c.ForeColour != foreDrawColourGlyph) {
-		foreDrawColourGlyph = c.ForeColour
-		SetTextureColour(glyphs, c.ForeColour)
-	} else if (tex == font && c.ForeColour != foreDrawColourText) {
-		foreDrawColourText = c.ForeColour
-		SetTextureColour(font, c.ForeColour)
+
+	//if we're drawing a nothing character (space, whatever), skip next part.
+	if tex == glyphs && c == 0 {
+		return
+	} else if tex == font && c == 32 {
+		return
 	}
-	
+
+	//change texture color mod if it is different from previous draw
+	if tex == glyphs && fore != foreDrawColourGlyph {
+		foreDrawColourGlyph = fore
+		SetTextureColour(glyphs, fore)
+	} else if tex == font && fore != foreDrawColourText {
+		foreDrawColourText = fore
+		SetTextureColour(font, fore)
+	}
+
 	renderer.Copy(tex, &src, &dst)
 }
 
@@ -286,13 +297,17 @@ func ToggleFPS() {
 	showFPS = !showFPS
 }
 
+func ToggleChanges() {
+	showChanges = !showChanges
+}
+
 func ForceRedraw() {
 	forceRedraw = true
 }
 
 //int32 for rect arguments. what a world.
 func makeRect(x, y, w, h int) sdl.Rect {
-	return sdl.Rect{X:int32(x), Y:int32(y), W:int32(w), H:int32(h)}
+	return sdl.Rect{X: int32(x), Y: int32(y), W: int32(w), H: int32(h)}
 }
 
 //Deletes special graphics structures, closes files, etc. Defer this function!
@@ -307,11 +322,9 @@ func Cleanup() {
 
 //Changes the glyph of a cell in the canvas at position (x, y).
 func ChangeGlyph(x, y, glyph int) {
-	if util.CheckBounds(x, y, width, height) && canvas[y*width+x].Glyph != glyph {
-		canvas[y*width+x].TextMode = false
-		canvas[y*width+x].Glyph = glyph
-		canvas[y*width+x].Dirty = true
-		masterDirty = true
+	s := y*width + x
+	if util.CheckBounds(x, y, width, height) {
+		canvas[s].SetGlyph(glyph, canvas[s].ForeColour, canvas[s].BackColour, canvas[s].Z)
 	}
 }
 
@@ -344,20 +357,26 @@ func ChangeChar(x, y, z, char, charNum int) {
 }
 
 //Changes the foreground drawing colour of a cell in the canvas at position (x, y).
-func ChangeForeColour(x, y int, fore uint32) {
-	if util.CheckBounds(x, y, width, height) && canvas[y*width+x].ForeColour != fore {
-		canvas[y*width+x].ForeColour = fore
-		canvas[y*width+x].Dirty = true
-		masterDirty = true
+func ChangeForeColour(x, y, z int, fore uint32) {
+	s := y*width + x
+	if util.CheckBounds(x, y, width, height) && canvas[s].Z <= z {
+		if canvas[s].TextMode {
+			canvas[s].SetText(canvas[s].Chars[0], canvas[s].Chars[1], fore, canvas[s].BackColour, z)
+		} else {
+			canvas[s].SetGlyph(canvas[s].Glyph, fore, canvas[s].BackColour, z)
+		}
 	}
 }
 
 //Changes the background colour of a cell in the canvas at position (x, y).
-func ChangeBackColour(x, y int, back uint32) {
-	if util.CheckBounds(x, y, width, height) && canvas[y*width+x].BackColour != back {
-		canvas[y*width+x].BackColour = back
-		canvas[y*width+x].Dirty = true
-		masterDirty = true
+func ChangeBackColour(x, y, z int, back uint32) {
+	s := y*width + x
+	if util.CheckBounds(x, y, width, height) && canvas[s].Z <= z {
+		if canvas[s].TextMode {
+			canvas[s].SetText(canvas[s].Chars[0], canvas[s].Chars[1], canvas[s].ForeColour, back, z)
+		} else {
+			canvas[s].SetGlyph(canvas[s].Glyph, canvas[s].ForeColour, back, z)
+		}
 	}
 }
 
@@ -378,7 +397,6 @@ func ChangeCell(x, y, z, glyph int, fore, back uint32) {
 	s := y*width + x
 	if util.CheckBounds(x, y, width, height) && canvas[s].Z <= z {
 		canvas[s].SetGlyph(glyph, fore, back, z)
-		masterDirty = true
 	}
 }
 
@@ -389,8 +407,12 @@ func DrawText(x, y, z int, txt string, fore, back uint32) {
 			ChangeChar(x+i/2, y, z, int(c), i%2)
 			if i%2 == 0 {
 				//only need to change colour each cell, not each character
-				ChangeForeColour(x+i/2, y, fore)
-				ChangeBackColour(x+i/2, y, back)
+				ChangeForeColour(x+i/2, y, z, fore)
+				ChangeBackColour(x+i/2, y, z, back)
+				if i == len(txt)-1 {
+					//if final character is in the left-side of a cell, blank the right side.
+					ChangeChar(x+i/2, y, z, 32, 1)
+				}
 			}
 		}
 	}

@@ -31,7 +31,7 @@ func (l List) GetSelection() int {
 
 //Ensures Selected item is not out of bounds.
 func (l *List) CheckSelection() {
-	l.selected = util.Clamp(l.selected, 0, len(l.Elements) - 1)
+	l.selected = util.Clamp(l.selected, 0, len(l.Elements)-1)
 }
 
 //Selects next item in the List, keeping selection in view.
@@ -42,7 +42,7 @@ func (l *List) Next() {
 		return
 	}
 
-	l.selected, _ = util.ModularClamp(l.selected + 1, 0, len(l.Elements)-1)
+	l.selected, _ = util.ModularClamp(l.selected+1, 0, len(l.Elements)-1)
 	l.ScrollToSelection()
 
 	PushEvent(l, CHANGE, "List Cycled +")
@@ -56,7 +56,7 @@ func (l *List) Prev() {
 		return
 	}
 
-	l.selected, _ = util.ModularClamp(l.selected - 1, 0, len(l.Elements)-1)
+	l.selected, _ = util.ModularClamp(l.selected-1, 0, len(l.Elements)-1)
 	l.ScrollToSelection()
 
 	PushEvent(l, CHANGE, "List Cycled -")
@@ -181,7 +181,7 @@ func (l *List) Render(offset ...int) {
 			console.ChangeCell(offX+l.x+l.width, offY+l.y, offZ+l.z, 0x1e, 0xFFFFFFFF, 0xFF000000)
 			console.ChangeCell(offX+l.x+l.width, offY+l.y+l.height-1, offZ+l.z, 0x1f, 0xFFFFFFFF, 0xFF000000)
 
-			sliderHeight := util.Max(int(float32(l.height-2) * (float32(l.height) / float32(l.contentHeight))), 1) //ensures sliderheight is at least 1
+			sliderHeight := util.Max(int(float32(l.height-2)*(float32(l.height)/float32(l.contentHeight))), 1) //ensures sliderheight is at least 1
 			sliderPosition := int((float32(l.height - 2 - sliderHeight)) * (float32(l.scrollOffset) / float32(l.contentHeight-l.height)))
 			if sliderPosition == 0 && l.scrollOffset != 0 {
 				//ensure that slider is not at top unless top of list is visible

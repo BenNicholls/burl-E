@@ -67,10 +67,10 @@ func (v1 Vec2) Add(v2 Vec2) Vec2 {
 func (v1 Vec2) Sub(v2 Vec2) Vec2 {
 	return Vec2{v1.X - v2.X, v1.Y - v2.Y}
 }
- 
+
 func (v Vec2) Mag() float64 {
 	return math.Sqrt(v.X*v.X + v.Y*v.Y)
- }
+}
 
 func (v Vec2) ToPolar() Vec2Polar {
 	return Vec2Polar{v.Mag(), math.Atan2(v.Y, v.X)}
@@ -94,5 +94,5 @@ func (v1 Vec2Polar) Add(v2 Vec2Polar) Vec2Polar {
 }
 
 func (v Vec2Polar) ToRect() Vec2 {
-	return Vec2{v.R*math.Cos(v.Phi), v.R*math.Sin(v.Phi)}
+	return Vec2{v.R * math.Cos(v.Phi), v.R * math.Sin(v.Phi)}
 }

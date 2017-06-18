@@ -25,7 +25,6 @@ func (t *Textbox) ChangeText(txt string) {
 	if t.text != txt {
 		t.text = txt
 		t.lines = util.WrapText(txt, t.width*2, t.height)
-
 	}
 }
 
@@ -35,20 +34,25 @@ func (t *Textbox) Render(offset ...int) {
 		offX, offY, offZ := processOffset(offset)
 
 		for l, line := range t.lines {
-			offX := offX //so we can modify the offset separately for each line
-
-			//clear texbox (fill with spaces).
-			for i := 0; i < t.width*t.height; i++ {
-				console.ChangeText(offX+t.x+i%t.width, offY+t.y+i/t.width+l, offZ+t.z, int(' '), int(' '))
-			}
+			lineOffset := 0
 
 			//offset if centered
 			if t.centered {
-				offX += (t.width/2 - len(line)/4)
+				lineOffset += (t.width/2 - len(line)/4)
+			}
+
+			//draw leading spaces
+			for i := 0; i < lineOffset; i++ {
+				console.ChangeText(offX+t.x+i%t.width, offY+t.y+i/t.width+l, offZ+t.z, int(' '), int(' '))
 			}
 
 			//print text
-			console.DrawText(offX+t.x, offY+t.y+l, offZ+t.z, line, 0xFFFFFFFF, 0xFF000000)
+			console.DrawText(offX+t.x+lineOffset, offY+t.y+l, offZ+t.z, line, 0xFFFFFFFF, 0xFF000000)
+
+			//draw trailing spaces
+			for i := lineOffset + len(line)/2; i < t.width; i++ {
+				console.ChangeText(offX+t.x+i%t.width, offY+t.y+i/t.width+l, offZ+t.z, int(' '), int(' '))
+			}
 		}
 
 		t.UIElement.Render(offX, offY, offZ)
