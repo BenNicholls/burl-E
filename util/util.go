@@ -2,6 +2,7 @@ package util
 
 import "math/rand"
 import "strings"
+import "math"
 
 //Bounded defines objects that can report a bounding box of some kind.
 type Bounded interface {
@@ -111,6 +112,11 @@ func ModularClamp(val, min, max int) (int, int) {
 	} else {
 		return val, 0
 	}
+}
+
+//RoundFLoatToInt rounds a float to an int in the way you'd expect. It's the way I expect anyways. 
+func RoundFloatToInt(f float64) int {
+	return int(f + math.Copysign(0.5, f))
 }
 
 //FindIntersectionRect calculates the intersection of two rectangularly-bound objects as a rect

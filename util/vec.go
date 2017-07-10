@@ -51,7 +51,7 @@ func (v Vec2) Get() (float64, float64) {
 
 //Returns (X, Y) as ints, rounding as necessary.
 func (v Vec2) GetInt() (int, int) {
-	return int(v.X + math.Copysign(0.5, v.X)), int(v.Y + math.Copysign(0.5, v.Y))
+	return RoundFloatToInt(v.X), RoundFloatToInt(v.Y)
 }
 
 func (v *Vec2) Mod(dx, dy float64) {
@@ -95,4 +95,34 @@ func (v1 Vec2Polar) Add(v2 Vec2Polar) Vec2Polar {
 
 func (v Vec2Polar) ToRect() Vec2 {
 	return Vec2{v.R * math.Cos(v.Phi), v.R * math.Sin(v.Phi)}
+}
+
+//Reorients vector to ensure R is positive and 0 <= Phi < 2*pi
+func (v *Vec2Polar) Pos() {
+	if v.R < 0 {
+		v.Phi += math.Pi
+		v.R = -v.R
+	}
+
+	for ; v.Phi < 0 ; {
+		v.Phi += 2*math.Pi
+	}
+
+	for ; v.Phi > 2*math.Pi ; {
+		v.Phi -= 2*math.Pi
+	}
+}
+
+//Returns the shortest anglular distance from v1 to v2. positive for counterclockwise, negative for clockwise
+//NOTE: Do these need to be Pos()'d?? Hmm.
+func (v1 Vec2Polar) AngularDistance(v2 Vec2Polar) float64 {
+	d := v2.Phi - v1.Phi
+
+	if d > math.Pi {
+		d -= 2*math.Pi
+	} else if d < -math.Pi {
+		d += 2*math.Pi
+	}
+
+	return d
 }
