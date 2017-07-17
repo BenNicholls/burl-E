@@ -114,7 +114,7 @@ func ModularClamp(val, min, max int) (int, int) {
 	}
 }
 
-//RoundFLoatToInt rounds a float to an int in the way you'd expect. It's the way I expect anyways. 
+//RoundFLoatToInt rounds a float to an int in the way you'd expect. It's the way I expect anyways.
 func RoundFloatToInt(f float64) int {
 	return int(f + math.Copysign(0.5, f))
 }

@@ -2,6 +2,10 @@ package util
 
 import "math"
 
+var (
+	ZERO_COORD Coord = Coord{0, 0}
+)
+
 //Coord is an (X, Y) pair that represents a spot on some 2d grid. Effectively just an implenetation of util.Vec2 using ints.
 type Coord struct {
 	X, Y int
@@ -104,12 +108,12 @@ func (v *Vec2Polar) Pos() {
 		v.R = -v.R
 	}
 
-	for ; v.Phi < 0 ; {
-		v.Phi += 2*math.Pi
+	for v.Phi < 0 {
+		v.Phi += 2 * math.Pi
 	}
 
-	for ; v.Phi > 2*math.Pi ; {
-		v.Phi -= 2*math.Pi
+	for v.Phi > 2*math.Pi {
+		v.Phi -= 2 * math.Pi
 	}
 }
 
@@ -119,9 +123,9 @@ func (v1 Vec2Polar) AngularDistance(v2 Vec2Polar) float64 {
 	d := v2.Phi - v1.Phi
 
 	if d > math.Pi {
-		d -= 2*math.Pi
+		d -= 2 * math.Pi
 	} else if d < -math.Pi {
-		d += 2*math.Pi
+		d += 2 * math.Pi
 	}
 
 	return d

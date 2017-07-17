@@ -25,6 +25,13 @@ func (tv *TileView) Draw(x, y, glyph int, f, b uint32) {
 	}
 }
 
+func (tv *TileView) DrawCircle(x, y, r, glyph int, f, b uint32) {
+	util.DrawCircle(util.Coord{x, y}, r,
+		func(x, y int) {
+			tv.Draw(x, y, glyph, f, b)
+		})
+}
+
 func (tv TileView) Render(offset ...int) {
 	if tv.visible {
 		offX, offY, offZ := processOffset(offset)

@@ -30,6 +30,7 @@ func main() {
 type TestUI struct {
 	burl.BurlState
 	container *ui.Container
+	tiles     *ui.TileView
 }
 
 func (t *TestUI) SetupUI() {
@@ -40,8 +41,11 @@ func (t *TestUI) SetupUI() {
 	t.container.Add(textbox)
 	t.container.SetTitle("FANCYTIMES")
 
+	t.tiles = ui.NewTileView(40, 40, 41, 1, 0, true)
+	t.tiles.DrawCircle(20, 20, 15, 0x32, 0xFFFFFFFF, 0)
 }
 
 func (t *TestUI) Render() {
 	t.container.Render()
+	t.tiles.Render()
 }
