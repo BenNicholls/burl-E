@@ -11,6 +11,7 @@ type UIElem interface {
 	ToggleVisible()
 	SetVisibility(v bool)
 	IsVisible() bool
+	IsFocused() bool
 	MoveTo(x, y, z int)
 	Rect() (int, int, int, int)
 }
@@ -89,6 +90,10 @@ func (u UIElement) Rect() (int, int, int, int) {
 
 func (u UIElement) IsVisible() bool {
 	return u.visible
+}
+
+func (u UIElement) IsFocused() bool {
+	return u.focused
 }
 
 func (u *UIElement) AddAnimation(a Animator) {

@@ -4,7 +4,7 @@ package ui
 type Button struct {
 	Textbox
 	press      *Event
-	pressPulse *PulseAnimation //animation that plays when pressed. TODO: make this modifiable. not always going to want a pulseanimation.
+	PressPulse *PulseAnimation //animation that plays when pressed. TODO: make this modifiable. not always going to want a pulseanimation.
 }
 
 //Creates a new button. Defaults to non-focused state.
@@ -20,7 +20,7 @@ func (b *Button) Register(e *Event) {
 
 //fires the registered event, plays press animation.
 func (b Button) Press() {
-	b.pressPulse.Activate()
+	b.PressPulse.Activate()
 	if b.press != nil {
 		EventStream <- b.press
 	}
@@ -35,7 +35,7 @@ func (b Button) Render(offset ...int) {
 		offX, offY, offZ := processOffset(offset)
 
 		b.Textbox.Render(offX, offY, offZ)
-		b.pressPulse.Tick()
-		b.pressPulse.Render(b.x+offX, b.y+offY, b.z+offZ)
+		b.PressPulse.Tick()
+		b.PressPulse.Render(b.x+offX, b.y+offY, b.z+offZ)
 	}
 }

@@ -19,6 +19,14 @@ func (pb *ProgressBar) SetProgress(i int) {
 	pb.progress = util.Clamp(i, 0, 100)
 }
 
+func (pb *ProgressBar) ChangeProgress(d int) {
+	pb.SetProgress(pb.progress + d)
+}
+
+func (pb ProgressBar) GetProgress() int {
+	return pb.progress
+}
+
 func (pb *ProgressBar) SetProgressColour(c uint32) {
 	pb.progresscolour = c
 }
