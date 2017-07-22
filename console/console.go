@@ -263,7 +263,7 @@ func CopyToRenderer(tex *sdl.Texture, src, dst sdl.Rect, fore, back uint32, c in
 	renderer.FillRect(&dst)
 
 	//if we're drawing a nothing character (space, whatever), skip next part.
-	if tex == glyphs && c == 0 {
+	if tex == glyphs && (c == GLYPH_NONE || c == GLYPH_SPACE) {
 		return
 	} else if tex == font && c == 32 {
 		return
@@ -429,19 +429,19 @@ func DrawBorder(x, y, z, w, h int, title string, focused bool) {
 	}
 	//Top and bottom.
 	for i := 0; i < w; i++ {
-		ChangeCell(x+i, y-1, z, 0xc4, bc, 0xFF000000)
-		ChangeCell(x+i, y+h, z, 0xc4, bc, 0xFF000000)
+		ChangeCell(x+i, y-1, z, GLYPH_BORDER_LR, bc, 0xFF000000)
+		ChangeCell(x+i, y+h, z, GLYPH_BORDER_LR, bc, 0xFF000000)
 	}
 	//Sides
 	for i := 0; i < h; i++ {
-		ChangeCell(x-1, y+i, z, 0xb3, bc, 0xFF000000)
-		ChangeCell(x+w, y+i, z, 0xb3, bc, 0xFF000000)
+		ChangeCell(x-1, y+i, z, GLYPH_BORDER_UD, bc, 0xFF000000)
+		ChangeCell(x+w, y+i, z, GLYPH_BORDER_UD, bc, 0xFF000000)
 	}
 	//corners
-	ChangeCell(x-1, y-1, z, 0xda, bc, 0xFF000000)
-	ChangeCell(x-1, y+h, z, 0xc0, bc, 0xFF000000)
-	ChangeCell(x+w, y+h, z, 0xd9, bc, 0xFF000000)
-	ChangeCell(x+w, y-1, z, 0xbf, bc, 0xFF000000)
+	ChangeCell(x-1, y-1, z, GLYPH_BORDER_DR, bc, 0xFF000000)
+	ChangeCell(x-1, y+h, z, GLYPH_BORDER_UR, bc, 0xFF000000)
+	ChangeCell(x+w, y+h, z, GLYPH_BORDER_UL, bc, 0xFF000000)
+	ChangeCell(x+w, y-1, z, GLYPH_BORDER_DL, bc, 0xFF000000)
 
 	//Write centered title.
 	if len(title) < w && title != "" {

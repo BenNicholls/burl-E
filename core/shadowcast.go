@@ -72,8 +72,7 @@ func (m *TileMap) Scan(x, y, row int, slope1, slope2 float32, radius int, r [4]i
 }
 
 //type specifying precisely what you can pass to the shadowcaster.
-//parameters here are the info that the shadowcaster will deliver,
-//do the rest via a function closure (see dm.MemoryCast())
+//parameters here are the info that the shadowcaster will deliver
 type Cast func(m *TileMap, x, y, d, r int)
 
 //Run this over the levelmap to light squares. Linearly interpolates
