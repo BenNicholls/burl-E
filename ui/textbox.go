@@ -38,6 +38,9 @@ func (t *Textbox) Render(offset ...int) {
 
 			//offset if centered
 			if t.centered {
+				if len(line) % 2 != 1 {
+					line = " " + line
+				}
 				lineOffset += (t.width/2 - len(line)/4)
 			}
 
