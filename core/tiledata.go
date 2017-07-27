@@ -19,12 +19,11 @@ type Visuals struct {
 func init() {
 	//tiledata[TILETYPE]
 	tiledata = make([]tileTypeData, 1)
-
-	//tiledata definitions go here. TODO: some kind of data loading function, load from file.
 	LoadTileData("Nothing", false, true, 0, 0xFF000000)
 }
 
 //Adds a new entry to the tile data respoitory. Returns the index for the data in the repo.
+//TODO: load from file.
 func LoadTileData(name string, pass, trans bool, glyph int, c uint32) int {
 	tiledata = append(tiledata, tileTypeData{name, pass, trans, Visuals{glyph, c}})
 	return len(tiledata) - 1

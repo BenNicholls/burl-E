@@ -15,14 +15,14 @@ func InitState(m State) {
 //The Big Enchelada! This is the gameloop that runs everything. Make sure to run burl.InitMode() and console.Setup() before beginning the game!
 func GameLoop() error {
 	//TODO: implement that horrible thread job queue thing from the go-sdl2 package
-	runtime.LockOSThread() //fixes some kind fo go-sdl2 based thread release bug.
+	runtime.LockOSThread() //fixes some kind of go-sdl2 based thread release bug.
 
 	if !console.Ready {
 		return errors.New("Console not set up. Run burl.console.Setup() before starting game loop!")
 	}
 
 	if gameState == nil {
-		return errors.New("No gameState initialized. Run burl.InitMode() before starting game loop!")
+		return errors.New("No gameState initialized. Run burl.InitState() before starting game loop!")
 	}
 
 	var event sdl.Event
