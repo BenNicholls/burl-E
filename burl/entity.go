@@ -1,4 +1,4 @@
-package core
+package burl
 
 //interface for all types of entities that are built upon BurlEntity
 //ensures other core objects can interact with BurlEntities.

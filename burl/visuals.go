@@ -1,4 +1,4 @@
-package console
+package burl
 
 type Visuals struct {
 	Glyph      int

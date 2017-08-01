@@ -1,7 +1,4 @@
-package ui
-
-import "github.com/bennicholls/burl/console"
-import "github.com/bennicholls/burl/util"
+package burl
 
 //ProgressBar is a textbox whose background can be a progress bar. Yes.
 type ProgressBar struct {
@@ -16,7 +13,7 @@ func NewProgressBar(w, h, x, y, z int, bord, cent bool, txt string, c uint32) *P
 
 //Takes a percentage value, clamped to 0 <= i <= 100
 func (pb *ProgressBar) SetProgress(i int) {
-	pb.progress = util.Clamp(i, 0, 100)
+	pb.progress = Clamp(i, 0, 100)
 }
 
 func (pb *ProgressBar) ChangeProgress(d int) {

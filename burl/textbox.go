@@ -1,7 +1,4 @@
-package ui
-
-import "github.com/bennicholls/burl/console"
-import "github.com/bennicholls/burl/util"
+package burl
 
 //UI Element for displaying text.
 type Textbox struct {
@@ -12,19 +9,19 @@ type Textbox struct {
 }
 
 func NewTextbox(w, h, x, y, z int, bord, cent bool, txt string) *Textbox {
-	return &Textbox{NewUIElement(x, y, z, w, h, bord), txt, cent, util.WrapText(txt, w*2, h)}
+	return &Textbox{NewUIElement(x, y, z, w, h, bord), txt, cent, WrapText(txt, w*2, h)}
 }
 
 //Returns the height required to fit a string after it has been wrapped.
 func CalcWrapHeight(s string, width int) int {
-	return len(util.WrapText(s, width*2))
+	return len(WrapText(s, width*2))
 }
 
 //Replaces the string for the textbox.
 func (t *Textbox) ChangeText(txt string) {
 	if t.text != txt {
 		t.text = txt
-		t.lines = util.WrapText(txt, t.width*2, t.height)
+		t.lines = WrapText(txt, t.width*2, t.height)
 	}
 }
 

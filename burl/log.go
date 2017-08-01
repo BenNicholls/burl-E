@@ -1,4 +1,4 @@
-package util
+package burl
 
 import "github.com/jcelliott/lumber"
 import "os"

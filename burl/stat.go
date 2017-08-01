@@ -1,6 +1,5 @@
-package core
+package burl
 
-import "github.com/bennicholls/burl/util"
 import "strconv"
 
 //Stat struct holds the value of a modifiable statistic, always an int.
@@ -23,7 +22,7 @@ func (s Stat) Get() int {
 
 //Manually set a value. If v > s.Max, sets to max. if v < s.min, sets to min.
 func (s *Stat) Set(v int) {
-	s.val = util.Clamp(v, s.min, s.max)
+	s.val = Clamp(v, s.min, s.max)
 }
 
 //Modifies the stat value. Takes a delta (which can of course be negative).
@@ -44,7 +43,7 @@ func (s Stat) Min() int {
 func (s *Stat) SetMin(m int) {
 	if m <= s.max {
 		s.min = m
-		s.val = util.Clamp(s.val, s.min, s.max)
+		s.val = Clamp(s.val, s.min, s.max)
 	}
 }
 
@@ -52,7 +51,7 @@ func (s *Stat) SetMin(m int) {
 func (s *Stat) SetMax(m int) {
 	if m >= s.min {
 		s.max = m
-		s.val = util.Clamp(s.val, s.min, s.max)
+		s.val = Clamp(s.val, s.min, s.max)
 	}
 }
 

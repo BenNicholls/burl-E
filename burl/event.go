@@ -1,6 +1,4 @@
-package ui
-
-import "github.com/bennicholls/burl/util"
+package burl
 
 //event IDs
 const (
@@ -29,7 +27,7 @@ func init() {
 func PushEvent(c UIElem, id int, m string) {
 	if len(EventStream) == cap(EventStream) {
 		ClearEvents()
-		util.LogError("UI Eventstream limit reached! FLUSHY FLUSHY.")
+		LogError("UI Eventstream limit reached! FLUSHY FLUSHY.")
 	}
 
 	EventStream <- &Event{c, id, m}

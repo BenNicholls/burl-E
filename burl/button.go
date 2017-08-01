@@ -1,4 +1,4 @@
-package ui
+package burl
 
 //Buttons are textboxes that can fire an event when "pressed". Event goes into the ui.EventStream
 type Button struct {

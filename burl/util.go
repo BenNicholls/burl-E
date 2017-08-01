@@ -1,4 +1,4 @@
-package util
+package burl
 
 import "math/rand"
 import "strings"

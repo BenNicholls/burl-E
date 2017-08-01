@@ -1,6 +1,4 @@
-package ui
-
-import "github.com/bennicholls/burl/console"
+package burl
 
 //UIElem is the basic definition for all UI elements.
 type UIElem interface {

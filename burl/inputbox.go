@@ -1,6 +1,5 @@
-package ui
+package burl
 
-import "github.com/bennicholls/burl/util"
 import "strings"
 import "strconv"
 
@@ -68,7 +67,7 @@ func (ib *Inputbox) Reset() {
 
 //takes a key representing a letter and inserts.
 func (ib *Inputbox) InsertText(key rune) {
-	if !util.ValidText(key) {
+	if !ValidText(key) {
 		return
 	}
 	s := strconv.QuoteRuneToASCII(key)
