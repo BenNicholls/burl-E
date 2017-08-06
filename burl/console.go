@@ -75,9 +75,9 @@ func (c *Cell) SetText(char1, char2 int, fore, back uint32, z int) {
 //Re-inits a cell back to default blankness.
 func (c *Cell) Clear() {
 	if c.Mode == DRAW_TEXT {
-		c.SetText(32, 32, 0xFF000000, 0xFF000000, 0)
+		c.SetText(32, 32, COL_BLACK, COL_BLACK, 0)
 	} else {
-		c.SetGlyph(GLYPH_NONE, 0xFF000000, 0xFF000000, 0)
+		c.SetGlyph(GLYPH_NONE, COL_BLACK, COL_BLACK, 0)
 	}
 }
 
@@ -190,7 +190,7 @@ func (c *Console) LoadTexture(path string) (*sdl.Texture, error) {
 	if err != nil {
 		return nil, errors.New("Failed to load image: " + fmt.Sprint(sdl.GetError()))
 	}
-	image.SetColorKey(1, 0xFFFF00FF)
+	image.SetColorKey(1, COL_FUSCHIA)
 	texture, err := c.renderer.CreateTextureFromSurface(image)
 	if err != nil {
 		return nil, errors.New("Failed to create texture: " + fmt.Sprint(sdl.GetError()))
@@ -209,7 +209,7 @@ func (c *Console) Render() {
 	//render fps counter
 	if c.showFPS && c.frames%(30) == 0 {
 		fpsString := fmt.Sprintf("%d fps", c.frames*1000/int(sdl.GetTicks()))
-		c.DrawText(0, 0, 10, fpsString, 0xFFFFFFFF, 0xFF000000)
+		c.DrawText(0, 0, 10, fpsString, COL_WHITE, COL_BLACK)
 	}
 
 	//render the scene!
@@ -259,7 +259,7 @@ func (c *Console) CopyToRenderer(mode drawmode, src, dst sdl.Rect, fore, back ui
 	}
 
 	if c.showChanges {
-		c.renderer.SetDrawColor(sdl.GetRGBA(c.MakeColour((c.frames*10)%255, ((c.frames+100)*10)%255, ((c.frames+200)*10)%255), c.format)) //Test Function
+		c.renderer.SetDrawColor(sdl.GetRGBA(MakeColour((c.frames*10)%255, ((c.frames+100)*10)%255, ((c.frames+200)*10)%255), c.format)) //Test Function
 	}
 
 	c.renderer.FillRect(&dst)
@@ -424,29 +424,29 @@ func (c *Console) DrawText(x, y, z int, txt string, fore, back uint32) {
 //border and ui styling.
 func (c *Console) DrawBorder(x, y, z, w, h int, title string, focused bool) {
 	//set border colour.
-	bc := uint32(0xFFE28F00)
+	bc := MakeColour(0xE2, 0x8F, 0x00)
 	if !focused {
-		bc = 0xFF555555
+		bc = COL_LIGHTGREY
 	}
 	//Top and bottom.
 	for i := 0; i < w; i++ {
-		c.ChangeCell(x+i, y-1, z, GLYPH_BORDER_LR, bc, 0xFF000000)
-		c.ChangeCell(x+i, y+h, z, GLYPH_BORDER_LR, bc, 0xFF000000)
+		c.ChangeCell(x+i, y-1, z, GLYPH_BORDER_LR, bc, COL_BLACK)
+		c.ChangeCell(x+i, y+h, z, GLYPH_BORDER_LR, bc, COL_BLACK)
 	}
 	//Sides
 	for i := 0; i < h; i++ {
-		c.ChangeCell(x-1, y+i, z, GLYPH_BORDER_UD, bc, 0xFF000000)
-		c.ChangeCell(x+w, y+i, z, GLYPH_BORDER_UD, bc, 0xFF000000)
+		c.ChangeCell(x-1, y+i, z, GLYPH_BORDER_UD, bc, COL_BLACK)
+		c.ChangeCell(x+w, y+i, z, GLYPH_BORDER_UD, bc, COL_BLACK)
 	}
 	//corners
-	c.ChangeCell(x-1, y-1, z, GLYPH_BORDER_DR, bc, 0xFF000000)
-	c.ChangeCell(x-1, y+h, z, GLYPH_BORDER_UR, bc, 0xFF000000)
-	c.ChangeCell(x+w, y+h, z, GLYPH_BORDER_UL, bc, 0xFF000000)
-	c.ChangeCell(x+w, y-1, z, GLYPH_BORDER_DL, bc, 0xFF000000)
+	c.ChangeCell(x-1, y-1, z, GLYPH_BORDER_DR, bc, COL_BLACK)
+	c.ChangeCell(x-1, y+h, z, GLYPH_BORDER_UR, bc, COL_BLACK)
+	c.ChangeCell(x+w, y+h, z, GLYPH_BORDER_UL, bc, COL_BLACK)
+	c.ChangeCell(x+w, y-1, z, GLYPH_BORDER_DL, bc, COL_BLACK)
 
 	//Write centered title.
 	if len(title) < w && title != "" {
-		c.DrawText(x+(w/2-len(title)/4-1), y-1, z+1, title, 0xFFFFFFFF, 0xFF000000)
+		c.DrawText(x+(w/2-len(title)/4-1), y-1, z+1, title, COL_WHITE, COL_BLACK)
 	}
 }
 
@@ -470,18 +470,6 @@ func (c *Console) Clear(rect ...int) {
 //Returns the dimensions of the canvas.
 func (c Console) Dims() (w, h int) {
 	return c.width, c.height
-}
-
-//Takes r,g,b ints and creates a colour as defined by the pixelformat with alpha 255.
-//TODO: rgba version of this function? variatic function that can optionally take an alpha? Hmm.
-func (c Console) MakeColour(r, g, b int) uint32 {
-	return sdl.MapRGBA(c.format, uint8(r), uint8(g), uint8(b), 255)
-}
-
-//Changes alpha of a colour.
-func (c Console) ChangeColourAlpha(colour uint32, alpha uint8) uint32 {
-	r, g, b := sdl.GetRGB(colour, c.format)
-	return sdl.MapRGBA(c.format, r, g, b, alpha)
 }
 
 //int32 for rect arguments. what a world.

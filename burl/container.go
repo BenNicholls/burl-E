@@ -37,7 +37,7 @@ func (c *Container) Render(offset ...int) {
 
 		//draw over container, so we don't appear transparent.
 		for i := 0; i < c.width*c.height; i++ {
-			console.ChangeColours(c.x+offX+(i%c.width), c.y+offY+(i/c.width), c.z+offZ, 0xFF000000, 0xFF000000)
+			console.ChangeColours(c.x+offX+(i%c.width), c.y+offY+(i/c.width), c.z+offZ, COL_BLACK, COL_BLACK)
 		}
 
 		for i := 0; i < len(c.Elements); i++ {

@@ -44,7 +44,7 @@ func (t *Textbox) Render(offset ...int) {
 			}
 
 			//print text
-			console.DrawText(offX+t.x+lineOffset, offY+t.y+l, offZ+t.z, line, 0xFFFFFFFF, 0xFF000000)
+			console.DrawText(offX+t.x+lineOffset, offY+t.y+l, offZ+t.z, line, COL_WHITE, COL_BLACK)
 
 			//draw trailing spaces
 			for i := lineOffset + len(line)/2; i < t.width; i++ {

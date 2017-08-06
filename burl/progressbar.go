@@ -47,7 +47,7 @@ func (pb ProgressBar) Render(offset ...int) {
 					console.ChangeBackColour(i+offX+pb.x, j+offY+pb.y, pb.z+offZ, pb.progresscolour)
 				} else {
 					//set to black for now (bgcolor support coming later I assume)
-					console.ChangeBackColour(i+offX+pb.x, j+offY+pb.y, pb.z+offZ, 0xFF000000)
+					console.ChangeBackColour(i+offX+pb.x, j+offY+pb.y, pb.z+offZ, COL_BLACK)
 				}
 			}
 		}

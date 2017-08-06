@@ -138,7 +138,7 @@ func (pa *PulseAnimation) Render(offset ...int) {
 		offX, offY, offZ := processOffset(offset)
 
 		for i := 0; i < pa.w*pa.h; i++ {
-			console.ChangeBackColour(pa.x+offX+i%pa.w, pa.y+offY+i/pa.w, offZ, console.MakeColour(c, c, c))
+			console.ChangeBackColour(pa.x+offX+i%pa.w, pa.y+offY+i/pa.w, offZ, MakeColour(c, c, c))
 		}
 	}
 }

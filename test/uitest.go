@@ -1,6 +1,6 @@
 package main
 
-import "github.com/bennicholls/burl/burl"
+import "github.com/bennicholls/burl-E/burl"
 import "math/rand"
 import "time"
 import "fmt"

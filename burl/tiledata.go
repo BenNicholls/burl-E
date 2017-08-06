@@ -14,13 +14,13 @@ type tileTypeData struct {
 func init() {
 	//tiledata[TILETYPE]
 	tiledata = make([]tileTypeData, 1)
-	LoadTileData("Nothing", false, true, 0, 0xFF000000)
+	LoadTileData("Nothing", false, true, 0, COL_BLACK)
 }
 
 //Adds a new entry to the tile data respoitory. Returns the index for the data in the repo.
 //TODO: load from file.
 func LoadTileData(name string, pass, trans bool, glyph int, c uint32) int {
-	tiledata = append(tiledata, tileTypeData{name, pass, trans, Visuals{glyph, c, 0xFF000000}})
+	tiledata = append(tiledata, tileTypeData{name, pass, trans, Visuals{glyph, c, COL_BLACK}})
 	return len(tiledata) - 1
 }
 
@@ -52,6 +52,6 @@ func GetTileVisuals(t int) Visuals {
 	if t < len(tiledata) {
 		return tiledata[t].vis
 	} else {
-		return Visuals{0, 0xFF000000, 0xFF000000}
+		return Visuals{0, COL_BLACK, COL_BLACK}
 	}
 }

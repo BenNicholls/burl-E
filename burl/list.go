@@ -175,8 +175,8 @@ func (l *List) Render(offset ...int) {
 		//draw scrollbar
 		//TODO: scrollbar could be useful for lots of other UI Elems (ex. textboxes with paragraphs of text). find way to make more general.
 		if l.contentHeight > l.height {
-			console.ChangeCell(offX+l.x+l.width, offY+l.y, offZ+l.z, GLYPH_TRIANGLE_UP, 0xFFFFFFFF, 0xFF000000)
-			console.ChangeCell(offX+l.x+l.width, offY+l.y+l.height-1, offZ+l.z, GLYPH_TRIANGLE_DOWN, 0xFFFFFFFF, 0xFF000000)
+			console.ChangeCell(offX+l.x+l.width, offY+l.y, offZ+l.z, GLYPH_TRIANGLE_UP, COL_WHITE, COL_BLACK)
+			console.ChangeCell(offX+l.x+l.width, offY+l.y+l.height-1, offZ+l.z, GLYPH_TRIANGLE_DOWN, COL_WHITE, COL_BLACK)
 
 			sliderHeight := Max(int(float32(l.height-2)*(float32(l.height)/float32(l.contentHeight))), 1) //ensures sliderheight is at least 1
 			sliderPosition := int((float32(l.height - 2 - sliderHeight)) * (float32(l.scrollOffset) / float32(l.contentHeight-l.height)))
@@ -186,7 +186,7 @@ func (l *List) Render(offset ...int) {
 			}
 
 			for i := 0; i < sliderHeight; i++ {
-				console.ChangeCell(offX+l.x+l.width, offY+l.y+i+1+sliderPosition, offZ+l.z, GLYPH_FILL, 0xFFFFFFFF, 0xFF000000)
+				console.ChangeCell(offX+l.x+l.width, offY+l.y+i+1+sliderPosition, offZ+l.z, GLYPH_FILL, COL_WHITE, COL_BLACK)
 			}
 		}
 
