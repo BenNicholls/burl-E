@@ -33,22 +33,25 @@ func (t *Textbox) Render(offset ...int) {
 		for l, line := range t.lines {
 			lineOffset := 0
 
-			//offset if centered
-			if t.centered {
-				lineOffset += (t.width/2 - len(line)/4)
+			//blank out line, lets start fresh
+			for i := 0; i < t.width; i++ {
+				console.ChangeText(t.x+offX+i, t.y+offY+l, t.z+offZ, int(' '), int(' '))
 			}
 
-			//draw leading spaces
-			for i := 0; i < lineOffset; i++ {
-				console.ChangeText(offX+t.x+i%t.width, offY+t.y+i/t.width+l, offZ+t.z, int(' '), int(' '))
+			//offset if centered
+			if t.centered {
+				lineOffset = (t.width*2 - len(line) + 1) / 2
 			}
 
 			//print text
-			console.DrawText(offX+t.x+lineOffset, offY+t.y+l, offZ+t.z, line, COL_WHITE, COL_BLACK)
+			console.DrawText(offX+t.x+lineOffset/2, offY+t.y+l, offZ+t.z, line, COL_WHITE, COL_BLACK, lineOffset%2)
 
-			//draw trailing spaces
-			for i := lineOffset + len(line)/2; i < t.width; i++ {
-				console.ChangeText(offX+t.x+i%t.width, offY+t.y+i/t.width+l, offZ+t.z, int(' '), int(' '))
+		}
+
+		//blank out empty lines at bottom
+		for y := len(t.lines); y < t.height; y++ {
+			for x := 0; x < t.width; x++ {
+				console.ChangeText(offX+t.x+x, offY+t.y+y, offZ+t.z, int(' '), int(' '))
 			}
 		}
 

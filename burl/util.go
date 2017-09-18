@@ -175,6 +175,7 @@ func WrapText(str string, width int, maxlines ...int) (lines []string) {
 
 		//add a line if current word won't fit
 		if len(currentLine)+len(s) > width {
+			currentLine = strings.TrimSpace(currentLine)
 			lines = append(lines, currentLine)
 			currentLine = ""
 
@@ -190,6 +191,7 @@ func WrapText(str string, width int, maxlines ...int) (lines []string) {
 	}
 	//append last line if needed after we're done looping through text
 	if currentLine != "" {
+		currentLine = strings.TrimSpace(currentLine)
 		lines = append(lines, currentLine)
 	}
 

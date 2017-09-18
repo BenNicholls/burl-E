@@ -209,7 +209,7 @@ func (c *Console) Render() {
 	//render fps counter
 	if c.showFPS && c.frames%(30) == 0 {
 		fpsString := fmt.Sprintf("%d fps", c.frames*1000/int(sdl.GetTicks()))
-		c.DrawText(0, 0, 10, fpsString, COL_WHITE, COL_BLACK)
+		c.DrawText(0, 0, 10, fpsString, COL_WHITE, COL_BLACK, 0)
 	}
 
 	//render the scene!
@@ -401,19 +401,16 @@ func (c *Console) ChangeCell(x, y, z, glyph int, fore, back uint32) {
 	}
 }
 
-//Draws a string to the console in text mode.
-func (c *Console) DrawText(x, y, z int, txt string, fore, back uint32) {
+//Draws a string to the console in text mode. CharNum determines which half of the cell we
+//start in. See ChageChar() for details.
+func (c *Console) DrawText(x, y, z int, txt string, fore, back uint32, charNum int) {
 	for i, char := range txt {
-		if CheckBounds(x+i/2, y, c.width, c.height) {
-			c.ChangeChar(x+i/2, y, z, int(char), i%2)
-			if i%2 == 0 {
-				//only need to change colour each cell, not each character
-				c.ChangeForeColour(x+i/2, y, z, fore)
-				c.ChangeBackColour(x+i/2, y, z, back)
-				if i == len(txt)-1 {
-					//if final character is in the left-side of a cell, blank the right side.
-					c.ChangeChar(x+i/2, y, z, 32, 1)
-				}
+		if CheckBounds(x+(i+charNum)/2, y, c.width, c.height) {
+			c.ChangeChar(x+(i+charNum)/2, y, z, int(char), (i+charNum)%2)
+			c.ChangeColours(x+(i+charNum)/2, y, z, fore, back)
+			if i == len(txt)-1 && (i+charNum)%2 == 0 {
+				//if final character is in the left-side of a cell, blank the right side.
+				c.ChangeChar(x+(i+charNum)/2, y, z, 32, 1)
 			}
 		}
 	}
@@ -446,7 +443,7 @@ func (c *Console) DrawBorder(x, y, z, w, h int, title string, focused bool) {
 
 	//Write centered title.
 	if len(title) < w && title != "" {
-		c.DrawText(x+(w/2-len(title)/4-1), y-1, z+1, title, COL_WHITE, COL_BLACK)
+		c.DrawText(x+(w/2-len(title)/4-1), y-1, z+1, title, COL_WHITE, COL_BLACK, 0)
 	}
 }
 

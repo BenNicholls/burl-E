@@ -36,10 +36,7 @@ func (tv TileView) Render(offset ...int) {
 	if tv.visible {
 		offX, offY, offZ := processOffset(offset)
 		for i, p := range tv.grid {
-			if p.Dirty {
-				console.ChangeCell(tv.x+offX+i%tv.width, tv.y+offY+i/tv.width, tv.z+offZ, p.Glyph, p.ForeColour, p.BackColour)
-				tv.grid[i].Dirty = false
-			}
+			console.ChangeCell(tv.x+offX+i%tv.width, tv.y+offY+i/tv.width, tv.z+offZ, p.Glyph, p.ForeColour, p.BackColour)
 		}
 		tv.UIElement.Render(offX, offY, offZ)
 	}

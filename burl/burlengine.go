@@ -17,12 +17,12 @@ func InitState(m State) {
 func InitConsole(w, h int, glyphPath, fontPath, title string) (*Console, error) {
 	console = new(Console)
 	err := console.Setup(w, h, glyphPath, fontPath, title)
-	if err == nil { 
+	if err == nil {
 		return console, err
 	} else {
 		return nil, err
 	}
-	
+
 }
 
 //The Big Enchelada! This is the gameloop that runs everything. Make sure to run burl.InitMode() and console.Setup() before beginning the game!
