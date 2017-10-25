@@ -25,6 +25,11 @@ func (t *Textbox) ChangeText(txt string) {
 	}
 }
 
+//LoremIpsum() fills the textbox with a paragraph of crazy latin. For testing!
+func (t *Textbox) LoremIpsum() {
+	t.ChangeText(loremipsum)
+}
+
 //Render function optionally takes an offset (for containering), 2 or 3 ints.
 func (t *Textbox) Render(offset ...int) {
 	if t.visible {
@@ -62,3 +67,5 @@ func (t *Textbox) Render(offset ...int) {
 func (t *Textbox) SetCentered(c bool) {
 	t.centered = c
 }
+
+const loremipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed finibus velit a tempor condimentum. Nam accumsan aliquam feugiat. Pellentesque lobortis iaculis orci vel consectetur. Etiam tincidunt ipsum ac leo vehicula, et malesuada nulla dapibus. Quisque ultricies ultricies metus, in elementum enim suscipit sit amet. Ut consectetur nisl vitae metus eleifend fringilla. Vestibulum purus nunc, bibendum ullamcorper lacinia a, suscipit vel urna."
