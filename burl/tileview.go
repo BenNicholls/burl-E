@@ -54,7 +54,7 @@ func (tv *TileView) Reset() {
 	}
 }
 
-//Loads an image exported from RexPaint into CSV format. 
+//Loads an image exported from RexPaint into CSV format.
 //TODO: write an actual .xp library for Go! Doesn't seem to be one!
 func (tv *TileView) LoadImageFromCSV(filename string) {
 	if !strings.HasSuffix(filename, ".csv") {
@@ -69,7 +69,7 @@ func (tv *TileView) LoadImageFromCSV(filename string) {
 		LogError("Could not load image data: " + filename)
 		return
 	}
-	
+
 	//read records/fields from csv into string[][]
 	data, err := csv.NewReader(f).ReadAll()
 	if err != nil {
@@ -81,7 +81,7 @@ func (tv *TileView) LoadImageFromCSV(filename string) {
 	for i := 1; i < len(data); i++ {
 		x, _ := strconv.ParseInt(data[i][0], 10, 0)
 		y, _ := strconv.ParseInt(data[i][1], 10, 0)
-		
+
 		if int(x) >= tv.width || int(y) >= tv.height {
 			continue
 		}

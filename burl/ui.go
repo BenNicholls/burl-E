@@ -110,27 +110,27 @@ func (u *UIElement) RemoveAnimation(a Animator) {
 //Centers the element within the console as a whole. Requires the console to be initialized first.
 func (u *UIElement) CenterInConsole() {
 	if console.Ready {
-		 w, h := console.Dims()
-		 u.x, u.y = (w - u.width)/2, (h - u.height)/2
+		w, h := console.Dims()
+		u.x, u.y = (w-u.width)/2, (h-u.height)/2
 	} else {
 		LogError("UI Element cannot center: console not setup.")
 	}
 }
 
 //Centers the element within the rect defined by (w, h, x, y)
-func (u *UIElement) Center(w,h,x,y int) {
+func (u *UIElement) Center(w, h, x, y int) {
 	u.CenterX(w, x)
 	u.CenterY(h, y)
 }
 
 //Centers the element horizontally within the range defined by (w, x)
-func (u *UIElement) CenterX(w,x int) {
-	u.x = (w - x - u.width)/2 + x
+func (u *UIElement) CenterX(w, x int) {
+	u.x = (w-x-u.width)/2 + x
 }
 
 //Centers the element vertically within the range defined by (h, y)
-func (u *UIElement) CenterY(h,y int) {
-	u.y = (h - y - u.height)/2 + y
+func (u *UIElement) CenterY(h, y int) {
+	u.y = (h-y-u.height)/2 + y
 }
 
 //Helper funtion for unpacking optional offsets passed to UI render functions. Required to allow for nesting of elements.
