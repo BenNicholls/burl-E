@@ -1,6 +1,8 @@
 package burl
 
 import "strconv"
+import "bytes"
+import "fmt"
 
 //Stat struct holds the value of a modifiable statistic, always an int.
 //Enforces a max and min value, other nice things. Eventually will support
@@ -84,4 +86,16 @@ func (s Stat) GetPct() int {
 
 func (s Stat) String() string {
 	return strconv.Itoa(s.val) + "/" + strconv.Itoa(s.max)
+}
+
+func (s Stat) MarshalBinary() ([]byte, error) {
+	var b bytes.Buffer
+	fmt.Fprintln(&b, s.min, s.max, s.val)
+	return b.Bytes(), nil
+}
+
+func (s *Stat) UnmarshalBinary(data []byte) (err error) {
+	b := bytes.NewBuffer(data) 
+	_, err = fmt.Fscanln(b, &s.min, &s.max, &s.val)
+	return err
 }
