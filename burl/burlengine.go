@@ -50,19 +50,10 @@ func GameLoop() error {
 				if t.Event == sdl.WINDOWEVENT_RESTORED {
 					console.ForceRedraw()
 				}
-			// case *sdl.MouseMotionEvent:
-			// 	fmt.Printf("[%d ms] MouseMotion\ttype:%d\tid:%d\tx:%d\ty:%d\txrel:%d\tyrel:%d\n",
-			// 		t.Timestamp, t.Type, t.Which, t.X, t.Y, t.XRel, t.YRel)
-			// case *sdl.MouseButtonEvent:
-			// 	fmt.Printf("[%d ms] MouseButton\ttype:%d\tid:%d\tx:%d\ty:%d\tbutton:%d\tstate:%d\n",
-			// 		t.Timestamp, t.Type, t.Which, t.X, t.Y, t.Button, t.State)
-			// case *sdl.MouseWheelEvent:
-			// 	fmt.Printf("[%d ms] MouseWheel\ttype:%d\tid:%d\tx:%d\ty:%d\n",
-			// 		t.Timestamp, t.Type, t.Which, t.X, t.Y)
 			case *sdl.KeyboardEvent:
-				//fmt.Printf("[%d ms] Keyboard\ttype:%d\tsym:%c\tmodifiers:%d\tstate:%d\trepeat:%d\n",
-				//	t.Timestamp, t.Type, t.Keysym.Sym, t.Keysym.Mod, t.State, t.Repeat)
-				gameState.HandleKeypress(t.Keysym.Sym)
+				if t.Type == sdl.KEYDOWN {
+					gameState.HandleKeypress(t.Keysym.Sym)
+				}
 			}
 		}
 
@@ -73,7 +64,6 @@ func GameLoop() error {
 		console.Render()
 	}
 
-	console.Cleanup()
 	log.Close()
 
 	return nil
