@@ -1,62 +1,62 @@
 package burl
 
 type TileMap struct {
-	width, height int
-	tiles         []Tile
+	Width, Height int
+	Tiles         []Tile
 }
 
 func NewMap(w, h int) *TileMap {
-	return &TileMap{width: w, height: h, tiles: make([]Tile, w*h)}
+	return &TileMap{Width: w, Height: h, Tiles: make([]Tile, w*h)}
 }
 
 func (m TileMap) Dims() (int, int) {
-	return m.width, m.height
+	return m.Width, m.Height
 }
 
 func (m *TileMap) ChangeTileType(x, y, tile int) {
-	if CheckBounds(x, y, m.width, m.height) {
-		m.tiles[y*m.width+x].tileType = tile
+	if CheckBounds(x, y, m.Width, m.Height) {
+		m.Tiles[y*m.Width+x].TileType = tile
 	}
 }
 
 func (m TileMap) GetTileType(x, y int) int {
-	if CheckBounds(x, y, m.width, m.height) {
-		return m.tiles[y*m.width+x].tileType
+	if CheckBounds(x, y, m.Width, m.Height) {
+		return m.Tiles[y*m.Width+x].TileType
 	} else {
 		return 0
 	}
 }
 
 func (m TileMap) GetTile(x, y int) Tile {
-	if CheckBounds(x, y, m.width, m.height) {
-		return m.tiles[y*m.width+x]
+	if CheckBounds(x, y, m.Width, m.Height) {
+		return m.Tiles[y*m.Width+x]
 	} else {
 		return Tile{}
 	}
 }
 
 func (m *TileMap) SetTile(x, y int, t Tile) {
-	if CheckBounds(x, y, m.width, m.height) {
-		m.tiles[x+y*m.width] = t
+	if CheckBounds(x, y, m.Width, m.Height) {
+		m.Tiles[x+y*m.Width] = t
 	}
 }
 
 func (m *TileMap) AddEntity(x, y int, e Entity) {
-	if CheckBounds(x, y, m.width, m.height) {
-		m.tiles[x+y*m.width].entity = e
+	if CheckBounds(x, y, m.Width, m.Height) {
+		m.Tiles[x+y*m.Width].entity = e
 		m.ShadowCast(x, y, e.GetLight().Strength, Lighten)
 	}
 }
 
 func (m *TileMap) RemoveEntity(x, y int) {
-	if CheckBounds(x, y, m.width, m.height) {
-		m.ShadowCast(x, y, m.tiles[x+y*m.width].entity.GetLight().Strength, Darken)
-		m.tiles[x+y*m.width].entity = nil
+	if CheckBounds(x, y, m.Width, m.Height) {
+		m.ShadowCast(x, y, m.Tiles[x+y*m.Width].entity.GetLight().Strength, Darken)
+		m.Tiles[x+y*m.Width].entity = nil
 	}
 }
 
 func (m *TileMap) MoveEntity(x, y, dx, dy int) {
-	e := m.tiles[x+y*m.width].entity
+	e := m.Tiles[x+y*m.Width].entity
 	if e != nil {
 		m.RemoveEntity(x, y)
 		m.AddEntity(x+dx, y+dy, e)
@@ -65,28 +65,28 @@ func (m *TileMap) MoveEntity(x, y, dx, dy int) {
 }
 
 func (m TileMap) GetEntity(x, y int) Entity {
-	if CheckBounds(x, y, m.width, m.height) {
-		return m.tiles[x+y*m.width].entity
+	if CheckBounds(x, y, m.Width, m.Height) {
+		return m.Tiles[x+y*m.Width].entity
 	} else {
 		return nil
 	}
 }
 
 // func (m *TileMap) AddItem(x, y int, i *Item) {
-// 	if CheckBounds(x, y, m.width, m.height) && i != nil {
-// 		m.tiles[x+y*m.width].Item = i
+// 	if CheckBounds(x, y, m.Width, m.Height) && i != nil {
+// 		m.Tiles[x+y*m.Width].Item = i
 // 	}
 // }
 
 // func (m *TileMap) RemoveItem(x, y int) {
-// 	if CheckBounds(x, y, m.width, m.height) {
-// 		m.tiles[x+y*m.width].Item = nil
+// 	if CheckBounds(x, y, m.Width, m.Height) {
+// 		m.Tiles[x+y*m.Width].Item = nil
 // 	}
 // }
 
 // func (m *TileMap) GetItem(x, y int) *Item {
-// 	if CheckBounds(x, y, m.width, m.height) {
-// 		return m.tiles[x+y*m.width].Item
+// 	if CheckBounds(x, y, m.Width, m.Height) {
+// 		return m.Tiles[x+y*m.Width].Item
 // 	} else {
 // 		return nil
 // 	}
@@ -94,14 +94,14 @@ func (m TileMap) GetEntity(x, y int) Entity {
 
 //For testing purposes.
 func (m *TileMap) ChangeTileColour(x, y int, c uint32) {
-	if CheckBounds(x, y, m.width, m.height) {
-		m.tiles[x+y*m.width].Light.Colour = c
+	if CheckBounds(x, y, m.Width, m.Height) {
+		m.Tiles[x+y*m.Width].Light.Colour = c
 	}
 }
 
 func (m TileMap) LastVisible(x, y int) int {
-	if CheckBounds(x, y, m.width, m.height) {
-		return m.tiles[x+y*m.width].LastVisible
+	if CheckBounds(x, y, m.Width, m.Height) {
+		return m.Tiles[x+y*m.Width].LastVisible
 	} else {
 		return 0
 	}
@@ -109,14 +109,14 @@ func (m TileMap) LastVisible(x, y int) int {
 
 //NOTE: Consider renaming this.
 func (m *TileMap) SetVisible(x, y, tick int) {
-	if CheckBounds(x, y, m.width, m.height) {
-		m.tiles[x+y*m.width].LastVisible = tick
+	if CheckBounds(x, y, m.Width, m.Height) {
+		m.Tiles[x+y*m.Width].LastVisible = tick
 	}
 }
 
 func (m *TileMap) ClearLights() {
-	for i, _ := range m.tiles {
-		m.tiles[i].Light.Bright = 0
+	for i, _ := range m.Tiles {
+		m.Tiles[i].Light.Bright = 0
 	}
 }
 
@@ -124,33 +124,28 @@ func (m *TileMap) ClearLights() {
 //(dropped weapons), and a pointer to an Entity if one is standing there
 //Eventually will hold pathfinding information too.
 type Tile struct {
-	tileType, variant int //
-	passable          bool
+	TileType, Variant int //
 	entity            Entity
 	LastVisible       int // Records the last tick that this tile was seen
 	Light             TileLight
 	//Item              *Item
 }
 
-func (t Tile) TileType() int {
-	return t.tileType
-}
-
 func (t Tile) Passable() bool {
-	return IsPassable(t.tileType) && t.entity == nil
+	return IsPassable(t.TileType) && t.entity == nil
 }
 
 func (t Tile) Transparent() bool {
-	return IsTransparent(t.tileType)
+	return IsTransparent(t.TileType)
 }
 
 func (t Tile) Empty() bool {
 	//return t.Entity == nil && t.Item == nil && IsPassable(t.tileType)
-	return t.entity == nil && IsPassable(t.tileType)
+	return t.entity == nil && IsPassable(t.TileType)
 }
 
 func (t Tile) GetVisuals() Visuals {
-	return tiledata[t.tileType].vis
+	return tiledata[t.TileType].vis
 }
 
 //Light characteristics for each tile.

@@ -33,7 +33,7 @@ func (m *TileMap) scan(x, y, row int, slope1, slope2 float32, radius int, r [4]i
 		//scan row
 		for dx, dy, newStart := -j, -j, slope1; dx <= 0; dx++ {
 			mx, my := x+dx*r[0]+dy*r[1], y+dx*r[2]+dy*r[3] //map coordinates
-			if !CheckBounds(mx, my, m.width, m.height) {
+			if !CheckBounds(mx, my, m.Width, m.Height) {
 				continue
 			}
 			lSlope, rSlope := (float32(dx)-0.5)/(float32(dy)+0.5), (float32(dx)+0.5)/(float32(dy)-0.5)
@@ -50,7 +50,7 @@ func (m *TileMap) scan(x, y, row int, slope1, slope2 float32, radius int, r [4]i
 				}
 				//scanning a block
 				if blocked {
-					if m.tiles[mx+my*m.width].Transparent() {
+					if m.Tiles[mx+my*m.Width].Transparent() {
 						blocked = false
 						slope1 = newStart
 					} else {
@@ -58,7 +58,7 @@ func (m *TileMap) scan(x, y, row int, slope1, slope2 float32, radius int, r [4]i
 					}
 				} else {
 					//blocked square, commence child scan
-					if !m.tiles[mx+my*m.width].Transparent() && j < radius {
+					if !m.Tiles[mx+my*m.Width].Transparent() && j < radius {
 						blocked = true
 						m.scan(x, y, j+1, newStart, lSlope, radius, r, cull, fn)
 						newStart = rSlope
@@ -76,15 +76,15 @@ type Cast func(m *TileMap, x, y, d, r int)
 //Run this over the levelmap to light squares. Linearly interpolates
 //from max (255) at center to 0 at radius.
 func Lighten(m *TileMap, x, y, d, r int) {
-	m.tiles[x+y*m.width].Light.Bright += (255 - int(255*float32(d)/float32(r*r)))
+	m.Tiles[x+y*m.Width].Light.Bright += (255 - int(255*float32(d)/float32(r*r)))
 }
 
 //Same as above, but opposite.
 func Darken(m *TileMap, x, y, d, r int) {
-	m.tiles[x+y*m.width].Light.Bright -= (255 - int(255*float32(d)/float32(r*r)))
+	m.Tiles[x+y*m.Width].Light.Bright -= (255 - int(255*float32(d)/float32(r*r)))
 
-	if m.tiles[x+y*m.width].Light.Bright < 0 {
-		m.tiles[x+y*m.width].Light.Bright = 0
+	if m.Tiles[x+y*m.Width].Light.Bright < 0 {
+		m.Tiles[x+y*m.Width].Light.Bright = 0
 	}
 }
 
