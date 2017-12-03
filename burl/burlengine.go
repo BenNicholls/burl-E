@@ -59,7 +59,7 @@ func GameLoop() error {
 			// case *sdl.MouseWheelEvent:
 			// 	fmt.Printf("[%d ms] MouseWheel\ttype:%d\tid:%d\tx:%d\ty:%d\n",
 			// 		t.Timestamp, t.Type, t.Which, t.X, t.Y)
-			case *sdl.KeyUpEvent:
+			case *sdl.KeyboardEvent:
 				//fmt.Printf("[%d ms] Keyboard\ttype:%d\tsym:%c\tmodifiers:%d\tstate:%d\trepeat:%d\n",
 				//	t.Timestamp, t.Type, t.Keysym.Sym, t.Keysym.Mod, t.State, t.Repeat)
 				gameState.HandleKeypress(t.Keysym.Sym)

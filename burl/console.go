@@ -92,7 +92,7 @@ func (c *Console) Setup(w, h int, glyphPath, fontPath, title string) (err error)
 	c.height = h
 	c.tileSize = 24
 
-	c.window, err = sdl.CreateWindow(title, sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, c.width*c.tileSize, c.height*c.tileSize, sdl.WINDOW_OPENGL)
+	c.window, err = sdl.CreateWindow(title, sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, int32(c.width*c.tileSize), int32(c.height*c.tileSize), sdl.WINDOW_OPENGL)
 	if err != nil {
 		LogError("CONSOLE: Failed to create window. sdl:" + fmt.Sprint(sdl.GetError()))
 		return errors.New("Failed to create window.")
@@ -168,7 +168,7 @@ func (c *Console) ChangeFonts(glyphPath, fontPath string) (err error) {
 	//reset window size if fontsize changed
 	if int(gw/16) != c.tileSize {
 		c.tileSize = int(gw / 16)
-		c.window.SetSize(c.tileSize*c.width, c.tileSize*c.height)
+		c.window.SetSize(int32(c.tileSize*c.width), int32(c.tileSize*c.height))
 		_ = c.CreateCanvasBuffer() //TODO: handle this error?
 		LogInfo("CONSOLE: resized window.")
 	}
@@ -180,7 +180,7 @@ func (c *Console) CreateCanvasBuffer() (err error) {
 	if c.canvasBuffer != nil {
 		c.canvasBuffer.Destroy()
 	}
-	c.canvasBuffer, err = c.renderer.CreateTexture(sdl.PIXELFORMAT_ARGB8888, sdl.TEXTUREACCESS_TARGET, c.width*c.tileSize, c.height*c.tileSize)
+	c.canvasBuffer, err = c.renderer.CreateTexture(sdl.PIXELFORMAT_ARGB8888, sdl.TEXTUREACCESS_TARGET, int32(c.width*c.tileSize), int32(c.height*c.tileSize))
 	if err != nil {
 		LogError("CONSOLE: Failed to create buffer texture. sdl:" + fmt.Sprint(sdl.GetError()))
 	}
