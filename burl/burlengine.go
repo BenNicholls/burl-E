@@ -75,7 +75,7 @@ func GameLoop() error {
 
 	console.Cleanup()
 	log.Close()
-	
+
 	return nil
 }
 

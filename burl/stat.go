@@ -88,14 +88,14 @@ func (s Stat) String() string {
 	return strconv.Itoa(s.val) + "/" + strconv.Itoa(s.max)
 }
 
-func (s Stat) MarshalBinary() ([]byte, error) {
+func (s Stat) GobEncode() ([]byte, error) {
 	var b bytes.Buffer
 	fmt.Fprintln(&b, s.min, s.max, s.val)
 	return b.Bytes(), nil
 }
 
-func (s *Stat) UnmarshalBinary(data []byte) (err error) {
-	b := bytes.NewBuffer(data) 
+func (s *Stat) GobDecode(data []byte) (err error) {
+	b := bytes.NewBuffer(data)
 	_, err = fmt.Fscanln(b, &s.min, &s.max, &s.val)
 	return err
 }

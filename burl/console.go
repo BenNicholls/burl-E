@@ -41,6 +41,7 @@ type Cell struct {
 	BackColour uint32
 	Z          int
 	Dirty      bool
+	Border     bool //marks cell as part of a UI Element border.
 
 	//for text rendering mode. TODO:multiple back and fore colours, one for each char
 	Mode  drawmode
@@ -56,6 +57,9 @@ func (c *Cell) SetGlyph(gl int, fore, back uint32, z int) {
 		c.BackColour = back
 		c.Z = z
 		c.Dirty = true
+		if gl < GLYPH_BORDER_UD || gl > GLYPH_BORDER_DR {
+			c.Border = false
+		}
 	}
 }
 
@@ -69,6 +73,7 @@ func (c *Cell) SetText(char1, char2 int, fore, back uint32, z int) {
 		c.BackColour = back
 		c.Z = z
 		c.Dirty = true
+		c.Border = false
 	}
 }
 
@@ -225,9 +230,12 @@ func (c *Console) Render() {
 					c.CopyToRenderer(DRAW_TEXT, src, dst, cell.ForeColour, cell.BackColour, char)
 				}
 			} else {
+				if cell.Border {
+					c.CalcBorderGlyph(i%c.width, i/c.width)
+				}
 				dst = makeRect((i%c.width)*c.tileSize, (i/c.width)*c.tileSize, c.tileSize, c.tileSize)
-				src = makeRect((cell.Glyph%16)*c.tileSize, (cell.Glyph/16)*c.tileSize, c.tileSize, c.tileSize)
-				c.CopyToRenderer(DRAW_GLYPH, src, dst, cell.ForeColour, cell.BackColour, cell.Glyph)
+				src = makeRect((c.canvas[i].Glyph%16)*c.tileSize, (c.canvas[i].Glyph/16)*c.tileSize, c.tileSize, c.tileSize)
+				c.CopyToRenderer(DRAW_GLYPH, src, dst, cell.ForeColour, cell.BackColour, c.canvas[i].Glyph)
 			}
 
 			c.canvas[i].Dirty = false
@@ -319,6 +327,14 @@ func (c *Console) Cleanup() {
 	c.canvasBuffer.Destroy()
 	c.renderer.Destroy()
 	c.window.Destroy()
+}
+
+//Returns a reference to the cell at (x, y). Returns nil if (x, y) is bad.
+func (c *Console) GetCell(x, y int) *Cell {
+	if CheckBounds(x, y, c.width, c.height) {
+		return &c.canvas[y*c.width+x]
+	}
+	return nil
 }
 
 //Changes the glyph of a cell in the canvas at position (x, y).
@@ -419,31 +435,96 @@ func (c *Console) DrawText(x, y, z int, txt string, fore, back uint32, charNum i
 //TODO: custom colouring, multiple styles.
 //NOTE: current border colouring thing is a bit of a hack. Need to add actual support for
 //border and ui styling.
+//Borders work by setting a flag on the cells that need to be borders. At render time, any
+//borders with a dirty flag are assigned a border glyph based on the state of their neighbours:
+//if the neighnouring cells are on the same z level and also borders, they will connect.
 func (c *Console) DrawBorder(x, y, z, w, h int, title string, focused bool) {
 	//set border colour.
-	bc := MakeColour(0xE2, 0x8F, 0x00)
+	bc := COL_PURPLE
 	if !focused {
 		bc = COL_LIGHTGREY
 	}
 	//Top and bottom.
-	for i := 0; i < w; i++ {
-		c.ChangeCell(x+i, y-1, z, GLYPH_BORDER_LR, bc, COL_BLACK)
-		c.ChangeCell(x+i, y+h, z, GLYPH_BORDER_LR, bc, COL_BLACK)
+	for i := -1; i <= w; i++ {
+		c.SetCellBorder(x+i, y-1, z, bc)
+		c.SetCellBorder(x+i, y+h, z, bc)
 	}
 	//Sides
 	for i := 0; i < h; i++ {
-		c.ChangeCell(x-1, y+i, z, GLYPH_BORDER_UD, bc, COL_BLACK)
-		c.ChangeCell(x+w, y+i, z, GLYPH_BORDER_UD, bc, COL_BLACK)
+		c.SetCellBorder(x-1, y+i, z, bc)
+		c.SetCellBorder(x+w, y+i, z, bc)
 	}
-	//corners
-	c.ChangeCell(x-1, y-1, z, GLYPH_BORDER_DR, bc, COL_BLACK)
-	c.ChangeCell(x-1, y+h, z, GLYPH_BORDER_UR, bc, COL_BLACK)
-	c.ChangeCell(x+w, y+h, z, GLYPH_BORDER_UL, bc, COL_BLACK)
-	c.ChangeCell(x+w, y-1, z, GLYPH_BORDER_DL, bc, COL_BLACK)
 
 	//Write centered title.
 	if len(title) < w && title != "" {
 		c.DrawText(x+(w/2-len(title)/4-1), y-1, z+1, title, COL_WHITE, COL_BLACK, 0)
+	}
+}
+
+//Sets the cell at (x, y) as a border cell, to be drawn out later when the frame is rendered.
+func (c *Console) SetCellBorder(x, y, z int, fore uint32) {
+	s := y*c.width + x
+	if CheckBounds(x, y, c.width, c.height) && c.canvas[s].Z <= z {
+		if !c.canvas[s].Border || c.canvas[s].Z < z || c.canvas[s].ForeColour != fore {
+			c.canvas[s].Border = true
+			c.canvas[s].Z = z
+			c.canvas[s].ForeColour = fore
+			c.canvas[s].Mode = DRAW_GLYPH
+			c.canvas[s].Dirty = true
+		}
+	}
+}
+
+//Chooses a border glyph for a cell at (x,y) based on the border state of it's neighbours.
+func (c *Console) CalcBorderGlyph(x, y int) {
+	if !CheckBounds(x, y, c.width, c.height) {
+		return
+	}
+
+	s := y*c.width + x
+	var g int
+	var u, d, l, r bool
+
+	if uCell := c.GetCell(x, y-1); uCell != nil && uCell.Z == c.canvas[s].Z {
+		u = uCell.Border
+	}
+	if dCell := c.GetCell(x, y+1); dCell != nil && dCell.Z == c.canvas[s].Z {
+		d = dCell.Border
+	}
+	if lCell := c.GetCell(x-1, y); lCell != nil && lCell.Z == c.canvas[s].Z {
+		l = lCell.Border
+	}
+	if rCell := c.GetCell(x+1, y); rCell != nil && rCell.Z == c.canvas[s].Z {
+		r = rCell.Border
+	}
+
+	switch {
+	case u && d && l && r:
+		g = GLYPH_BORDER_UDLR
+	case u && d && l:
+		g = GLYPH_BORDER_UDL
+	case u && d && !l && r:
+		g = GLYPH_BORDER_UDR
+	case u && !d && l && r:
+		g = GLYPH_BORDER_ULR
+	case u && !d && !l && r:
+		g = GLYPH_BORDER_UR
+	case u && !d && l && !r:
+		g = GLYPH_BORDER_UL
+	case !u && d && l && r:
+		g = GLYPH_BORDER_DLR
+	case !u && d && l && !r:
+		g = GLYPH_BORDER_DL
+	case !u && d && !l && r:
+		g = GLYPH_BORDER_DR
+	case (u || d) && (!l && !r):
+		g = GLYPH_BORDER_UD
+	case (!u && !d) && (l || r):
+		g = GLYPH_BORDER_LR
+	}
+
+	if g != 0 {
+		c.canvas[s].Glyph = g
 	}
 }
 
