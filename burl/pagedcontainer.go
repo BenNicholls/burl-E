@@ -45,6 +45,10 @@ func (p PagedContainer) GetPageDims() (int, int) {
 	return p.width - 2, p.height - 4
 }
 
+func (p PagedContainer) CurrentIndex() int {
+	return p.curPage
+}
+
 func (p *PagedContainer) NextPage() {
 	p.curPage, _ = ModularClamp(p.curPage+1, 0, len(p.pages)-1)
 	p.setActivePage()

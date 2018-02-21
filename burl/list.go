@@ -16,6 +16,11 @@ func NewList(w, h, x, y, z int, bord bool, empty string) *List {
 	return &List{*c, 0, true, 0, NewTextbox(w, CalcWrapHeight(empty, w), 0, h/2-CalcWrapHeight(empty, w)/2, z, false, true, empty), 0}
 }
 
+func (l *List) Add(elems ...UIElem) {
+	l.Container.Add(elems...)
+	l.Calibrate()
+}
+
 func (l *List) Select(s int) {
 	if s < len(l.Elements) && s >= 0 {
 		l.selected = s
@@ -79,11 +84,14 @@ func (l *List) ScrollToTop() {
 	l.scrollOffset = 0
 }
 
+//Scrolls the list to ensure the currently selected element is in view. Called by Prev() and Next()
 func (l *List) ScrollToSelection() {
-	if l.selected < l.scrollOffset {
-		l.scrollOffset = l.selected
-	} else if l.scrollOffset < l.selected-l.height+1 {
-		l.scrollOffset = l.selected - l.height + 1
+	_, y, _ := l.Elements[l.selected].Pos()
+	_, h := l.Elements[l.selected].Dims()
+	if y < l.scrollOffset {
+		l.scrollOffset = y
+	} else if l.scrollOffset+l.height < y+h {
+		l.scrollOffset = y - l.height + h
 	}
 }
 
