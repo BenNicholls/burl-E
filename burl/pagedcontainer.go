@@ -1,83 +1,99 @@
 package burl
 
+//PagedContainer is a container for pages, with little tabs at the top. You can cycle through the pages
+//like you'd expect. Cool, right?
 type PagedContainer struct {
-	Container
-	page         int
-	pageTitles   []*Textbox
+	UIElement
+	curPage      int
+	pages        []*Page
 	redrawTitles bool
+}
+
+//Page is a single page in the PagedContainer. Might need to think of a better name for this.
+type Page struct {
+	page  *Container
+	title *Textbox
 }
 
 func NewPagedContainer(w, h, x, y, z int, bord bool) *PagedContainer {
 	p := new(PagedContainer)
-	p.Container = *NewContainer(w, h, x, y, z, bord)
-	p.page = 3
-	p.pageTitles = make([]*Textbox, 0, 0)
-	p.redraw = true
+	p.UIElement = NewUIElement(w, h, x, y, z, bord)
+	p.curPage = 0
+	p.pages = make([]*Page, 0, 0)
 
 	return p
 }
 
-func (p *PagedContainer) AddPage(title string, page UIElem) {
-	p.Add(page)
+//Adds a page to the PagedContainer, returning a pointer to the page itself
+func (p *PagedContainer) AddPage(title string) *Container {
 	offX := 1
-	for _, t := range p.pageTitles {
-		offX += t.width + 1
+	for _, e := range p.pages {
+		offX += e.title.width + 1
 	}
 	titleBox := NewTextbox(len(title)/2+2, 1, offX, 1, 1, false, true, title)
-	p.pageTitles = append(p.pageTitles, titleBox)
+
+	newPage := new(Page)
+	newPage.title = titleBox
+	newPage.page = NewContainer(p.width-2, p.height-4, 1, 3, 1, true)
+	p.pages = append(p.pages, newPage)
 	p.setActivePage()
+
+	return newPage.page
 }
 
 func (p PagedContainer) GetPageDims() (int, int) {
-	return p.width, p.height - 2
+	return p.width - 2, p.height - 4
 }
 
 func (p *PagedContainer) NextPage() {
-	p.page, _ = ModularClamp(p.page+1, 0, len(p.pageTitles)-1)
+	p.curPage, _ = ModularClamp(p.curPage+1, 0, len(p.pages)-1)
 	p.setActivePage()
 }
 
 func (p *PagedContainer) PrevPage() {
-	p.page, _ = ModularClamp(p.page-1, 0, len(p.pageTitles)-1)
+	p.curPage, _ = ModularClamp(p.curPage-1, 0, len(p.pages)-1)
 	p.setActivePage()
 }
 
 //Finds the active page and fixes up visibilities, borders, etc.
 func (p *PagedContainer) setActivePage() {
-	for i := 0; i < len(p.pageTitles); i++ {
-		if i == p.page {
-			p.pageTitles[i].bordered = true
+	for i := 0; i < len(p.pages); i++ {
+		if i == p.curPage {
+			p.pages[i].title.bordered = true
 		} else {
-			p.pageTitles[i].bordered = false
+			p.pages[i].title.bordered = false
 		}
 	}
 	p.redrawTitles = true
-	console.Clear() //TOTAL HACK. Note: should probably not be using Container as the embedded type here. Maybe make a Page struct??
+	console.Clear()
 }
 
 func (p PagedContainer) Render(offset ...int) {
 	if p.visible {
 		offX, offY, offZ := processOffset(offset)
 
-		p.Container.UIElement.Render(offX, offY, offZ)
-		p.Container.Elements[p.page].Render(p.x+offX, p.y+offY, p.z+offZ)
+		p.UIElement.Render(offX, offY, offZ)
 
-		if p.redrawTitles {
+		if len(p.pages) > 0 {
 
-			//draw over page title area
-			for i := 0; i < p.width*2; i++ {
-				console.ChangeCell(p.x+offX+(i%p.width), p.y+offY+(i/p.width), p.z+offZ, GLYPH_NONE, COL_BLACK, COL_BLACK)
-			}
+			p.pages[p.curPage].page.Render(p.x+offX, p.y+offY, p.z+offZ)
 
-			//draw titles
-			for i, titleBox := range p.pageTitles {
-				titleBox.Render(p.x+offX, p.y+offY, p.z+offZ)
-				if i == p.page {
-					//remove border below title of selected page
-					console.Clear(p.x+offX+titleBox.x, p.y+offY+titleBox.y+1, titleBox.width, 1)
+			if p.redrawTitles {
+				//draw over page title area
+				for i := 0; i < p.width*2; i++ {
+					console.ChangeCell(p.x+offX+(i%p.width), p.y+offY+(i/p.width), p.z+offZ, GLYPH_NONE, COL_BLACK, COL_BLACK)
 				}
+
+				//draw titles
+				for i, page := range p.pages {
+					page.title.Render(p.x+offX, p.y+offY, p.z+offZ)
+					if i == p.curPage {
+						//remove border below title of selected page
+						console.Clear(p.x+offX+page.title.x, p.y+offY+page.title.y+1, page.title.width, 1)
+					}
+				}
+				p.redrawTitles = false
 			}
-			p.redrawTitles = false
 		}
 	}
 }

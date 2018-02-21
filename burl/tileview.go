@@ -13,7 +13,7 @@ type TileView struct {
 
 func NewTileView(w, h, x, y, z int, bord bool) *TileView {
 	tv := new(TileView)
-	tv.UIElement = NewUIElement(x, y, z, w, h, bord)
+	tv.UIElement = NewUIElement(w, h, x, y, z, bord)
 	tv.grid = make([]Cell, w*h)
 	tv.Reset()
 	return tv

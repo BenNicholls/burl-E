@@ -9,7 +9,7 @@ type Container struct {
 }
 
 func NewContainer(w, h, x, y, z int, bord bool) *Container {
-	return &Container{NewUIElement(x, y, z, w, h, bord), true, make([]UIElem, 0, 20)}
+	return &Container{NewUIElement(w, h, x, y, z, bord), true, make([]UIElem, 0, 20)}
 }
 
 //Adds any number of UIElem to the container.

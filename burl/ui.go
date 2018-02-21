@@ -16,8 +16,8 @@ type UIElem interface {
 }
 
 type UIElement struct {
-	x, y, z       int
 	width, height int
+	x, y, z       int
 	bordered      bool
 	title         string
 	visible       bool
@@ -26,8 +26,8 @@ type UIElement struct {
 	anims []Animator
 }
 
-func NewUIElement(x, y, z, width, height int, bord bool) UIElement {
-	return UIElement{x, y, z, width, height, bord, "", true, false, make([]Animator, 0, 20)}
+func NewUIElement(width, height, x, y, z int, bord bool) UIElement {
+	return UIElement{width, height, x, y, z, bord, "", true, false, make([]Animator, 0, 20)}
 }
 
 //basic render function for all elements.

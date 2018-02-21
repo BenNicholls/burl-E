@@ -9,7 +9,7 @@ type Textbox struct {
 }
 
 func NewTextbox(w, h, x, y, z int, bord, cent bool, txt string) *Textbox {
-	return &Textbox{NewUIElement(x, y, z, w, h, bord), txt, cent, WrapText(txt, w*2, h)}
+	return &Textbox{NewUIElement(w, h, x, y, z, bord), txt, cent, WrapText(txt, w*2, h)}
 }
 
 //Returns the height required to fit a string after it has been wrapped.
