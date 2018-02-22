@@ -46,8 +46,6 @@ func (l *List) Next() {
 
 	l.selected, _ = ModularClamp(l.selected+1, 0, len(l.Elements)-1)
 	l.ScrollToSelection()
-
-	PushEvent(l, CHANGE, "List Cycled +")
 }
 
 //Selects previous item in the List, keeping selection in view.
@@ -60,8 +58,6 @@ func (l *List) Prev() {
 
 	l.selected, _ = ModularClamp(l.selected-1, 0, len(l.Elements)-1)
 	l.ScrollToSelection()
-
-	PushEvent(l, CHANGE, "List Cycled -")
 }
 
 func (l *List) ScrollUp() {
