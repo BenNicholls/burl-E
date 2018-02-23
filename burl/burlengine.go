@@ -6,10 +6,24 @@ import "github.com/veandco/go-sdl2/sdl"
 
 var console *Console
 var gameState State
+var nextState State
 
 //Initializes the game State. Call before running the game loop.
 func InitState(m State) {
-	gameState = m
+	if gameState == nil {
+		gameState = m
+	}
+}
+
+//Tell burl to change from one state to another. This is done at the end of frame. Only the first
+//call to this function will succeed per frame, subsequent calls evoke an error and are ignored.
+func ChangeState(m State) {
+	if nextState == nil {
+		nextState = m
+		PushEvent(NewEvent(CHANGE_STATE, ""))
+	} else {
+		LogError("Multiple state changes detected in one frame!")
+	}
 }
 
 //Initializes the console. Returns a pointer to the console so the user can
@@ -76,6 +90,10 @@ func GameLoop() error {
 			case QUIT_EVENT:
 				gameState.Shutdown()
 				running = false
+			case CHANGE_STATE:
+				gameState.Shutdown()
+				gameState = nextState
+				nextState = nil
 			}
 		}
 	}

@@ -6,6 +6,7 @@ type EventType int
 const (
 	NONE            EventType = iota
 	UPDATE_UI_EVENT           //signifies some UI needs to be updated
+	CHANGE_STATE              //state change required --internal--
 	QUIT_EVENT                //shut it down! --internal--
 	MAX_EVENTS
 )
@@ -49,6 +50,7 @@ func init() {
 
 	//set which events types are internal to burl
 	internalEvent[QUIT_EVENT] = true
+	internalEvent[CHANGE_STATE] = true
 }
 
 //Emits an event into the relevant EventStream. If the stream is full we flush the whole buffer.
