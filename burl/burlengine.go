@@ -25,7 +25,8 @@ func InitConsole(w, h int, glyphPath, fontPath, title string) (*Console, error) 
 
 }
 
-//The Big Enchelada! This is the gameloop that runs everything. Make sure to run burl.InitMode() and console.Setup() before beginning the game!
+//The Big Enchelada! This is the gameloop that runs everything. Make sure to run
+//burl.InitState() and burl.InitConsole before beginning the game!
 func GameLoop() error {
 	//TODO: implement that horrible thread job queue thing from the go-sdl2 package
 	runtime.LockOSThread() //fixes some kind of go-sdl2 based thread release bug.
@@ -45,6 +46,7 @@ func GameLoop() error {
 		for event = sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch t := event.(type) {
 			case *sdl.QuitEvent:
+				gameState.Shutdown()
 				running = false
 			case *sdl.WindowEvent:
 				if t.Event == sdl.WINDOWEVENT_RESTORED {
@@ -59,9 +61,23 @@ func GameLoop() error {
 
 		gameState.Update()
 
+		//serve events to application for handling
+		for e := PopEvent(); e != nil; e = PopEvent() {
+			gameState.HandleEvent(e)
+		}
+
 		//TODO: get console.Render() running in another thread (i think this is a good idea... maybe?)
 		gameState.Render()
-		console.Render()
+		console.Render() //should this come after the burl events are processed??
+
+		//process burl-handled events
+		for e := popInternalEvent(); e != nil; e = popInternalEvent() {
+			switch e.ID {
+			case QUIT_EVENT:
+				gameState.Shutdown()
+				running = false
+			}
+		}
 	}
 
 	log.Close()
@@ -73,8 +89,10 @@ func GameLoop() error {
 type State interface {
 	HandleKeypress(sdl.Keycode)
 	Update()
+	HandleEvent(*Event) //called for each event in the stream, every frame
 	Render()
 	GetTick() int
+	Shutdown() //called on program exit
 }
 
 //base state object, compose states around this if you want
@@ -95,5 +113,13 @@ func (b *BaseState) Update() {
 }
 
 func (b BaseState) Render() {
+
+}
+
+func (b BaseState) Shutdown() {
+
+}
+
+func (b BaseState) HandleEvent(e *Event) {
 
 }

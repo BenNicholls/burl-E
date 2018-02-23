@@ -22,7 +22,7 @@ func (b *Button) Register(e *Event) {
 func (b Button) Press() {
 	b.PressPulse.Activate()
 	if b.press != nil {
-		EventStream <- b.press
+		PushEvent(b.press)
 	}
 }
 
