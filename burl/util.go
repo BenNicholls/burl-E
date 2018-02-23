@@ -101,6 +101,11 @@ func Clamp(val, min, max int) int {
 //The second argument is the number of overflow cycles. negative for underflow, 0 for none, positive for overflow.
 //This kind of function probably has an actual name but hell if I know what it is.
 func ModularClamp(val, min, max int) (int, int) {
+	if min > max {
+		//if someone foolishly puts their min higher than max, swap
+		min, max = max, min
+	}
+
 	if val < min {
 		r := max - min + 1
 		underflows := (min-val-1)/r + 1
