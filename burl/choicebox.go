@@ -26,7 +26,7 @@ func NewChoiceBox(w, h, x, y, z int, bord bool, dir int, choices ...string) (cb 
 	cb.choices = choices
 
 	if dir == CHOICE_VERTICAL {
-		cb.direction = dir
+		cb.direction = CHOICE_VERTICAL
 	} else {
 		cb.direction = CHOICE_HORIZONTAL
 	}

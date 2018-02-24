@@ -7,12 +7,15 @@ type UIElem interface {
 	Pos() (x int, y int, z int)
 	SetTitle(title string)
 	ToggleVisible()
+	ToggleFocus()
 	SetVisibility(v bool)
 	IsVisible() bool
 	IsFocused() bool
 	MoveTo(x, y, z int)
 	Rect() (int, int, int, int)
 	CenterInConsole()
+	SetTabID(id int)
+	TabID() int
 }
 
 type UIElement struct {
@@ -22,12 +25,13 @@ type UIElement struct {
 	title         string
 	visible       bool
 	focused       bool
+	tabID         int //for to tab between elements in a container
 
 	anims []Animator
 }
 
 func NewUIElement(width, height, x, y, z int, bord bool) UIElement {
-	return UIElement{width, height, x, y, z, bord, "", true, false, make([]Animator, 0, 20)}
+	return UIElement{width, height, x, y, z, bord, "", true, false, 0, make([]Animator, 0, 20)}
 }
 
 //basic render function for all elements.
@@ -131,6 +135,17 @@ func (u *UIElement) CenterX(w, x int) {
 //Centers the element vertically within the range defined by (h, y)
 func (u *UIElement) CenterY(h, y int) {
 	u.y = (h-y-u.height)/2 + y
+}
+
+//Sets a Tab number for the element. Elements in the same container can be
+//tabbed back and forth across the TabIDs, starting with 1. Default is 0, which
+//is ignored by the tabbing function.
+func (u *UIElement) SetTabID(id int) {
+	u.tabID = id
+}
+
+func (u UIElement) TabID() int {
+	return u.tabID
 }
 
 //Helper funtion for unpacking optional offsets passed to UI render functions. Required to allow for nesting of elements.
