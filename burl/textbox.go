@@ -43,6 +43,10 @@ func (t *Textbox) Render(offset ...int) {
 				console.ChangeText(t.x+offX+i, t.y+offY+l, t.z+offZ, int(' '), int(' '))
 			}
 
+			if line == "" {
+				continue
+			}
+
 			//offset if centered
 			if t.centered {
 				lineOffset = (t.width*2 - len(line) + 1) / 2
@@ -50,7 +54,6 @@ func (t *Textbox) Render(offset ...int) {
 
 			//print text
 			console.DrawText(offX+t.x+lineOffset/2, offY+t.y+l, offZ+t.z, line, COL_WHITE, COL_BLACK, lineOffset%2)
-
 		}
 
 		//blank out empty lines at bottom

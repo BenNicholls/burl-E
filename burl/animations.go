@@ -83,7 +83,7 @@ func (ba *BlinkCharAnimation) Tick() {
 
 func (ba *BlinkCharAnimation) Activate() {
 	if ba.enabled {
-		ba.state = false
+		ba.state = true
 	}
 
 	ba.Animation.Activate()
@@ -94,6 +94,7 @@ func (ba *BlinkCharAnimation) Render(charNum int, offset ...int) {
 	if ba.enabled {
 		offX, offY, offZ := processOffset(offset)
 		if ba.state {
+			console.ChangeForeColour(ba.x+offX, ba.y+offY, offZ, COL_WHITE)
 			console.ChangeChar(ba.x+offX, ba.y+offY, offZ, 31, charNum)
 		} else {
 			console.ChangeChar(ba.x+offX, ba.y+offY, offZ, 32, charNum)
