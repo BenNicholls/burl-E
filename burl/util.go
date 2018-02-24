@@ -172,26 +172,36 @@ func WrapText(str string, width int, maxlines ...int) (lines []string) {
 
 	currentLine := ""
 
-	for _, s := range strings.Split(str, " ") {
-		//super long word make-it-not-break hack.
-		if len(s) > width {
-			s = s[:width]
-		}
+	for _, broken := range strings.Split(str, "/n") {
+		for _, s := range strings.Split(broken, " ") {
+			//super long word make-it-not-break hack.
+			if len(s) > width {
+				s = s[:width]
+			}
 
-		//add a line if current word won't fit
-		if len(currentLine)+len(s) > width {
-			currentLine = strings.TrimSpace(currentLine)
-			lines = append(lines, currentLine)
-			currentLine = ""
+			//add a line if current word won't fit
+			if len(currentLine)+len(s) > width {
+				currentLine = strings.TrimSpace(currentLine)
+				lines = append(lines, currentLine)
+				currentLine = ""
 
-			//break if number of lines == height
-			if capped && len(lines) == cap(lines) {
-				break
+				//break if number of lines == height
+				if capped && len(lines) == cap(lines) {
+					break
+				}
+			}
+			currentLine += s
+			if len(currentLine) != width {
+				currentLine += " "
 			}
 		}
-		currentLine += s
-		if len(currentLine) != width {
-			currentLine += " "
+
+		currentLine = strings.TrimSpace(currentLine)
+		lines = append(lines, currentLine)
+		currentLine = ""
+
+		if capped && len(lines) == cap(lines) {
+			break
 		}
 	}
 	//append last line if needed after we're done looping through text
