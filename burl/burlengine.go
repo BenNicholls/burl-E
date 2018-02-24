@@ -69,9 +69,6 @@ func GameLoop() error {
 			case *sdl.KeyboardEvent:
 				if t.Type == sdl.KEYDOWN {
 					gameState.HandleKeypress(t.Keysym.Sym)
-					if t.Keysym.Sym == sdl.K_F5 {
-						DebugToggleRenderChangeView()
-					}
 				}
 			}
 		}
