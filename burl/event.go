@@ -8,6 +8,8 @@ const (
 	UPDATE_UI_EVENT           //signifies some UI needs to be updated
 	CHANGE_STATE              //state change required --internal--
 	QUIT_EVENT                //shut it down! --internal--
+	ANIMATION_DONE
+	BUTTON_PRESS
 	MAX_EVENTS
 )
 

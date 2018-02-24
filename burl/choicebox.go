@@ -1,5 +1,9 @@
 package burl
 
+import (
+	"math/rand"
+)
+
 const (
 	CHOICE_VERTICAL int = iota
 	CHOICE_HORIZONTAL
@@ -56,6 +60,11 @@ func (cb *ChoiceBox) Prev() {
 
 func (cb ChoiceBox) GetChoice() int {
 	return cb.curChoice
+}
+
+func (cb *ChoiceBox) RandomizeChoice() {
+	cb.curChoice = rand.Intn(len(cb.choices))
+	cb.ChangeText(cb.choices[cb.curChoice])
 }
 
 func (cb ChoiceBox) Render(offset ...int) {
