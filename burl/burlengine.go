@@ -116,11 +116,11 @@ type State interface {
 
 //base state object, compose states around this if you want
 type BaseState struct {
-	tick int //update ticks since init
+	Tick int //update ticks since init
 }
 
 func (b BaseState) GetTick() int {
-	return b.tick
+	return b.Tick
 }
 
 func (b BaseState) HandleKeypress(key sdl.Keycode) {
@@ -128,7 +128,7 @@ func (b BaseState) HandleKeypress(key sdl.Keycode) {
 }
 
 func (b *BaseState) Update() {
-	b.tick++
+	b.Tick++
 }
 
 func (b BaseState) Render() {
