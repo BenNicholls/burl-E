@@ -1,6 +1,10 @@
 package burl
 
-import "strconv"
+import (
+	"strconv"
+
+	"github.com/veandco/go-sdl2/sdl"
+)
 
 //Inputbox is a textbox designed for user input of text, complete with mighty blinking cursor.
 //TODO: String longer than size of Textbox. How hard could that be????
@@ -53,6 +57,17 @@ func (ib Inputbox) GetText() string {
 func (ib *Inputbox) ToggleFocus() {
 	ib.focused = !ib.focused
 	ib.cursorAnimation.Toggle()
+}
+
+func (ib *Inputbox) HandleKeypress(key sdl.Keycode) {
+	switch key {
+	case sdl.K_BACKSPACE:
+		ib.Delete()
+	case sdl.K_SPACE:
+		ib.Insert(" ")
+	default:
+		ib.InsertText(rune(key))
+	}
 }
 
 //TODO: Fix cursor for if inputbox has centered text. For now, just don't do that (looks silly anyways)

@@ -20,7 +20,7 @@ func InitState(m State) {
 func ChangeState(m State) {
 	if nextState == nil {
 		nextState = m
-		PushEvent(NewEvent(CHANGE_STATE, ""))
+		PushEvent(NewEvent(EV_CHANGE_STATE, ""))
 	} else {
 		LogError("Multiple state changes detected in one frame!")
 	}
@@ -87,10 +87,10 @@ func GameLoop() error {
 		//process burl-handled events
 		for e := popInternalEvent(); e != nil; e = popInternalEvent() {
 			switch e.ID {
-			case QUIT_EVENT:
+			case EV_QUIT:
 				gameState.Shutdown()
 				running = false
-			case CHANGE_STATE:
+			case EV_CHANGE_STATE:
 				gameState.Shutdown()
 				console.Clear()
 				gameState = nextState

@@ -1,5 +1,9 @@
 package burl
 
+import (
+	"github.com/veandco/go-sdl2/sdl"
+)
+
 //List UI Elem is a special kind of container that arranges it's nested elements as a vertical list,
 //supporting scrollbars, scrolling, selection of list elements, etc.
 type List struct {
@@ -46,6 +50,7 @@ func (l *List) Next() {
 
 	l.selected, _ = ModularClamp(l.selected+1, 0, len(l.Elements)-1)
 	l.ScrollToSelection()
+	PushEvent(NewUIEvent(EV_LIST_CYCLE, "+", l))
 }
 
 //Selects previous item in the List, keeping selection in view.
@@ -58,6 +63,7 @@ func (l *List) Prev() {
 
 	l.selected, _ = ModularClamp(l.selected-1, 0, len(l.Elements)-1)
 	l.ScrollToSelection()
+	PushEvent(NewUIEvent(EV_LIST_CYCLE, "-", l))
 }
 
 func (l *List) ScrollUp() {
@@ -142,6 +148,15 @@ func (l *List) Change(i int, item string) {
 //Toggles highlighting of selected element.
 func (l *List) ToggleHighlight() {
 	l.Highlight = !l.Highlight
+}
+
+func (l *List) HandleKeypress(key sdl.Keycode) {
+	switch key {
+	case sdl.K_UP:
+		l.Prev()
+	case sdl.K_DOWN:
+		l.Next()
+	}
 }
 
 //Currently renders large items (h > 1) outside of list boundaries. TODO: think of way to prune these down.

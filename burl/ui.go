@@ -1,5 +1,9 @@
 package burl
 
+import (
+	"github.com/veandco/go-sdl2/sdl"
+)
+
 //UIElem is the basic definition for all UI elements.
 type UIElem interface {
 	Render(offset ...int)
@@ -16,6 +20,7 @@ type UIElem interface {
 	CenterInConsole()
 	SetTabID(id int)
 	TabID() int
+	HandleKeypress(key sdl.Keycode)
 }
 
 type UIElement struct {
@@ -146,6 +151,11 @@ func (u *UIElement) SetTabID(id int) {
 
 func (u UIElement) TabID() int {
 	return u.tabID
+}
+
+func (u *UIElement) HandleKeypress(key sdl.Keycode) {
+	//No-op. Maybe i'll make a default "no action associated with that key"
+	//animation later, like maybe it subtly pulses once or something. Might be annoying though.
 }
 
 //Helper funtion for unpacking optional offsets passed to UI render functions. Required to allow for nesting of elements.

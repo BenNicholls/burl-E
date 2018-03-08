@@ -2,6 +2,8 @@ package burl
 
 import (
 	"math/rand"
+
+	"github.com/veandco/go-sdl2/sdl"
 )
 
 const (
@@ -51,11 +53,13 @@ func (cb *ChoiceBox) AddChoice(c string) {
 func (cb *ChoiceBox) Next() {
 	cb.curChoice, _ = ModularClamp(cb.curChoice+1, 0, len(cb.choices)-1)
 	cb.ChangeText(cb.choices[cb.curChoice])
+	PushEvent(NewUIEvent(EV_LIST_CYCLE, "+", cb))
 }
 
 func (cb *ChoiceBox) Prev() {
 	cb.curChoice, _ = ModularClamp(cb.curChoice-1, 0, len(cb.choices)-1)
 	cb.ChangeText(cb.choices[cb.curChoice])
+	PushEvent(NewUIEvent(EV_LIST_CYCLE, "-", cb))
 }
 
 func (cb ChoiceBox) GetChoice() int {
@@ -65,6 +69,24 @@ func (cb ChoiceBox) GetChoice() int {
 func (cb *ChoiceBox) RandomizeChoice() {
 	cb.curChoice = rand.Intn(len(cb.choices))
 	cb.ChangeText(cb.choices[cb.curChoice])
+}
+
+func (cb *ChoiceBox) HandleKeypress(key sdl.Keycode) {
+	if cb.direction == CHOICE_HORIZONTAL {
+		switch key {
+		case sdl.K_LEFT:
+			cb.Prev()
+		case sdl.K_RIGHT:
+			cb.Next()
+		}
+	} else {
+		switch key {
+		case sdl.K_UP:
+			cb.Prev()
+		case sdl.K_DOWN:
+			cb.Next()
+		}
+	}
 }
 
 func (cb ChoiceBox) Render(offset ...int) {

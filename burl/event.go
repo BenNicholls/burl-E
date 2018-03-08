@@ -4,13 +4,14 @@ type EventType int
 
 //event IDs used by burl internally
 const (
-	NONE            EventType = iota
-	UPDATE_UI_EVENT           //signifies some UI needs to be updated
-	CHANGE_STATE              //state change required --internal--
-	QUIT_EVENT                //shut it down! --internal--
-	ANIMATION_DONE
-	BUTTON_PRESS
-	MAX_EVENTS
+	EV_UPDATE_UI    EventType = iota //signifies some UI needs to be updated
+	EV_CHANGE_STATE                  //state change required --internal--
+	EV_QUIT                          //shut it down! --internal--
+	EV_TAB_FIELD                     //for when you tab around a UI. NOTE: should this be internal burl behaviour?
+	EV_ANIMATION_DONE
+	EV_BUTTON_PRESS
+	EV_LIST_CYCLE
+	EV_MAX_EVENTS
 )
 
 //flags set to true for events that are internal only
@@ -20,10 +21,17 @@ var internalEvent map[EventType]bool
 type Event struct {
 	ID      EventType
 	Message string
+	Caller  UIElem //for UI events, record what emitted the event.
 }
 
+//Creates a new generic event, with no UI caller.
 func NewEvent(id EventType, m string) *Event {
-	return &Event{id, m}
+	return &Event{id, m, nil}
+}
+
+//Creates a new UI event. Should be emitted internally by the UI system, but consumed externally.
+func NewUIEvent(id EventType, m string, call UIElem) *Event {
+	return &Event{id, m, call}
 }
 
 //EventStream is the queue of Events produced and consumed by the application. Burl may
@@ -48,11 +56,11 @@ func init() {
 	eventStream = make(chan *Event, 1000)
 	eventStreamInternal = make(chan *Event, 1000)
 	uiEvents = make(map[string]bool, 100)
-	internalEvent = make(map[EventType]bool, MAX_EVENTS)
+	internalEvent = make(map[EventType]bool, EV_MAX_EVENTS)
 
 	//set which events types are internal to burl
-	internalEvent[QUIT_EVENT] = true
-	internalEvent[CHANGE_STATE] = true
+	internalEvent[EV_QUIT] = true
+	internalEvent[EV_CHANGE_STATE] = true
 }
 
 //Emits an event into the relevant EventStream. If the stream is full we flush the whole buffer.
@@ -61,7 +69,7 @@ func init() {
 func PushEvent(e *Event) {
 	//special processing for certain IDs
 	switch e.ID {
-	case UPDATE_UI_EVENT:
+	case EV_UPDATE_UI:
 		if uiEvents[e.Message] {
 			return
 		}
@@ -98,7 +106,7 @@ func PopEvent() *Event {
 	if len(eventStream) > 0 {
 		e := <-eventStream
 
-		if e.ID == UPDATE_UI_EVENT {
+		if e.ID == EV_UPDATE_UI {
 			uiEvents[e.Message] = false
 		}
 

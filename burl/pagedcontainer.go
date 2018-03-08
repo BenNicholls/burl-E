@@ -1,5 +1,9 @@
 package burl
 
+import (
+	"github.com/veandco/go-sdl2/sdl"
+)
+
 //PagedContainer is a container for pages, with little tabs at the top. You can cycle through the pages
 //like you'd expect. Cool, right?
 type PagedContainer struct {
@@ -70,6 +74,13 @@ func (p *PagedContainer) setActivePage() {
 	}
 	p.redrawTitles = true
 	console.Clear()
+}
+
+func (p *PagedContainer) HandleKeypress(key sdl.Keycode) {
+	switch key {
+	case sdl.K_TAB:
+		p.NextPage()
+	}
 }
 
 func (p PagedContainer) Render(offset ...int) {
