@@ -9,13 +9,13 @@ func main() {
 
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	console, err := burl.InitConsole(80, 45, "../res/curses.bmp", "../res/DelveFont8x16.bmp", "UI Test")
+	console, err := burl.InitConsole(80, 45, "res/curses.bmp", "res/DelveFont8x16.bmp", "UI Test")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	console.ToggleChanges()
+	//console.ToggleChanges()
 
 	t := new(TestUI)
 	t.SetupUI()
@@ -28,22 +28,24 @@ type TestUI struct {
 	burl.BaseState
 	container *burl.Container
 	tiles     *burl.TileView
-	
+
 	yes bool
 }
 
 func (t *TestUI) SetupUI() {
-	t.container = burl.NewContainer(40, 20, 2, 2, 0, true)
+	t.container = burl.NewContainer(50, 20, 2, 2, 0, true)
 	t.container.SetTitle("")
-	
+
 	textbox := burl.NewTextbox(30, 20, 2, 2, 0, true, false, "")
 	textbox.ChangeText("Loremipsumdolorsitamet,consecteturadipiscingelit.Donecvitaenibhrisus. Quisque consectetur lacus eu velit viverra convallis. In at mattis orci. Suspendisse rhoncus lacinia elit ac ullamcorper. Donec id mattis velit, in condimentum massa. Nam non dui eu urna lacinia varius ut nec justo. Suspendisse consequat ornare neque, sit amet cursus enim volutpat in. Proin nibh ante, tempus in laoreet luctus, tempus in eros.")
 	textbox.SetTitle("YAY")
 	t.container.Add(textbox)
-	
-	t.tiles = burl.NewTileView(30, 20, 45, 1, 0, true)
+
+	t.tiles = burl.NewTileView(48, 15, 10, 1, 1, true)
+	t.tiles.CenterInConsole()
 	t.tiles.SetTitle("Whatever")
-	t.tiles.DrawCircle(15, 10, 2, burl.GLYPH_FACE1, 0xFFFFFFFF, 0xFF000000)
+	t.tiles.LoadImageFromXP("res/anomaly.xp")
+
 	t.yes = false
 }
 

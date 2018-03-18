@@ -4,3 +4,4 @@ debug
 log.txt
 *.pdn
 test/save.txt
+test/log.txt
