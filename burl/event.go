@@ -14,6 +14,14 @@ const (
 	EV_MAX_EVENTS
 )
 
+//number of custom events.
+var customEventNum int
+
+func RegisterCustomEvent() EventType {
+	customEventNum++
+	return EventType(int(EV_MAX_EVENTS) + customEventNum)
+}
+
 //flags set to true for events that are internal only
 var internalEvent map[EventType]bool
 
@@ -61,6 +69,7 @@ func init() {
 	//set which events types are internal to burl
 	internalEvent[EV_QUIT] = true
 	internalEvent[EV_CHANGE_STATE] = true
+	customEventNum = 0
 }
 
 //Emits an event into the relevant EventStream. If the stream is full we flush the whole buffer.

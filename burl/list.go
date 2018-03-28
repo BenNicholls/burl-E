@@ -145,6 +145,10 @@ func (l *List) Change(i int, item string) {
 	l.Calibrate()
 }
 
+func (l *List) ChangeEmptyText(text string) {
+	l.emptyElem = NewTextbox(l.width, CalcWrapHeight(text, l.width), 0, l.height/2-CalcWrapHeight(text, l.width)/2, l.z, false, true, text)
+}
+
 //Toggles highlighting of selected element.
 func (l *List) ToggleHighlight() {
 	l.Highlight = !l.Highlight
@@ -152,9 +156,9 @@ func (l *List) ToggleHighlight() {
 
 func (l *List) HandleKeypress(key sdl.Keycode) {
 	switch key {
-	case sdl.K_UP:
+	case sdl.K_UP, sdl.K_PAGEUP:
 		l.Prev()
-	case sdl.K_DOWN:
+	case sdl.K_DOWN, sdl.K_PAGEDOWN:
 		l.Next()
 	}
 }
