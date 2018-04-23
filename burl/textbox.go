@@ -25,6 +25,11 @@ func (t *Textbox) ChangeText(txt string) {
 	}
 }
 
+//Adds text to the contents of textbox.
+func (t *Textbox) AppendText(txt string) {
+	t.ChangeText(t.text + txt)
+}
+
 //LoremIpsum() fills the textbox with a paragraph of crazy latin. For testing!
 func (t *Textbox) LoremIpsum() {
 	t.ChangeText(loremipsum)
