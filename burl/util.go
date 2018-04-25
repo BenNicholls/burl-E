@@ -1,8 +1,11 @@
 package burl
 
-import "math/rand"
-import "strings"
-import "math"
+import (
+	"io/ioutil"
+	"math"
+	"math/rand"
+	"strings"
+)
 
 //Bounded defines objects that can report a bounding box of some kind.
 type Bounded interface {
@@ -208,6 +211,28 @@ func WrapText(str string, width int, maxlines ...int) (lines []string) {
 	if currentLine != "" {
 		currentLine = strings.TrimSpace(currentLine)
 		lines = append(lines, currentLine)
+	}
+
+	return
+}
+
+// GetFileList returns a list of all files in the provided directory.
+// If ext is provided, it only includes files with that extension.
+func GetFileList(dirPath, ext string) (files []string, err error) {
+	files = make([]string, 0)
+
+	dirContents, err := ioutil.ReadDir(dirPath)
+	if err != nil {
+		LogError(err.Error())
+	} else {
+		for i, file := range dirContents {
+			if !file.IsDir() {
+				if ext != "" && !strings.HasSuffix(dirContents[i].Name(), ext) {
+					continue
+				}
+				files = append(files, dirContents[i].Name())
+			}
+		}
 	}
 
 	return
