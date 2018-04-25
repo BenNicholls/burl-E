@@ -1,17 +1,27 @@
 package burl
 
-import "github.com/veandco/go-sdl2/sdl"
+//Takes r,g,b ints and creates a colour with alpha 255 in ARGB format.
+func MakeColour(r, g, b, a int) (colour uint32) {
+	colour = uint32((a % 255) << 24)
+	colour |= uint32(r%255) << 16
+	colour |= uint32(g%255) << 8
+	colour |= uint32(b % 255)
 
-//Takes r,g,b ints and creates a colour as defined by the pixelformat with alpha 255.
-//TODO: rgba version of this function? variatic function that can optionally take an alpha? Hmm.
-func MakeColour(r, g, b int) uint32 {
-	return sdl.MapRGBA(console.format, uint8(r), uint8(g), uint8(b), 0xFF)
+	return
 }
 
-//Changes alpha of a colour.
-func ChangeAlpha(colour uint32, alpha uint8) uint32 {
-	r, g, b := sdl.GetRGB(colour, console.format)
-	return sdl.MapRGBA(console.format, r, g, b, alpha)
+func MakeOpaqueColour(r, g, b int) uint32 {
+	return MakeColour(r, g, b, 255)
+}
+
+//Returns the RGBA components of an ARGB8888 formatted uint32 colour.
+func GetRGBA(colour uint32) (r, g, b, a uint8) {
+	b = uint8(colour & 0x000000FF)
+	g = uint8((colour >> 8) & 0x000000FF)
+	r = uint8((colour >> 16) & 0x000000FF)
+	a = uint8(colour >> 24)
+
+	return
 }
 
 const (

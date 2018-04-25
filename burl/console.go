@@ -3,6 +3,7 @@ package burl
 import "github.com/veandco/go-sdl2/sdl"
 import "fmt"
 import "errors"
+import "time"
 
 type Console struct {
 	window       *sdl.Window
@@ -10,17 +11,17 @@ type Console struct {
 	glyphs       *sdl.Texture
 	font         *sdl.Texture
 	canvasBuffer *sdl.Texture
-	format       *sdl.PixelFormat
 
 	width, height, tileSize int
 
-	canvas                []Cell
-	forceRedraw           bool
-	frameTime, ticks, fps uint32
-	frames                int
-	showFPS               bool
-	showChanges           bool
-	Ready                 bool //true when console is ready for drawing and stuff!
+	canvas       []Cell
+	forceRedraw  bool
+	frameTime    time.Time
+	fps, elapsed time.Duration
+	frames       int
+	showFPS      bool
+	showChanges  bool
+	Ready        bool //true when console is ready for drawing and stuff!
 
 	//store render colours so we don't have to set them for every renderer.Copy()
 	backDrawColour      uint32
@@ -98,13 +99,6 @@ func (c *Console) Setup(w, h int, glyphPath, fontPath, title string) (err error)
 		return errors.New("Failed to create window.")
 	}
 
-	//manually set pixelformat to ARGB (window defaults to RGB for some reason)
-	c.format, err = sdl.AllocFormat(uint(sdl.PIXELFORMAT_ARGB8888))
-	if err != nil {
-		LogError("CONSOLE: Failed to allocate pixelformat. sdl:" + fmt.Sprint(sdl.GetError()))
-		return errors.New("No pixelformat.")
-	}
-
 	c.renderer, err = sdl.CreateRenderer(c.window, -1, sdl.RENDERER_ACCELERATED)
 	if err != nil {
 		LogError("CONSOLE: Failed to create renderer. sdl:" + fmt.Sprint(sdl.GetError()))
@@ -127,8 +121,7 @@ func (c *Console) Setup(w, h int, glyphPath, fontPath, title string) (err error)
 	}
 
 	c.frames = 0
-	c.frameTime, c.ticks = 0, 0
-	c.fps = 17 //17ms = 60 FPS approx
+	c.SetFramerate(60)
 	c.showFPS = false
 	c.showChanges = false
 	c.Ready = true
@@ -214,7 +207,7 @@ func (c *Console) Render() {
 	//render fps counter
 	if c.showFPS && c.frames%(30) == 0 {
 		fpsString := fmt.Sprintf("%d fps", c.frames*1000/int(sdl.GetTicks()))
-		c.DrawText(0, 0, 10, fpsString, COL_WHITE, COL_BLACK, 0)
+		c.DrawText(0, 0, 100, fpsString, COL_WHITE, COL_BLACK, 0)
 	}
 
 	//render the scene!
@@ -250,11 +243,11 @@ func (c *Console) Render() {
 	c.forceRedraw = false
 
 	//framerate limiter, so the cpu doesn't implode
-	c.ticks = sdl.GetTicks() - c.frameTime
-	if c.ticks < c.fps {
-		sdl.Delay(c.fps - c.ticks)
+	c.elapsed = time.Since(c.frameTime)
+	if c.elapsed < c.fps {
+		time.Sleep(c.fps - c.elapsed)
 	}
-	c.frameTime = sdl.GetTicks()
+	c.frameTime = time.Now()
 	c.frames++
 }
 
@@ -263,11 +256,11 @@ func (c *Console) CopyToRenderer(mode drawmode, src, dst sdl.Rect, fore, back ui
 	//change backcolour if it is different from previous draw
 	if back != c.backDrawColour {
 		c.backDrawColour = back
-		c.renderer.SetDrawColor(sdl.GetRGBA(back, c.format))
+		c.renderer.SetDrawColor(GetRGBA(back))
 	}
 
 	if c.showChanges {
-		c.renderer.SetDrawColor(sdl.GetRGBA(MakeColour((c.frames*10)%255, ((c.frames+100)*10)%255, ((c.frames+200)*10)%255), c.format)) //Test Function
+		c.renderer.SetDrawColor(uint8((c.frames*10)%255), uint8(((c.frames+100)*10)%255), uint8(((c.frames+200)*10)%255), 0xFF) //Test Function
 	}
 
 	c.renderer.FillRect(&dst)
@@ -296,14 +289,14 @@ func (c *Console) CopyToRenderer(mode drawmode, src, dst sdl.Rect, fore, back ui
 }
 
 func (c *Console) SetTextureColour(tex *sdl.Texture, colour uint32) {
-	r, g, b, a := sdl.GetRGBA(colour, c.format)
+	r, g, b, a := GetRGBA(colour)
 	tex.SetColorMod(r, g, b)
 	tex.SetAlphaMod(a)
 }
 
 //Sets maximum framerate as enforced by the framerate limiter. NOTE: cannot go higher than 1000 fps.
 func (c *Console) SetFramerate(f int) {
-	c.fps = uint32(1000/f) + 1
+	c.fps = time.Duration(1000/float64(f+1)) * time.Millisecond
 }
 
 //Toggles rendering of the FPS meter.
@@ -321,7 +314,6 @@ func (c *Console) ForceRedraw() {
 
 //Deletes special graphics structures, closes files, etc. Defer this function!
 func (c *Console) Cleanup() {
-	c.format.Free()
 	c.glyphs.Destroy()
 	c.font.Destroy()
 	c.canvasBuffer.Destroy()
