@@ -43,22 +43,23 @@ func (t *Textbox) Render(offset ...int) {
 		for l, line := range t.lines {
 			lineOffset := 0
 
-			//blank out line, lets start fresh
-			for i := 0; i < t.width; i++ {
-				console.ChangeText(t.x+offX+i, t.y+offY+l, t.z+offZ, int(' '), int(' '))
-			}
-
-			if line == "" {
-				continue
-			}
-
 			//offset if centered
 			if t.centered {
 				lineOffset = (t.width*2 - len(line) + 1) / 2
+				//blank out area before text
+				for i := 0; i < lineOffset/2; i++ {
+					console.ChangeText(t.x+offX+i, t.y+offY+l, t.z+offZ, int(' '), int(' '))
+				}
 			}
 
-			//print text
-			console.DrawText(offX+t.x+lineOffset/2, offY+t.y+l, offZ+t.z, line, COL_WHITE, COL_BLACK, lineOffset%2)
+			if line != "" {
+				console.DrawText(offX+t.x+lineOffset/2, offY+t.y+l, offZ+t.z, line, COL_WHITE, COL_BLACK, lineOffset%2)
+			}
+
+			//blank out area after text
+			for i := lineOffset + len(line)/2 + 1; i < t.width; i++ {
+				console.ChangeText(t.x+offX+i, t.y+offY+l, t.z+offZ, int(' '), int(' '))
+			}
 		}
 
 		//blank out empty lines at bottom
