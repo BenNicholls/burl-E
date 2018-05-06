@@ -2,10 +2,10 @@ package burl
 
 //Takes r,g,b ints and creates a colour with alpha 255 in ARGB format.
 func MakeColour(r, g, b, a int) (colour uint32) {
-	colour = uint32((a % 255) << 24)
-	colour |= uint32(r%255) << 16
-	colour |= uint32(g%255) << 8
-	colour |= uint32(b % 255)
+	colour = uint32((a % 256) << 24)
+	colour |= uint32(r%256) << 16
+	colour |= uint32(g%256) << 8
+	colour |= uint32(b % 256)
 
 	return
 }
