@@ -187,7 +187,7 @@ func (c *Console) LoadTexture(path string) (*sdl.Texture, error) {
 	if err != nil {
 		return nil, errors.New("Failed to load image: " + fmt.Sprint(sdl.GetError()))
 	}
-	image.SetColorKey(1, COL_FUSCHIA)
+	image.SetColorKey(true, COL_FUSCHIA)
 	texture, err := c.renderer.CreateTextureFromSurface(image)
 	if err != nil {
 		return nil, errors.New("Failed to create texture: " + fmt.Sprint(sdl.GetError()))
