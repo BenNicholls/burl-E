@@ -21,6 +21,7 @@ type UIElem interface {
 	SetTabID(id int)
 	TabID() int
 	HandleKeypress(key sdl.Keycode)
+	SetHint(hint string)
 }
 
 type UIElement struct {
@@ -28,6 +29,7 @@ type UIElement struct {
 	x, y, z       int
 	bordered      bool
 	title         string
+	hint          string
 	visible       bool
 	focused       bool
 	tabID         int //for to tab between elements in a container
@@ -35,8 +37,17 @@ type UIElement struct {
 	anims []Animator
 }
 
-func NewUIElement(width, height, x, y, z int, bord bool) UIElement {
-	return UIElement{width, height, x, y, z, bord, "", true, false, 0, make([]Animator, 0, 20)}
+func NewUIElement(w, h, x, y, z int, bord bool) UIElement {
+	return UIElement{
+		width:    w,
+		height:   h,
+		x:        x,
+		y:        y,
+		z:        z,
+		bordered: bord,
+		visible:  true,
+		anims:    make([]Animator, 0, 20),
+	}
 }
 
 //basic render function for all elements.
@@ -45,7 +56,7 @@ func (u *UIElement) Render(offset ...int) {
 		offX, offY, offZ := processOffset(offset)
 
 		if u.bordered {
-			console.DrawBorder(u.x+offX, u.y+offY, u.z+offZ, u.width, u.height, u.title, u.focused)
+			console.DrawBorder(u.x+offX, u.y+offY, u.z+offZ, u.width, u.height, u.title, u.hint, u.focused)
 		}
 
 		for i, _ := range u.anims {
@@ -69,6 +80,10 @@ func (u UIElement) Pos() (int, int, int) {
 
 func (u *UIElement) SetTitle(txt string) {
 	u.title = txt
+}
+
+func (u *UIElement) SetHint(txt string) {
+	u.hint = txt
 }
 
 func (u *UIElement) ToggleVisible() {

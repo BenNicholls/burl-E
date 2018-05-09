@@ -74,7 +74,6 @@ func (c *Cell) SetText(char1, char2 int, fore, back uint32, z int) {
 		c.BackColour = back
 		c.Z = z
 		c.Dirty = true
-		c.Border = false
 	}
 }
 
@@ -412,7 +411,8 @@ func (c *Console) ChangeCell(x, y, z, glyph int, fore, back uint32) {
 //Draws a string to the console in text mode. CharNum determines which half of the cell we
 //start in. See ChageChar() for details.
 func (c *Console) DrawText(x, y, z int, txt string, fore, back uint32, charNum int) {
-	for i, char := range txt {
+	i := 0 //can't use the index from the range loop since it it counting bytes, not code-points
+	for _, char := range txt {
 		if CheckBounds(x+(i+charNum)/2, y, c.width, c.height) {
 			c.ChangeChar(x+(i+charNum)/2, y, z, int(char), (i+charNum)%2)
 			c.ChangeColours(x+(i+charNum)/2, y, z, fore, back)
@@ -421,6 +421,7 @@ func (c *Console) DrawText(x, y, z int, txt string, fore, back uint32, charNum i
 				c.ChangeChar(x+(i+charNum)/2, y, z, 32, 1)
 			}
 		}
+		i += 1
 	}
 }
 
@@ -430,7 +431,7 @@ func (c *Console) DrawText(x, y, z int, txt string, fore, back uint32, charNum i
 //Borders work by setting a flag on the cells that need to be borders. At render time, any
 //borders with a dirty flag are assigned a border glyph based on the state of their neighbours:
 //if the neighnouring cells are on the same z level and also borders, they will connect.
-func (c *Console) DrawBorder(x, y, z, w, h int, title string, focused bool) {
+func (c *Console) DrawBorder(x, y, z, w, h int, title, hint string, focused bool) {
 	//set border colour.
 	bc := COL_PURPLE
 	if !focused {
@@ -450,6 +451,18 @@ func (c *Console) DrawBorder(x, y, z, w, h int, title string, focused bool) {
 	//Write centered title.
 	if len(title) < w && title != "" {
 		c.DrawText(x+(w/2-len(title)/4-1), y-1, z+1, title, COL_WHITE, COL_BLACK, 0)
+	}
+
+	//Write right-justified hint text
+	if len(hint) < 2*w && hint != "" {
+		decoratedHint := TEXT_BORDER_DECO_LEFT + hint + TEXT_BORDER_DECO_RIGHT
+		offset := w - len(hint)/2 - 1
+		if len(hint)%2 == 1 {
+			decoratedHint = TEXT_BORDER_LR + decoratedHint
+			offset -= 1
+		}
+
+		c.DrawText(x+offset, y+h, z, decoratedHint, bc, COL_BLACK, 0)
 	}
 }
 
