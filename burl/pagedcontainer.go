@@ -34,11 +34,15 @@ func (p *PagedContainer) AddPage(title string) *Container {
 	for _, e := range p.pages {
 		offX += e.title.width + 1
 	}
-	titleBox := NewTextbox(len(title)/2+2, 1, offX, 1, 1, false, true, title)
+	paddedTitle := title
+	if len(title)%2 == 1 {
+		paddedTitle = paddedTitle + " "
+	}
+	titleBox := NewTextbox(len(paddedTitle)/2, 1, offX, 1, 2, false, false, paddedTitle)
 
 	newPage := new(Page)
 	newPage.title = titleBox
-	newPage.page = NewContainer(p.width-2, p.height-4, 1, 3, 1, true)
+	newPage.page = NewContainer(p.width, p.height-3, 0, 3, 0, true)
 	p.pages = append(p.pages, newPage)
 	p.setActivePage()
 
@@ -51,6 +55,10 @@ func (p PagedContainer) GetPageDims() (int, int) {
 
 func (p PagedContainer) CurrentIndex() int {
 	return p.curPage
+}
+
+func (p PagedContainer) CurrentPage() *Container {
+	return p.pages[p.curPage].page
 }
 
 func (p *PagedContainer) NextPage() {
@@ -104,7 +112,13 @@ func (p PagedContainer) Render(offset ...int) {
 					page.title.Render(p.x+offX, p.y+offY, p.z+offZ)
 					if i == p.curPage {
 						//remove border below title of selected page
-						console.Clear(p.x+offX+page.title.x, p.y+offY+page.title.y+1, page.title.width, 1)
+						console.Clear(p.x+offX+page.title.x-1, p.y+offY+page.title.y+1, page.title.width+2, 1)
+						if i == 0 {
+							console.Clear(p.x+offX+page.title.x-2, p.y+offY+page.title.y+1, 1, 1)
+							console.ChangeCell(p.x+offX+page.title.x-2, p.y+offY+page.title.y+1, p.z+offZ, GLYPH_BORDER_UDR, console.BorderColour(p.IsFocused()), COL_BLACK)
+						}
+						console.ChangeCell(p.x+offX+page.title.x-1, p.y+offY+page.title.y+1, p.z+offZ, GLYPH_BORDER_UL, console.BorderColour(p.IsFocused()), COL_BLACK)
+						console.ChangeCell(p.x+offX+page.title.x+page.title.width, p.y+offY+page.title.y+1, p.z+offZ, GLYPH_BORDER_UR, console.BorderColour(p.IsFocused()), COL_BLACK)
 					}
 				}
 				p.redrawTitles = false

@@ -433,10 +433,8 @@ func (c *Console) DrawText(x, y, z int, txt string, fore, back uint32, charNum i
 //if the neighnouring cells are on the same z level and also borders, they will connect.
 func (c *Console) DrawBorder(x, y, z, w, h int, title, hint string, focused bool) {
 	//set border colour.
-	bc := COL_PURPLE
-	if !focused {
-		bc = COL_LIGHTGREY
-	}
+	bc := c.BorderColour(focused)
+
 	//Top and bottom.
 	for i := -1; i <= w; i++ {
 		c.SetCellBorder(x+i, y-1, z, bc)
@@ -464,6 +462,13 @@ func (c *Console) DrawBorder(x, y, z, w, h int, title, hint string, focused bool
 
 		c.DrawText(x+offset, y+h, z, decoratedHint, bc, COL_BLACK, 0)
 	}
+}
+
+func (c Console) BorderColour(focused bool) uint32 {
+	if focused {
+		return COL_PURPLE
+	}
+	return COL_LIGHTGREY
 }
 
 //Sets the cell at (x, y) as a border cell, to be drawn out later when the frame is rendered.
