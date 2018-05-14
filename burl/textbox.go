@@ -45,10 +45,10 @@ func (t *Textbox) Render(offset ...int) {
 
 			//offset if centered
 			if t.centered {
-				lineOffset = (t.width*2 - len(line) + 1) / 2
+				lineOffset = (t.width*2 - len(line)) / 2
 				//blank out area before text
-				for i := 0; i < lineOffset/2; i++ {
-					console.ChangeText(t.x+offX+i, t.y+offY+l, t.z+offZ, int(' '), int(' '))
+				for i := 0; i < lineOffset; i++ {
+					console.ChangeChar(t.x+offX+i/2, t.y+offY+l, t.z+offZ, int(' '), i%2)
 				}
 			}
 
@@ -57,8 +57,8 @@ func (t *Textbox) Render(offset ...int) {
 			}
 
 			//blank out area after text
-			for i := lineOffset + len(line)/2 + 1; i < t.width; i++ {
-				console.ChangeText(t.x+offX+i, t.y+offY+l, t.z+offZ, int(' '), int(' '))
+			for i := lineOffset + len(line); i < t.width*2; i++ {
+				console.ChangeChar(t.x+offX+i/2, t.y+offY+l, t.z+offZ, int(' '), i%2)
 			}
 		}
 
