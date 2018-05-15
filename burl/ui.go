@@ -87,8 +87,10 @@ func (u *UIElement) SetHint(txt string) {
 }
 
 func (u *UIElement) ToggleVisible() {
+	if (u.visible) {
+		console.Clear()
+	}
 	u.visible = !u.visible
-	console.Clear()
 }
 
 func (u *UIElement) SetVisibility(v bool) {

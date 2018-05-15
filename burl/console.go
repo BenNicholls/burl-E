@@ -119,10 +119,7 @@ func (c *Console) Setup(w, h int, glyphPath, fontPath, title string) (err error)
 		return errors.New("Could not load fonts.")
 	}
 
-	c.frames = 0
 	c.SetFramerate(60)
-	c.showFPS = false
-	c.showChanges = false
 	c.Ready = true
 
 	return nil
@@ -552,6 +549,16 @@ func (c *Console) Clear(rect ...int) {
 		if CheckBounds(x, y, c.width, c.height) {
 			c.canvas[y*c.width+x].Clear()
 		}
+	}
+}
+
+//Fill fills a rect of the console with the provided glyph visuals, at the
+//provided z level.
+func (c *Console) Fill(x, y, z, w, h, g int, fore, back uint32) {
+	for i := 0; i < w*h; i++ {
+		ix := x + i%w
+		iy := y + i/w
+		c.ChangeCell(ix, iy, z, g, fore, back)	
 	}
 }
 

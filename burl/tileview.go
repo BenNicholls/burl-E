@@ -16,10 +16,6 @@ func NewTileView(w, h, x, y, z int, bord bool) *TileView {
 	return tv
 }
 
-func (tv *TileView) SetTitle(s string) {
-	tv.title = s
-}
-
 //Draws a glyph to the TileView.
 func (tv *TileView) Draw(x, y, glyph int, f, b uint32) {
 	if CheckBounds(x, y, tv.width, tv.height) {

@@ -17,7 +17,7 @@ type List struct {
 
 func NewList(w, h, x, y, z int, bord bool, empty string) *List {
 	c := NewContainer(w, h, x, y, z, bord)
-	return &List{*c, 0, true, 0, NewTextbox(w, CalcWrapHeight(empty, w), 0, h/2-CalcWrapHeight(empty, w)/2, z, false, true, empty), 0}
+	return &List{*c, 0, true, 0, NewTextbox(w, CalcWrapHeight(empty, w), 0, h/2-CalcWrapHeight(empty, w)/2, 0, false, true, empty), 0}
 }
 
 func (l *List) Add(elems ...UIElem) {
