@@ -68,19 +68,37 @@ func GameLoop() error {
 				}
 			case *sdl.KeyboardEvent:
 				if t.Type == sdl.KEYDOWN {
-					gameState.HandleKeypress(t.Keysym.Sym)
+					if d := gameState.GetDialog(); d == nil {
+						gameState.HandleKeypress(t.Keysym.Sym)							
+					} else {
+						d.HandleKeypress(t.Keysym.Sym)
+					}
 				}
 			}
 		}
 
-		gameState.Update()
+		if d := gameState.GetDialog(); d == nil {
+			gameState.Update()
+		} else {
+			d.Update()
+			if d.Done() {
+				gameState.CloseDialog()
+			}			
+		}
 
 		//serve events to application for handling
 		for e := PopEvent(); e != nil; e = PopEvent() {
-			gameState.HandleEvent(e)
+			if d := gameState.GetDialog(); d == nil {
+				gameState.HandleEvent(e)
+			} else {
+				d.HandleEvent(e)
+			}
 		}
 
 		//TODO: get console.Render() running in another thread (i think this is a good idea... maybe?)
+		if d := gameState.GetDialog(); d != nil {
+			d.Render()
+		}
 		gameState.Render()
 		console.Render() //should this come after the burl events are processed??
 
@@ -111,12 +129,21 @@ type State interface {
 	HandleEvent(*Event) //called for each event in the stream, every frame
 	Render()
 	GetTick() int
+	GetDialog() Dialog
+	CloseDialog()
 	Shutdown() //called on program exit
+}
+
+//Dialogs are states that can report when they are done.
+type Dialog interface {
+	State
+	Done() bool
 }
 
 //base state object, compose states around this if you want
 type BaseState struct {
 	Tick int //update ticks since init
+	dialog Dialog
 }
 
 func (b BaseState) GetTick() int {
@@ -141,4 +168,16 @@ func (b BaseState) Shutdown() {
 
 func (b BaseState) HandleEvent(e *Event) {
 
+}
+
+func (b *BaseState) OpenDialog(d Dialog) {
+	b.dialog = d
+}
+
+func (b BaseState) GetDialog() Dialog {
+	return b.dialog
+}
+
+func (b *BaseState) CloseDialog() {
+	b.dialog = nil
 }
