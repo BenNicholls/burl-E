@@ -25,21 +25,20 @@ func main() {
 }
 
 type TestUI struct {
-	burl.BaseState
-	container *burl.Container
+	burl.StatePrototype
 	tiles     *burl.TileView
 
 	yes bool
 }
 
 func (t *TestUI) SetupUI() {
-	t.container = burl.NewContainer(50, 20, 2, 2, 0, true)
-	t.container.SetTitle("")
+	t.Window = burl.NewContainer(50, 20, 2, 2, 0, true)
+	t.Window.SetTitle("")
 
 	textbox := burl.NewTextbox(30, 20, 2, 2, 0, true, false, "")
 	textbox.ChangeText("Loremipsumdolorsitamet,consecteturadipiscingelit.Donecvitaenibhrisus. Quisque consectetur lacus eu velit viverra convallis. In at mattis orci. Suspendisse rhoncus lacinia elit ac ullamcorper. Donec id mattis velit, in condimentum massa. Nam non dui eu urna lacinia varius ut nec justo. Suspendisse consequat ornare neque, sit amet cursus enim volutpat in. Proin nibh ante, tempus in laoreet luctus, tempus in eros.")
 	textbox.SetTitle("YAY")
-	t.container.Add(textbox)
+	t.Window.Add(textbox)
 
 	t.tiles = burl.NewTileView(48, 15, 10, 1, 1, true)
 	t.tiles.CenterInConsole()
@@ -51,7 +50,6 @@ func (t *TestUI) SetupUI() {
 
 func (t *TestUI) Render() {
 	if !t.yes {
-		t.container.Render()
 		t.tiles.Render()
 		t.yes = true
 	}

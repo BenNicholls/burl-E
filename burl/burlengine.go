@@ -98,8 +98,15 @@ func GameLoop() error {
 		//TODO: get console.Render() running in another thread (i think this is a good idea... maybe?)
 		if d := gameState.GetDialog(); d != nil {
 			d.Render()
+			if w := d.GetWindow(); w != nil {
+				w.Render()
+			}
 		}
 		gameState.Render()
+		if w := gameState.GetWindow(); w != nil {
+			w.Render()
+		}
+
 		console.Render() //should this come after the burl events are processed??
 
 		//process burl-handled events
@@ -129,6 +136,7 @@ type State interface {
 	HandleEvent(*Event) //called for each event in the stream, every frame
 	Render()
 	GetTick() int
+	GetWindow() *Container
 	GetDialog() Dialog
 	CloseDialog()
 	Shutdown() //called on program exit
@@ -141,43 +149,61 @@ type Dialog interface {
 }
 
 //base state object, compose states around this if you want
-type BaseState struct {
+type StatePrototype struct {
 	Tick int //update ticks since init
+	Window *Container
 	dialog Dialog
 }
 
-func (b BaseState) GetTick() int {
+func (b StatePrototype) GetTick() int {
 	return b.Tick
 }
 
-func (b BaseState) HandleKeypress(key sdl.Keycode) {
+func (b StatePrototype) HandleKeypress(key sdl.Keycode) {
 
 }
 
-func (b *BaseState) Update() {
+func (b *StatePrototype) Update() {
 	b.Tick++
 }
 
-func (b BaseState) Render() {
+func (b StatePrototype) Render() {
 
 }
 
-func (b BaseState) Shutdown() {
+func (b StatePrototype) Shutdown() {
 
 }
 
-func (b BaseState) HandleEvent(e *Event) {
+func (b StatePrototype) HandleEvent(e *Event) {
 
 }
 
-func (b *BaseState) OpenDialog(d Dialog) {
+func (b *StatePrototype) InitWindow(bord bool) {
+	w, h := console.Dims()
+	x, y := 0, 0
+	if bord {
+		w, h, x, y = w-2, h-2, 1, 1
+	}
+	b.Window = NewContainer(w, h, x, y, 0, true)
+}
+
+func (b StatePrototype) GetWindow() *Container {
+	return b.Window
+}
+
+func (b *StatePrototype) OpenDialog(d Dialog) {
+	if b.dialog != nil {
+		b.CloseDialog()
+	}
 	b.dialog = d
 }
 
-func (b BaseState) GetDialog() Dialog {
+func (b StatePrototype) GetDialog() Dialog {
 	return b.dialog
 }
 
-func (b *BaseState) CloseDialog() {
+func (b *StatePrototype) CloseDialog() {
+	b.dialog.GetWindow().ToggleVisible()
 	b.dialog = nil
 }
