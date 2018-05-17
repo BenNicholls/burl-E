@@ -36,10 +36,8 @@ func (t *Textbox) LoremIpsum() {
 }
 
 //Render function optionally takes an offset (for containering), 2 or 3 ints.
-func (t *Textbox) Render(offset ...int) {
+func (t *Textbox) Render() {
 	if t.visible {
-		offX, offY, offZ := processOffset(offset)
-
 		for l, line := range t.lines {
 			lineOffset := 0
 
@@ -48,28 +46,28 @@ func (t *Textbox) Render(offset ...int) {
 				lineOffset = (t.width*2 - len(line)) / 2
 				//blank out area before text
 				for i := 0; i < lineOffset; i++ {
-					console.ChangeChar(t.x+offX+i/2, t.y+offY+l, t.z+offZ, int(' '), i%2)
+					console.ChangeChar(t.x+i/2, t.y+l, t.z, int(' '), i%2)
 				}
 			}
 
 			if line != "" {
-				console.DrawText(offX+t.x+lineOffset/2, offY+t.y+l, offZ+t.z, line, COL_WHITE, COL_BLACK, lineOffset%2)
+				console.DrawText(t.x+lineOffset/2, t.y+l, t.z, line, COL_WHITE, COL_BLACK, lineOffset%2)
 			}
 
 			//blank out area after text
 			for i := lineOffset + len(line); i < t.width*2; i++ {
-				console.ChangeChar(t.x+offX+i/2, t.y+offY+l, t.z+offZ, int(' '), i%2)
+				console.ChangeChar(t.x+i/2, t.y+l, t.z, int(' '), i%2)
 			}
 		}
 
 		//blank out empty lines at bottom
 		for y := len(t.lines); y < t.height; y++ {
 			for x := 0; x < t.width; x++ {
-				console.ChangeText(offX+t.x+x, offY+t.y+y, offZ+t.z, int(' '), int(' '))
+				console.ChangeText(t.x+x, t.y+y, t.z, int(' '), int(' '))
 			}
 		}
 
-		t.UIElement.Render(offX, offY, offZ)
+		t.UIElement.Render()
 	}
 }
 

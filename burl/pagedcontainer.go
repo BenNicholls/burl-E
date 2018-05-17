@@ -28,6 +28,14 @@ func NewPagedContainer(w, h, x, y, z int, bord bool) *PagedContainer {
 	return p
 }
 
+func (p *PagedContainer) Move(dx, dy, dz int) {
+	p.UIElement.Move(dx, dy, dz)
+	for i := range p.pages {
+		p.pages[i].page.Move(dx, dy, dz)
+		p.pages[i].title.Move(dx, dy, dz)
+	}
+}
+
 //Adds a page to the PagedContainer, returning a pointer to the page itself
 func (p *PagedContainer) AddPage(title string) *Container {
 	offX := 1
@@ -38,11 +46,11 @@ func (p *PagedContainer) AddPage(title string) *Container {
 	if len(title)%2 == 1 {
 		paddedTitle = paddedTitle + " "
 	}
-	titleBox := NewTextbox(len(paddedTitle)/2, 1, offX, 1, 2, false, false, paddedTitle)
+	titleBox := NewTextbox(len(paddedTitle)/2, 1, p.x+offX, p.y+1, p.z+2, false, false, paddedTitle)
 
 	newPage := new(Page)
 	newPage.title = titleBox
-	newPage.page = NewContainer(p.width, p.height-3, 0, 3, 0, true)
+	newPage.page = NewContainer(p.width, p.height-3, p.x, p.y+3, p.z, true)
 	p.pages = append(p.pages, newPage)
 	p.setActivePage()
 
@@ -91,34 +99,30 @@ func (p *PagedContainer) HandleKeypress(key sdl.Keycode) {
 	}
 }
 
-func (p PagedContainer) Render(offset ...int) {
+func (p PagedContainer) Render() {
 	if p.visible {
-		offX, offY, offZ := processOffset(offset)
-
-		p.UIElement.Render(offX, offY, offZ)
+		p.UIElement.Render()
 
 		if len(p.pages) > 0 {
 
-			p.pages[p.curPage].page.Render(p.x+offX, p.y+offY, p.z+offZ)
+			p.pages[p.curPage].page.Render()
 
 			if p.redrawTitles {
 				//draw over page title area
-				for i := 0; i < p.width*2; i++ {
-					console.ChangeCell(p.x+offX+(i%p.width), p.y+offY+(i/p.width), p.z+offZ, GLYPH_NONE, COL_BLACK, COL_BLACK)
-				}
+				console.Fill(p.x, p.y, p.z, p.width, 2, GLYPH_NONE, COL_BLACK, COL_BLACK)
 
 				//draw titles
 				for i, page := range p.pages {
-					page.title.Render(p.x+offX, p.y+offY, p.z+offZ)
+					page.title.Render()
 					if i == p.curPage {
 						//remove border below title of selected page
-						console.Clear(p.x+offX+page.title.x-1, p.y+offY+page.title.y+1, page.title.width+2, 1)
+						console.Clear(page.title.x-1, page.title.y+1, page.title.width+2, 1)
 						if i == 0 {
-							console.Clear(p.x+offX+page.title.x-2, p.y+offY+page.title.y+1, 1, 1)
-							console.ChangeCell(p.x+offX+page.title.x-2, p.y+offY+page.title.y+1, p.z+offZ, GLYPH_BORDER_UDR, console.BorderColour(p.IsFocused()), COL_BLACK)
+							console.Clear(page.title.x-2, page.title.y+1, 1, 1)
+							console.ChangeCell(page.title.x-2, page.title.y+1, p.z, GLYPH_BORDER_UDR, console.BorderColour(p.IsFocused()), COL_BLACK)
 						}
-						console.ChangeCell(p.x+offX+page.title.x-1, p.y+offY+page.title.y+1, p.z+offZ, GLYPH_BORDER_UL, console.BorderColour(p.IsFocused()), COL_BLACK)
-						console.ChangeCell(p.x+offX+page.title.x+page.title.width, p.y+offY+page.title.y+1, p.z+offZ, GLYPH_BORDER_UR, console.BorderColour(p.IsFocused()), COL_BLACK)
+						console.ChangeCell(page.title.x-1, page.title.y+1, p.z, GLYPH_BORDER_UL, console.BorderColour(p.IsFocused()), COL_BLACK)
+						console.ChangeCell(page.title.x+page.title.width, page.title.y+1, p.z, GLYPH_BORDER_UR, console.BorderColour(p.IsFocused()), COL_BLACK)
 					}
 				}
 				p.redrawTitles = false

@@ -15,8 +15,26 @@ func NewContainer(w, h, x, y, z int, bord bool) *Container {
 //Adds any number of UIElem to the container.
 func (c *Container) Add(elems ...UIElem) {
 	for _, e := range elems {
-		c.Elements = append(c.Elements, e)
+		e.Move(c.x, c.y, c.z)
+		c.Elements = append(c.Elements, e)		
 	}
+}
+
+func (c *Container) Move(dx, dy, dz int) {
+	c.UIElement.Move(dx, dy, dz)
+	for i := range c.Elements {
+		c.Elements[i].Move(dx, dy, dz)
+	}
+}
+
+func (c *Container) MoveTo(x, y, z int) {
+	for i := range c.Elements {
+		c.Elements[i].Move(x - c.x, y - c.y, z - c.z)
+	}
+
+	c.x = x
+	c.y = y
+	c.z = z
 }
 
 //Deletes all UIElem from the container.
@@ -90,24 +108,22 @@ func (c *Container) FindPrevTab(e UIElem) UIElem {
 }
 
 //Offets (x,y,z, all optional) are passed through to the nested elements.
-func (c *Container) Render(offset ...int) {
+func (c *Container) Render() {
 	if c.visible {
-		offX, offY, offZ := processOffset(offset)
-
 		if c.redraw {
-			console.Clear(c.x+offX, c.y+offY, c.width, c.height)
+			console.Clear(c.x, c.y, c.width, c.height)
 			c.redraw = false
 		}
 
 		//draw over container, so we don't appear transparent.
 		for i := 0; i < c.width*c.height; i++ {
-			console.ChangeColours(c.x+offX+(i%c.width), c.y+offY+(i/c.width), c.z+offZ, COL_BLACK, COL_BLACK)
+			console.ChangeColours(c.x+(i%c.width), c.y+(i/c.width), c.z, COL_BLACK, COL_BLACK)
 		}
 
 		for i := 0; i < len(c.Elements); i++ {
-			c.Elements[i].Render(c.x+offX, c.y+offY, c.z+offZ)
+			c.Elements[i].Render()
 		}
 
-		c.UIElement.Render(offX, offY, offZ)
+		c.UIElement.Render()
 	}
 }

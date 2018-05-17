@@ -14,7 +14,7 @@ type Inputbox struct {
 }
 
 func NewInputbox(w, h, x, y, z int, bord bool) *Inputbox {
-	ib := &Inputbox{*NewTextbox(w, h, x, y, z, bord, false, ""), NewBlinkCharAnimation(0, 0, 20)}
+	ib := &Inputbox{*NewTextbox(w, h, x, y, z, bord, false, ""), NewBlinkCharAnimation(0, 0, 0, 20)}
 	return ib
 }
 
@@ -71,12 +71,12 @@ func (ib *Inputbox) HandleKeypress(key sdl.Keycode) {
 }
 
 //TODO: Fix cursor for if inputbox has centered text. For now, just don't do that (looks silly anyways)
-func (ib *Inputbox) Render(offset ...int) {
+func (ib *Inputbox) Render() {
 	if ib.visible {
-		offX, offY, offZ := processOffset(offset)
-
-		ib.Textbox.Render(offX, offY, offZ)
+		ib.Textbox.Render()
 		ib.cursorAnimation.Tick()
-		ib.cursorAnimation.Render(len(ib.text)%2, ib.x+len(ib.text)/2+offX, ib.y+offY, ib.z+offZ)
+		ib.cursorAnimation.x = len(ib.text)/2
+		ib.cursorAnimation.SetCharNum(len(ib.text)%2)
+		ib.cursorAnimation.Render(ib.x, ib.y, ib.z)
 	}
 }

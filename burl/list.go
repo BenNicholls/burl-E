@@ -20,6 +20,11 @@ func NewList(w, h, x, y, z int, bord bool, empty string) *List {
 	return &List{*c, 0, true, 0, NewTextbox(w, CalcWrapHeight(empty, w), 0, h/2-CalcWrapHeight(empty, w)/2, 0, false, true, empty), 0}
 }
 
+func (l *List) Move(dx, dy, dz int) {
+	l.Container.Move(dx, dy, dz)
+	l.emptyElem.Move(dx, dy, dz)
+}
+
 func (l *List) Add(elems ...UIElem) {
 	l.Container.Add(elems...)
 	l.Calibrate()
@@ -67,33 +72,46 @@ func (l *List) Prev() {
 }
 
 func (l *List) ScrollUp() {
-	if l.scrollOffset != 0 {
+	if l.scrollOffset > 0 {
 		l.scrollOffset = l.scrollOffset - 1
+		l.Calibrate()
 	}
 }
 
 func (l *List) ScrollDown() {
 	if l.scrollOffset < l.contentHeight-l.height {
 		l.scrollOffset = l.scrollOffset + 1
+		l.Calibrate()
 	}
 }
 
 func (l *List) ScrollToBottom() {
 	l.scrollOffset = l.contentHeight - l.height
+	l.Calibrate()
 }
 
 func (l *List) ScrollToTop() {
 	l.scrollOffset = 0
+	l.Calibrate()
 }
 
 //Scrolls the list to ensure the currently selected element is in view. Called by Prev() and Next()
 func (l *List) ScrollToSelection() {
+	//no scrolling if content fits in the list
+	if l.contentHeight <= l.height {
+		l.scrollOffset = 0
+		return
+	}
+
 	_, y, _ := l.Elements[l.selected].Pos()
 	_, h := l.Elements[l.selected].Dims()
-	if y < l.scrollOffset {
-		l.scrollOffset = y
-	} else if l.scrollOffset+l.height < y+h {
-		l.scrollOffset = y - l.height + h
+	_, fy, _ := l.Elements[0].Pos()
+	if y < l.y {
+		l.scrollOffset = y - fy
+		l.Calibrate()
+	} else if y+h > l.y+l.height {
+		l.scrollOffset = y - fy + h - l.height
+		l.Calibrate()
 	}
 }
 
@@ -105,8 +123,7 @@ func (l *List) Append(items ...string) {
 
 	for _, i := range items {
 		h := CalcWrapHeight(i, l.width)
-		l.Add(NewTextbox(l.width, h, 0, l.contentHeight, 0, false, false, i))
-		l.contentHeight += h
+		l.Add(NewTextbox(l.width, h, l.x, l.y, l.z, false, false, i))
 	}
 	l.Calibrate()
 }
@@ -132,7 +149,7 @@ func (l *List) Calibrate() {
 	l.contentHeight = 0
 	h := 0
 	for i := range l.Elements {
-		l.Elements[i].MoveTo(0, l.contentHeight, 0)
+		l.Elements[i].MoveTo(l.x, l.contentHeight+l.y-l.scrollOffset, l.z)
 		_, h = l.Elements[i].Dims()
 		l.contentHeight += h
 	}
@@ -164,23 +181,21 @@ func (l *List) HandleKeypress(key sdl.Keycode) {
 }
 
 //Currently renders large items (h > 1) outside of list boundaries. TODO: think of way to prune these down.
-func (l *List) Render(offset ...int) {
+func (l *List) Render() {
 	if l.visible {
-		offX, offY, offZ := processOffset(offset)
-
 		if l.redraw {
-			console.Clear(l.x+offX, l.y+offY, l.width, l.height)
+			console.Clear(l.x, l.y, l.width, l.height)
 			l.redraw = false
 		}
 
 		if len(l.Elements) <= 0 {
-			l.emptyElem.Render(l.x+offX, l.y+offY, l.z+offZ)
+			l.emptyElem.Render()
 		} else {
 			for _, e := range l.Elements {
 				_, y, _ := e.Pos()
 				_, h := e.Dims()
-				if y < l.scrollOffset+l.height && y+h > l.scrollOffset {
-					e.Render(l.x+offX, l.y+offY-l.scrollOffset, l.z+offZ)
+				if y < l.y+l.height && y+h > l.y {
+					e.Render()
 				}
 			}
 
@@ -189,17 +204,19 @@ func (l *List) Render(offset ...int) {
 				_, y, _ := l.Elements[l.selected].Pos()
 				for j := 0; j < h; j++ {
 					for i := 0; i < w; i++ {
-						console.Invert(offX+l.x+i, offY+l.y-l.scrollOffset+j+y, offZ+l.z)
+						console.Invert(l.x+i, j+y, l.z)
 					}
 				}
 			}
 		}
 
+		l.Container.UIElement.Render() //must be done BEFORE scrollbar drawing
+
 		//draw scrollbar
 		//TODO: scrollbar could be useful for lots of other UI Elems (ex. textboxes with paragraphs of text). find way to make more general.
 		if l.contentHeight > l.height {
-			console.ChangeCell(offX+l.x+l.width, offY+l.y, offZ+l.z, GLYPH_TRIANGLE_UP, COL_WHITE, COL_BLACK)
-			console.ChangeCell(offX+l.x+l.width, offY+l.y+l.height-1, offZ+l.z, GLYPH_TRIANGLE_DOWN, COL_WHITE, COL_BLACK)
+			console.ChangeCell(l.x+l.width-1, l.y, l.z, GLYPH_TRIANGLE_UP, COL_WHITE, COL_BLACK)
+			console.ChangeCell(l.x+l.width-1, l.y+l.height-1, l.z, GLYPH_TRIANGLE_DOWN, COL_WHITE, COL_BLACK)
 
 			sliderHeight := Max(int(float32(l.height-2)*(float32(l.height)/float32(l.contentHeight))), 1) //ensures sliderheight is at least 1
 			sliderPosition := int((float32(l.height - 2 - sliderHeight)) * (float32(l.scrollOffset) / float32(l.contentHeight-l.height)))
@@ -209,10 +226,8 @@ func (l *List) Render(offset ...int) {
 			}
 
 			for i := 0; i < sliderHeight; i++ {
-				console.ChangeCell(offX+l.x+l.width, offY+l.y+i+1+sliderPosition, offZ+l.z, GLYPH_FILL, COL_WHITE, COL_BLACK)
+				console.ChangeCell(l.x+l.width-1, l.y+i+1+sliderPosition, l.z, GLYPH_FILL, COL_WHITE, COL_BLACK)
 			}
 		}
-
-		l.Container.UIElement.Render(offX, offY, offZ)
 	}
 }

@@ -28,11 +28,9 @@ func (pb *ProgressBar) SetProgressColour(c uint32) {
 	pb.progresscolour = c
 }
 
-func (pb ProgressBar) Render(offset ...int) {
+func (pb ProgressBar) Render() {
 	if pb.visible {
-		offX, offY, offZ := processOffset(offset)
-
-		pb.Textbox.Render(offX, offY, offZ)
+		pb.Textbox.Render()
 
 		barWidth := int(float32(pb.progress) * float32(pb.width) / float32(100))
 		if barWidth == 0 && pb.progress != 0 {
@@ -44,10 +42,10 @@ func (pb ProgressBar) Render(offset ...int) {
 		for i := 0; i < pb.width; i++ {
 			for j := 0; j < pb.height; j++ {
 				if i < barWidth {
-					console.ChangeBackColour(i+offX+pb.x, j+offY+pb.y, pb.z+offZ, pb.progresscolour)
+					console.ChangeBackColour(i+pb.x, j+pb.y, pb.z, pb.progresscolour)
 				} else {
 					//set to black for now (bgcolor support coming later I assume)
-					console.ChangeBackColour(i+offX+pb.x, j+offY+pb.y, pb.z+offZ, COL_BLACK)
+					console.ChangeBackColour(i+pb.x, j+pb.y, pb.z, COL_BLACK)
 				}
 			}
 		}

@@ -30,13 +30,12 @@ func (tv *TileView) DrawCircle(x, y, r, glyph int, f, b uint32) {
 		})
 }
 
-func (tv TileView) Render(offset ...int) {
+func (tv TileView) Render() {
 	if tv.visible {
-		offX, offY, offZ := processOffset(offset)
 		for i, p := range tv.grid {
-			console.ChangeCell(tv.x+offX+i%tv.width, tv.y+offY+i/tv.width, tv.z+offZ, p.Glyph, p.ForeColour, p.BackColour)
+			console.ChangeCell(tv.x+i%tv.width, tv.y+i/tv.width, tv.z, p.Glyph, p.ForeColour, p.BackColour)
 		}
-		tv.UIElement.Render(offX, offY, offZ)
+		tv.UIElement.Render()
 	}
 }
 

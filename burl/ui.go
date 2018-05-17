@@ -6,27 +6,28 @@ import (
 
 //UIElem is the basic definition for all UI elements.
 type UIElem interface {
-	Render(offset ...int)
+	Render()
 	Dims() (w int, h int)
 	Pos() (x int, y int, z int)
+	Rect() (int, int, int, int)
+	MoveTo(x, y, z int)
+	Move(dx, dy, dz int)
 	SetTitle(title string)
+	SetHint(hint string)
 	ToggleVisible()
-	ToggleFocus()
 	SetVisibility(v bool)
 	IsVisible() bool
+	ToggleFocus()
 	IsFocused() bool
-	MoveTo(x, y, z int)
-	Rect() (int, int, int, int)
 	CenterInConsole()
 	SetTabID(id int)
 	TabID() int
 	HandleKeypress(key sdl.Keycode)
-	SetHint(hint string)
 }
 
 type UIElement struct {
-	width, height int
 	x, y, z       int
+	width, height int
 	bordered      bool
 	title         string
 	hint          string
@@ -39,11 +40,11 @@ type UIElement struct {
 
 func NewUIElement(w, h, x, y, z int, bord bool) UIElement {
 	return UIElement{
-		width:    w,
-		height:   h,
 		x:        x,
 		y:        y,
 		z:        z,
+		width:    w,
+		height:   h,
 		bordered: bord,
 		visible:  true,
 		anims:    make([]Animator, 0, 20),
@@ -51,17 +52,15 @@ func NewUIElement(w, h, x, y, z int, bord bool) UIElement {
 }
 
 //basic render function for all elements.
-func (u *UIElement) Render(offset ...int) {
+func (u *UIElement) Render() {
 	if u.visible {
-		offX, offY, offZ := processOffset(offset)
-
 		if u.bordered {
-			console.DrawBorder(u.x+offX, u.y+offY, u.z+offZ, u.width, u.height, u.title, u.hint, u.focused)
+			console.DrawBorder(u.x, u.y, u.z, u.width, u.height, u.title, u.hint, u.focused)
 		}
 
 		for i, _ := range u.anims {
 			u.anims[i].Tick()
-			u.anims[i].Render(u.x+offX, u.y+offY, u.z+offZ)
+			u.anims[i].Render(u.x, u.y, u.z)
 			//remove animation if it is done
 			if u.anims[i].IsFinished() {
 				u.anims = append(u.anims[:i], u.anims[i+1:]...)
@@ -78,6 +77,22 @@ func (u UIElement) Pos() (int, int, int) {
 	return u.x, u.y, u.z
 }
 
+func (u UIElement) Rect() (int, int, int, int) {
+	return u.x, u.y, u.width, u.height
+}
+
+func (u *UIElement) Move(dx, dy, dz int) {
+	u.x += dx
+	u.y += dy
+	u.z += dz
+}
+
+func (u *UIElement) MoveTo(x, y, z int) {
+	u.x = x
+	u.y = y
+	u.z = z
+}
+
 func (u *UIElement) SetTitle(txt string) {
 	u.title = txt
 }
@@ -87,7 +102,7 @@ func (u *UIElement) SetHint(txt string) {
 }
 
 func (u *UIElement) ToggleVisible() {
-	if (u.visible) {
+	if u.visible {
 		console.Clear()
 	}
 	u.visible = !u.visible
@@ -99,22 +114,12 @@ func (u *UIElement) SetVisibility(v bool) {
 	}
 }
 
-func (u *UIElement) ToggleFocus() {
-	u.focused = !u.focused
-}
-
-func (u *UIElement) MoveTo(x, y, z int) {
-	u.x = x
-	u.y = y
-	u.z = z
-}
-
-func (u UIElement) Rect() (int, int, int, int) {
-	return u.x, u.y, u.width, u.height
-}
-
 func (u UIElement) IsVisible() bool {
 	return u.visible
+}
+
+func (u *UIElement) ToggleFocus() {
+	u.focused = !u.focused
 }
 
 func (u UIElement) IsFocused() bool {
@@ -173,16 +178,4 @@ func (u UIElement) TabID() int {
 func (u *UIElement) HandleKeypress(key sdl.Keycode) {
 	//No-op. Maybe i'll make a default "no action associated with that key"
 	//animation later, like maybe it subtly pulses once or something. Might be annoying though.
-}
-
-//Helper funtion for unpacking optional offsets passed to UI render functions. Required to allow for nesting of elements.
-func processOffset(offset []int) (x, y, z int) {
-	x, y, z = 0, 0, 0
-	if len(offset) >= 2 {
-		x, y = offset[0], offset[1]
-		if len(offset) == 3 {
-			z = offset[2]
-		}
-	}
-	return
 }

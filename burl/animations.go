@@ -6,24 +6,24 @@ package burl
 //Remember that animations always start DISABLED (enabled = false) and must be activated manually.
 type Animator interface {
 	Tick()
-	Render(offset ...int)
+	Render(offX, offY, offZ int)
 	Toggle()
 	Activate() //Activates the animation. If it's already running, restarts it.
 	IsFinished() bool
-	Move(dx, dy int)
+	Move(dx, dy, dz int)
 	MoveTo(x, y int)
 }
 
 type Animation struct {
-	x, y    int
+	x, y, z int
 	tick    int
 	enabled bool
 	repeat  bool
 	done    bool
 }
 
-func NewAnimation(x, y int, repeat bool) Animation {
-	return Animation{x, y, 0, false, repeat, false}
+func NewAnimation(x, y, z int, repeat bool) Animation {
+	return Animation{x, y, z, 0, false, repeat, false}
 }
 
 func (a *Animation) Tick() {
@@ -32,7 +32,7 @@ func (a *Animation) Tick() {
 	}
 }
 
-func (a Animation) Render() {
+func (a Animation) Render(offX, offY, offZ int) {
 
 }
 
@@ -51,9 +51,10 @@ func (a Animation) IsFinished() bool {
 	return a.done
 }
 
-func (a *Animation) Move(dx, dy int) {
+func (a *Animation) Move(dx, dy, dz int) {
 	a.x += dx
 	a.y += dy
+	a.z += dz
 }
 
 func (a *Animation) MoveTo(x, y int) {
@@ -64,12 +65,13 @@ func (a *Animation) MoveTo(x, y int) {
 //BlinkCharAnimation draws a blinking cursor character. Speed controls frequency.
 type BlinkCharAnimation struct {
 	Animation
-	speed int  //number of frames between blinks
-	state bool //cursor shown or not shown
+	speed        int  //number of frames between blinks
+	state        bool //cursor shown or not shown
+	startCharNum int  //charNum to start drawing from
 }
 
-func NewBlinkCharAnimation(x, y, speed int) *BlinkCharAnimation {
-	return &BlinkCharAnimation{NewAnimation(x, y, true), speed, true}
+func NewBlinkCharAnimation(x, y, z, speed int) *BlinkCharAnimation {
+	return &BlinkCharAnimation{NewAnimation(x, y, z, true), speed, true, 0}
 }
 
 func (ba *BlinkCharAnimation) Tick() {
@@ -90,14 +92,17 @@ func (ba *BlinkCharAnimation) Activate() {
 }
 
 //charnum: 0 = left, 1 = right char
-func (ba *BlinkCharAnimation) Render(charNum int, offset ...int) {
+func (ba *BlinkCharAnimation) SetCharNum(num int) {
+	ba.startCharNum = num%2
+}
+
+func (ba *BlinkCharAnimation) Render(offX, offY, offZ int) {
 	if ba.enabled {
-		offX, offY, offZ := processOffset(offset)
 		if ba.state {
-			console.ChangeForeColour(ba.x+offX, ba.y+offY, offZ, COL_WHITE)
-			console.ChangeChar(ba.x+offX, ba.y+offY, offZ, 31, charNum)
+			console.ChangeForeColour(ba.x + offX, ba.y + offY, ba.z + offZ, COL_WHITE)
+			console.ChangeChar(ba.x + offX, ba.y + offY, ba.z + offZ, 31, ba.startCharNum)
 		} else {
-			console.ChangeChar(ba.x+offX, ba.y+offY, offZ, 32, charNum)
+			console.ChangeChar(ba.x + offX, ba.y + offY, ba.z + offZ, 32, ba.startCharNum)
 		}
 	}
 }
@@ -111,8 +116,8 @@ type PulseAnimation struct {
 	w, h int
 }
 
-func NewPulseAnimation(x, y, w, h, dur, num int, repeat bool) *PulseAnimation {
-	return &PulseAnimation{NewAnimation(x, y, repeat), dur, num, w, h}
+func NewPulseAnimation(x, y, z, w, h, dur, num int, repeat bool) *PulseAnimation {
+	return &PulseAnimation{NewAnimation(x, y, z, repeat), dur, num, w, h}
 }
 
 func (pa *PulseAnimation) Tick() {
@@ -127,7 +132,7 @@ func (pa *PulseAnimation) Tick() {
 	}
 }
 
-func (pa *PulseAnimation) Render(offset ...int) {
+func (pa *PulseAnimation) Render(offX, offY, offZ int) {
 	if pa.enabled {
 		//interpolate for correct pulse colour
 		n := pa.tick % pa.dur
@@ -135,11 +140,10 @@ func (pa *PulseAnimation) Render(offset ...int) {
 			n = pa.dur - n
 		}
 		c := int(255 * (float32(n) / float32((pa.dur / 2))))
-
-		offX, offY, offZ := processOffset(offset)
+		col := MakeOpaqueColour(c, c, c)
 
 		for i := 0; i < pa.w*pa.h; i++ {
-			console.ChangeBackColour(pa.x+offX+i%pa.w, pa.y+offY+i/pa.w, offZ, MakeOpaqueColour(c, c, c))
+			console.ChangeBackColour(pa.x+i%pa.w+offX, pa.y+i/pa.w+offY, pa.z+offZ, col)
 		}
 	}
 }

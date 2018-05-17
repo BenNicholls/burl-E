@@ -89,19 +89,17 @@ func (cb *ChoiceBox) HandleKeypress(key sdl.Keycode) {
 	}
 }
 
-func (cb ChoiceBox) Render(offset ...int) {
+func (cb ChoiceBox) Render() {
 	if cb.visible {
-		offX, offY, offZ := processOffset(offset)
-
-		cb.Textbox.Render(offX, offY, offZ)
+		cb.Textbox.Render()
 
 		//draw choice cycling triangles
 		if cb.direction == CHOICE_HORIZONTAL {
-			console.ChangeCell(cb.x+offX, cb.y+offY+cb.height/2, cb.z+offZ, GLYPH_TRIANGLE_LEFT, COL_WHITE, COL_BLACK)
-			console.ChangeCell(cb.x+offX+cb.width-1, cb.y+offY+cb.height/2, cb.z+offZ, GLYPH_TRIANGLE_RIGHT, COL_WHITE, COL_BLACK)
+			console.ChangeCell(cb.x, cb.y+cb.height/2, cb.z, GLYPH_TRIANGLE_LEFT, COL_WHITE, COL_BLACK)
+			console.ChangeCell(cb.x+cb.width-1, cb.y+cb.height/2, cb.z, GLYPH_TRIANGLE_RIGHT, COL_WHITE, COL_BLACK)
 		} else {
-			console.ChangeCell(cb.x+offX+cb.width/2, cb.y+offY-1, cb.z+offZ, GLYPH_TRIANGLE_UP, COL_WHITE, COL_BLACK)
-			console.ChangeCell(cb.x+offX+cb.width/2, cb.y+offY+cb.height, cb.z+offZ, GLYPH_TRIANGLE_DOWN, COL_WHITE, COL_BLACK)
+			console.ChangeCell(cb.x+cb.width/2, cb.y-1, cb.z, GLYPH_TRIANGLE_UP, COL_WHITE, COL_BLACK)
+			console.ChangeCell(cb.x+cb.width/2, cb.y+cb.height, cb.z, GLYPH_TRIANGLE_DOWN, COL_WHITE, COL_BLACK)
 		}
 
 	}
