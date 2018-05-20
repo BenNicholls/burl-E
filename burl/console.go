@@ -535,19 +535,26 @@ func (c *Console) CalcBorderGlyph(x, y int) {
 	}
 }
 
-//Clears an area of the canvas. Optionally takes a rect (defined by 4 ints) so you can clear specific areas of the console
-func (c *Console) Clear(rect ...int) {
-	offX, offY, w, h := 0, 0, c.width, c.height
+//Clears the canvas. Optionally takes args in form (w, h, x, y, z), with z optional,
+//so you can clear specific areas of the console. If z if provided, it will leave
+//the area at the specified z-level.
+func (c *Console) Clear(area ...int) {
+	w, h, x, y, z := c.width, c.height, 0, 0, 0
 
-	if len(rect) == 4 {
-		offX, offY, w, h = rect[0], rect[1], rect[2], rect[3]
+	if len(area) >= 4 {
+		w, h, x, y = area[0], area[1], area[2], area[3]
+	}
+
+	if len(area) == 5 {
+		z = area[4]
 	}
 
 	for i := 0; i < w*h; i++ {
-		x := offX + i%w
-		y := offY + i/w
-		if CheckBounds(x, y, c.width, c.height) {
-			c.canvas[y*c.width+x].Clear()
+		ix := x + i%w
+		iy := y + i/w
+		if CheckBounds(ix, iy, c.width, c.height) {
+			c.canvas[iy*c.width+ix].Clear()
+			c.canvas[iy*c.width+ix].Z = z
 		}
 	}
 }
@@ -558,7 +565,7 @@ func (c *Console) Fill(x, y, z, w, h, g int, fore, back uint32) {
 	for i := 0; i < w*h; i++ {
 		ix := x + i%w
 		iy := y + i/w
-		c.ChangeCell(ix, iy, z, g, fore, back)	
+		c.ChangeCell(ix, iy, z, g, fore, back)			
 	}
 }
 

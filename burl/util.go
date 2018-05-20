@@ -7,11 +7,6 @@ import (
 	"strings"
 )
 
-//Bounded defines objects that can report a bounding box of some kind.
-type Bounded interface {
-	Rect() (int, int, int, int)
-}
-
 //ValidText checks if key is a letter or number or basic punctuation (ASCII-encoded)
 //TODO: this is NOT comprehensive. Improve this later.
 func ValidText(key rune) bool {
@@ -125,27 +120,6 @@ func ModularClamp(val, min, max int) (int, int) {
 //RoundFLoatToInt rounds a float to an int in the way you'd expect. It's the way I expect anyways.
 func RoundFloatToInt(f float64) int {
 	return int(f + math.Copysign(0.5, f))
-}
-
-//FindIntersectionRect calculates the intersection of two rectangularly-bound objects as a rect
-//if no intersection, returns (0,0,0,0)
-func FindIntersectionRect(r1, r2 Bounded) (x, y, w, h int) {
-	x1, y1, w1, h1 := r1.Rect()
-	x2, y2, w2, h2 := r2.Rect()
-
-	x, y, w, h = 0, 0, 0, 0
-
-	//check for intersection
-	if x1 >= x2+w2 || x2 >= x1+w1 || y1 >= y2+h2 || y2 >= y1+h1 {
-		return
-	}
-
-	x = Max(x1, x2)
-	y = Max(y1, y2)
-	w = Min(x1+w1, x2+w2) - x
-	h = Min(y1+h1, y2+h2) - y
-
-	return
 }
 
 //Lerp linearly interpolates a range (min-max) over (steps) intervals, and returns the (val)th step.

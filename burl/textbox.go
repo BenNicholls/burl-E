@@ -35,7 +35,6 @@ func (t *Textbox) LoremIpsum() {
 	t.ChangeText(loremipsum)
 }
 
-//Render function optionally takes an offset (for containering), 2 or 3 ints.
 func (t *Textbox) Render() {
 	if t.visible {
 		for l, line := range t.lines {

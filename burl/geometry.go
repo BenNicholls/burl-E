@@ -130,3 +130,39 @@ func (v1 Vec2Polar) AngularDistance(v2 Vec2Polar) float64 {
 
 	return d
 }
+
+//Bounded defines objects that can report a bounding box of some kind.
+type Bounded interface {
+	Bounds() Rect
+}
+
+type Rect struct {
+	W, H int
+	X, Y int
+}
+
+//Goofy... but needed to satisfy Bounded interface.
+func (r Rect) Bounds() Rect {
+	return r
+}
+
+//FindIntersectionRect calculates the intersection of two rectangularly-bound objects as a rect
+//if no intersection, returns Rect{0,0,0,0}
+func FindIntersectionRect(r1, r2 Bounded) Rect {
+	b1 := r1.Bounds()
+	b2 := r2.Bounds()
+
+	x, y, w, h := 0, 0, 0, 0
+
+	//check for intersection
+	if b1.X >= b2.X+b2.W || b2.X >= b1.X+b1.W || b1.Y >= b2.Y+b2.H || b2.Y >= b1.Y+b1.H {
+		return Rect{0,0,0,0}
+	}
+
+	x = Max(b1.X, b2.X)
+	y = Max(b1.Y, b2.Y)
+	w = Min(b1.X+b1.W, b2.X+b2.W) - x
+	h = Min(b1.Y+b1.H, b2.Y+b2.H) - y
+
+	return Rect{w, h, x, y}
+}

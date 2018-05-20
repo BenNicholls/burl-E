@@ -17,7 +17,7 @@ type List struct {
 
 func NewList(w, h, x, y, z int, bord bool, empty string) *List {
 	c := NewContainer(w, h, x, y, z, bord)
-	return &List{*c, 0, true, 0, NewTextbox(w, CalcWrapHeight(empty, w), 0, h/2-CalcWrapHeight(empty, w)/2, 0, false, true, empty), 0}
+	return &List{*c, 0, true, 0, NewTextbox(w, CalcWrapHeight(empty, w), x, y+h/2-CalcWrapHeight(empty, w)/2, z, false, true, empty), 0}
 }
 
 func (l *List) Move(dx, dy, dz int) {
@@ -27,11 +27,12 @@ func (l *List) Move(dx, dy, dz int) {
 
 func (l *List) Add(elems ...UIElem) {
 	l.Container.Add(elems...)
+	l.dirty = true
 	l.Calibrate()
 }
 
 func (l *List) Select(s int) {
-	if s < len(l.Elements) && s >= 0 {
+	if s < len(l.Elements) && s >= 0 && l.selected != s {
 		l.selected = s
 	}
 }
@@ -74,6 +75,7 @@ func (l *List) Prev() {
 func (l *List) ScrollUp() {
 	if l.scrollOffset > 0 {
 		l.scrollOffset = l.scrollOffset - 1
+		l.dirty = true
 		l.Calibrate()
 	}
 }
@@ -81,22 +83,30 @@ func (l *List) ScrollUp() {
 func (l *List) ScrollDown() {
 	if l.scrollOffset < l.contentHeight-l.height {
 		l.scrollOffset = l.scrollOffset + 1
+		l.dirty = true
 		l.Calibrate()
 	}
 }
 
 func (l *List) ScrollToBottom() {
-	l.scrollOffset = l.contentHeight - l.height
-	l.Calibrate()
+	if l.scrollOffset != l.contentHeight-l.height {
+		l.scrollOffset = l.contentHeight - l.height
+		l.dirty = true
+		l.Calibrate()
+	}
 }
 
 func (l *List) ScrollToTop() {
-	l.scrollOffset = 0
-	l.Calibrate()
+	if l.scrollOffset != 0 {
+		l.scrollOffset = 0
+		l.dirty = true
+		l.Calibrate()
+	}
 }
 
 //Scrolls the list to ensure the currently selected element is in view. Called by Prev() and Next()
 func (l *List) ScrollToSelection() {
+	l.dirty = true
 	//no scrolling if content fits in the list
 	if l.contentHeight <= l.height {
 		l.scrollOffset = 0
@@ -126,6 +136,7 @@ func (l *List) Append(items ...string) {
 		l.Add(NewTextbox(l.width, h, l.x, l.y, l.z, false, false, i))
 	}
 	l.Calibrate()
+	l.dirty = true
 }
 
 //removes the ith item from the internal list of items
@@ -139,6 +150,7 @@ func (l *List) Remove(i int) {
 			l.Calibrate()
 		}
 		l.redraw = true
+		l.dirty = true
 		l.CheckSelection()
 	}
 }
@@ -184,7 +196,7 @@ func (l *List) HandleKeypress(key sdl.Keycode) {
 func (l *List) Render() {
 	if l.visible {
 		if l.redraw {
-			console.Clear(l.x, l.y, l.width, l.height)
+			l.Redraw()
 			l.redraw = false
 		}
 
@@ -198,7 +210,8 @@ func (l *List) Render() {
 					e.Render()
 				}
 			}
-
+			
+			//TODO: implement highlight by inverting BACK and FORE when UIElement Colour Scheming goes in
 			if l.Highlight {
 				w, h := l.Elements[l.selected].Dims()
 				_, y, _ := l.Elements[l.selected].Pos()
@@ -214,7 +227,7 @@ func (l *List) Render() {
 
 		//draw scrollbar
 		//TODO: scrollbar could be useful for lots of other UI Elems (ex. textboxes with paragraphs of text). find way to make more general.
-		if l.contentHeight > l.height {
+		if l.contentHeight > l.height && l.dirty {
 			console.ChangeCell(l.x+l.width-1, l.y, l.z, GLYPH_TRIANGLE_UP, COL_WHITE, COL_BLACK)
 			console.ChangeCell(l.x+l.width-1, l.y+l.height-1, l.z, GLYPH_TRIANGLE_DOWN, COL_WHITE, COL_BLACK)
 
@@ -228,6 +241,8 @@ func (l *List) Render() {
 			for i := 0; i < sliderHeight; i++ {
 				console.ChangeCell(l.x+l.width-1, l.y+i+1+sliderPosition, l.z, GLYPH_FILL, COL_WHITE, COL_BLACK)
 			}
-		}
+
+			l.dirty = false
+		}		
 	}
 }

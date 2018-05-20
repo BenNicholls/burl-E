@@ -7,9 +7,10 @@ import (
 //UIElem is the basic definition for all UI elements.
 type UIElem interface {
 	Render()
+	Redraw()
 	Dims() (w int, h int)
 	Pos() (x int, y int, z int)
-	Rect() (int, int, int, int)
+	Bounds() Rect
 	MoveTo(x, y, z int)
 	Move(dx, dy, dz int)
 	SetTitle(title string)
@@ -34,6 +35,7 @@ type UIElement struct {
 	visible       bool
 	focused       bool
 	tabID         int //for to tab between elements in a container
+	dirty         bool //only used for some elements. could be used all around probably??
 
 	anims []Animator
 }
@@ -48,6 +50,7 @@ func NewUIElement(w, h, x, y, z int, bord bool) UIElement {
 		bordered: bord,
 		visible:  true,
 		anims:    make([]Animator, 0, 20),
+		dirty:    true,
 	}
 }
 
@@ -69,6 +72,18 @@ func (u *UIElement) Render() {
 	}
 }
 
+func (u *UIElement) Redraw() {
+	if u.visible {
+		if u.bordered {
+			console.Fill(u.x-1, u.y-1, u.z, u.width+2, u.height+2, GLYPH_NONE, COL_BLACK, COL_BLACK)
+		} else {
+			console.Fill(u.x, u.y, u.z, u.width, u.height, GLYPH_NONE, COL_BLACK, COL_BLACK)
+		}
+		u.dirty = true
+		u.dirty = true
+	}
+}
+
 func (u UIElement) Dims() (int, int) {
 	return u.width, u.height
 }
@@ -77,8 +92,8 @@ func (u UIElement) Pos() (int, int, int) {
 	return u.x, u.y, u.z
 }
 
-func (u UIElement) Rect() (int, int, int, int) {
-	return u.x, u.y, u.width, u.height
+func (u UIElement) Bounds() Rect {
+	return Rect{u.width, u.height, u.x, u.y}
 }
 
 func (u *UIElement) Move(dx, dy, dz int) {
@@ -102,10 +117,33 @@ func (u *UIElement) SetHint(txt string) {
 }
 
 func (u *UIElement) ToggleVisible() {
-	if u.visible {
-		console.Clear()
-	}
 	u.visible = !u.visible
+
+	if !u.visible {
+		if u.bordered {
+			console.Clear(u.width+2, u.height+2, u.x-1, u.y-1)
+		} else {
+			console.Clear(u.width, u.height, u.x, u.y)
+		}
+
+		//redraw elements underneath this one
+		if gameState != nil && gameState.GetWindow() != nil {
+			for _, elem := range gameState.GetWindow().Elements {
+				eX, eY, _ := elem.Pos()
+				eW, eH := elem.Dims()
+
+				eRect := Rect{eW + 2, eH + 2, eX - 1, eY - 1} //bounding rect is bigger to account for borders
+
+				intersection := FindIntersectionRect(u.Bounds(), eRect)
+
+				if intersection.W != 0 && intersection.H != 0 {
+					elem.Redraw()
+				}
+			}
+		}
+	} else {
+		u.Redraw()
+	}
 }
 
 func (u *UIElement) SetVisibility(v bool) {
@@ -142,7 +180,7 @@ func (u *UIElement) RemoveAnimation(a Animator) {
 func (u *UIElement) CenterInConsole() {
 	if console.Ready {
 		w, h := console.Dims()
-		u.x, u.y = (w-u.width)/2, (h-u.height)/2
+		u.MoveTo((w-u.width)/2, (h-u.height)/2, u.z)
 	} else {
 		LogError("UI Element cannot center: console not setup.")
 	}
@@ -156,12 +194,12 @@ func (u *UIElement) Center(w, h, x, y int) {
 
 //Centers the element horizontally within the range defined by (w, x)
 func (u *UIElement) CenterX(w, x int) {
-	u.x = (w-x-u.width)/2 + x
+	u.MoveTo((w-x-u.width)/2+x, u.y, u.z)
 }
 
 //Centers the element vertically within the range defined by (h, y)
 func (u *UIElement) CenterY(h, y int) {
-	u.y = (h-y-u.height)/2 + y
+	u.MoveTo(u.x, (h-y-u.height)/2+y, u.z)
 }
 
 //Sets a Tab number for the element. Elements in the same container can be

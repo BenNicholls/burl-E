@@ -16,7 +16,7 @@ func NewContainer(w, h, x, y, z int, bord bool) *Container {
 func (c *Container) Add(elems ...UIElem) {
 	for _, e := range elems {
 		e.Move(c.x, c.y, c.z)
-		c.Elements = append(c.Elements, e)		
+		c.Elements = append(c.Elements, e)
 	}
 }
 
@@ -29,7 +29,7 @@ func (c *Container) Move(dx, dy, dz int) {
 
 func (c *Container) MoveTo(x, y, z int) {
 	for i := range c.Elements {
-		c.Elements[i].Move(x - c.x, y - c.y, z - c.z)
+		c.Elements[i].Move(x-c.x, y-c.y, z-c.z)
 	}
 
 	c.x = x
@@ -107,17 +107,11 @@ func (c *Container) FindPrevTab(e UIElem) UIElem {
 	return prev
 }
 
-//Offets (x,y,z, all optional) are passed through to the nested elements.
 func (c *Container) Render() {
 	if c.visible {
 		if c.redraw {
-			console.Clear(c.x, c.y, c.width, c.height)
+			c.Redraw()
 			c.redraw = false
-		}
-
-		//draw over container, so we don't appear transparent.
-		for i := 0; i < c.width*c.height; i++ {
-			console.ChangeColours(c.x+(i%c.width), c.y+(i/c.width), c.z, COL_BLACK, COL_BLACK)
 		}
 
 		for i := 0; i < len(c.Elements); i++ {

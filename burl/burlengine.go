@@ -36,7 +36,6 @@ func InitConsole(w, h int, glyphPath, fontPath, title string) (*Console, error) 
 	} else {
 		return nil, err
 	}
-
 }
 
 //The Big Enchelada! This is the gameloop that runs everything. Make sure to run

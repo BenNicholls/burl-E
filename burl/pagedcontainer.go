@@ -8,9 +8,9 @@ import (
 //like you'd expect. Cool, right?
 type PagedContainer struct {
 	UIElement
+	titleBorder  UIElement
 	curPage      int
 	pages        []*Page
-	redrawTitles bool
 }
 
 //Page is a single page in the PagedContainer. Might need to think of a better name for this.
@@ -22,6 +22,7 @@ type Page struct {
 func NewPagedContainer(w, h, x, y, z int, bord bool) *PagedContainer {
 	p := new(PagedContainer)
 	p.UIElement = NewUIElement(w, h, x, y, z, bord)
+	p.titleBorder = NewUIElement(w, 2, x, y, z, true)
 	p.curPage = 0
 	p.pages = make([]*Page, 0, 0)
 
@@ -50,7 +51,7 @@ func (p *PagedContainer) AddPage(title string) *Container {
 
 	newPage := new(Page)
 	newPage.title = titleBox
-	newPage.page = NewContainer(p.width, p.height-3, p.x, p.y+3, p.z, true)
+	newPage.page = NewContainer(p.width, p.height-3, p.x, p.y+3, p.z, false)
 	p.pages = append(p.pages, newPage)
 	p.setActivePage()
 
@@ -70,26 +71,30 @@ func (p PagedContainer) CurrentPage() *Container {
 }
 
 func (p *PagedContainer) NextPage() {
+	p.pages[p.curPage].page.ToggleVisible()
 	p.curPage, _ = ModularClamp(p.curPage+1, 0, len(p.pages)-1)
+	p.pages[p.curPage].page.ToggleVisible()
 	p.setActivePage()
 }
 
 func (p *PagedContainer) PrevPage() {
+	p.pages[p.curPage].page.ToggleVisible()
 	p.curPage, _ = ModularClamp(p.curPage-1, 0, len(p.pages)-1)
+	p.pages[p.curPage].page.ToggleVisible()
 	p.setActivePage()
 }
 
 //Finds the active page and fixes up visibilities, borders, etc.
 func (p *PagedContainer) setActivePage() {
-	for i := 0; i < len(p.pages); i++ {
-		if i == p.curPage {
-			p.pages[i].title.bordered = true
-		} else {
-			p.pages[i].title.bordered = false
+	if len(p.pages) > 0 {
+		p.pages[p.curPage].page.SetVisibility(true)
+		for i := 0; i < len(p.pages); i++ {
+			if p.pages[i].title.bordered != (i == p.curPage) {
+				p.pages[i].title.bordered = (i == p.curPage)
+				p.dirty = true
+			}
 		}
 	}
-	p.redrawTitles = true
-	console.Clear()
 }
 
 func (p *PagedContainer) HandleKeypress(key sdl.Keycode) {
@@ -99,34 +104,35 @@ func (p *PagedContainer) HandleKeypress(key sdl.Keycode) {
 	}
 }
 
-func (p PagedContainer) Render() {
+func (p *PagedContainer) Render() {
 	if p.visible {
 		p.UIElement.Render()
 
 		if len(p.pages) > 0 {
-
 			p.pages[p.curPage].page.Render()
 
-			if p.redrawTitles {
+			if p.dirty {
 				//draw over page title area
-				console.Fill(p.x, p.y, p.z, p.width, 2, GLYPH_NONE, COL_BLACK, COL_BLACK)
-
+				console.Clear(p.width, 2, p.x, p.y, p.z)
+				p.titleBorder.Render()
+				
 				//draw titles
-				for i, page := range p.pages {
-					page.title.Render()
-					if i == p.curPage {
-						//remove border below title of selected page
-						console.Clear(page.title.x-1, page.title.y+1, page.title.width+2, 1)
-						if i == 0 {
-							console.Clear(page.title.x-2, page.title.y+1, 1, 1)
-							console.ChangeCell(page.title.x-2, page.title.y+1, p.z, GLYPH_BORDER_UDR, console.BorderColour(p.IsFocused()), COL_BLACK)
-						}
-						console.ChangeCell(page.title.x-1, page.title.y+1, p.z, GLYPH_BORDER_UL, console.BorderColour(p.IsFocused()), COL_BLACK)
-						console.ChangeCell(page.title.x+page.title.width, page.title.y+1, p.z, GLYPH_BORDER_UR, console.BorderColour(p.IsFocused()), COL_BLACK)
-					}
+				for _, page := range p.pages {
+					page.title.Render()					
 				}
-				p.redrawTitles = false
+				p.dirty = false
 			}
+
+			//remove border below title of selected page
+			curTitle := p.pages[p.curPage].title
+
+			console.Clear(curTitle.width+2, 1, curTitle.x-1, curTitle.y+1, p.z)
+			if p.curPage == 0 {
+				console.Clear(1, 1, curTitle.x-2, curTitle.y+1, p.z)
+				console.ChangeCell(curTitle.x-2, curTitle.y+1, p.z+1, GLYPH_BORDER_UDR, console.BorderColour(p.IsFocused()), COL_BLACK)
+			}
+			console.ChangeCell(curTitle.x-1, curTitle.y+1, p.z, GLYPH_BORDER_UL, console.BorderColour(p.IsFocused()), COL_BLACK)
+			console.ChangeCell(curTitle.x+curTitle.width, curTitle.y+1, p.z, GLYPH_BORDER_UR, console.BorderColour(p.IsFocused()), COL_BLACK)
 		}
 	}
 }
