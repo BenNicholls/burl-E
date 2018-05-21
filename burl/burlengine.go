@@ -41,12 +41,12 @@ func InitConsole(w, h int, glyphPath, fontPath, title string) (*Console, error) 
 //The Big Enchelada! This is the gameloop that runs everything. Make sure to run
 //burl.InitState() and burl.InitConsole before beginning the game!
 func GameLoop() error {
-	//TODO: implement that horrible thread job queue thing from the go-sdl2 package
-	runtime.LockOSThread() //fixes some kind of go-sdl2 based thread release bug.
+	runtime.LockOSThread() //sdl is inherently single-threaded.
 
 	if !console.Ready {
 		return errors.New("Console not set up. Run burl.InitConsole() before starting game loop!")
 	}
+	defer console.Cleanup()
 
 	if gameState == nil {
 		return errors.New("No gameState initialized. Run burl.InitState() before starting game loop!")
@@ -68,7 +68,7 @@ func GameLoop() error {
 			case *sdl.KeyboardEvent:
 				if t.Type == sdl.KEYDOWN {
 					if d := gameState.GetDialog(); d == nil {
-						gameState.HandleKeypress(t.Keysym.Sym)							
+						gameState.HandleKeypress(t.Keysym.Sym)
 					} else {
 						d.HandleKeypress(t.Keysym.Sym)
 					}
@@ -82,7 +82,7 @@ func GameLoop() error {
 			d.Update()
 			if d.Done() {
 				gameState.CloseDialog()
-			}			
+			}
 		}
 
 		//serve events to application for handling
@@ -149,7 +149,7 @@ type Dialog interface {
 
 //base state object, compose states around this if you want
 type StatePrototype struct {
-	Tick int //update ticks since init
+	Tick   int //update ticks since init
 	Window *Container
 	dialog Dialog
 }

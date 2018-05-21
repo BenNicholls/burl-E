@@ -93,16 +93,16 @@ func (ba *BlinkCharAnimation) Activate() {
 
 //charnum: 0 = left, 1 = right char
 func (ba *BlinkCharAnimation) SetCharNum(num int) {
-	ba.startCharNum = num%2
+	ba.startCharNum = num % 2
 }
 
 func (ba *BlinkCharAnimation) Render(offX, offY, offZ int) {
 	if ba.enabled {
 		if ba.state {
-			console.ChangeForeColour(ba.x + offX, ba.y + offY, ba.z + offZ, COL_WHITE)
-			console.ChangeChar(ba.x + offX, ba.y + offY, ba.z + offZ, 31, ba.startCharNum)
+			console.ChangeForeColour(ba.x+offX, ba.y+offY, ba.z+offZ, COL_WHITE)
+			console.ChangeChar(ba.x+offX, ba.y+offY, ba.z+offZ, 31, ba.startCharNum)
 		} else {
-			console.ChangeChar(ba.x + offX, ba.y + offY, ba.z + offZ, 32, ba.startCharNum)
+			console.ChangeChar(ba.x+offX, ba.y+offY, ba.z+offZ, 32, ba.startCharNum)
 		}
 	}
 }
@@ -139,7 +139,8 @@ func (pa *PulseAnimation) Render(offX, offY, offZ int) {
 		if n > pa.dur/2 {
 			n = pa.dur - n
 		}
-		c := int(255 * (float32(n) / float32((pa.dur / 2))))
+
+		c := Lerp(0, 255, n, pa.dur/2)
 		col := MakeOpaqueColour(c, c, c)
 
 		for i := 0; i < pa.w*pa.h; i++ {

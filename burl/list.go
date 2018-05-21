@@ -210,7 +210,7 @@ func (l *List) Render() {
 					e.Render()
 				}
 			}
-			
+
 			//TODO: implement highlight by inverting BACK and FORE when UIElement Colour Scheming goes in
 			if l.Highlight {
 				w, h := l.Elements[l.selected].Dims()
@@ -243,6 +243,6 @@ func (l *List) Render() {
 			}
 
 			l.dirty = false
-		}		
+		}
 	}
 }

@@ -565,7 +565,7 @@ func (c *Console) Fill(x, y, z, w, h, g int, fore, back uint32) {
 	for i := 0; i < w*h; i++ {
 		ix := x + i%w
 		iy := y + i/w
-		c.ChangeCell(ix, iy, z, g, fore, back)			
+		c.ChangeCell(ix, iy, z, g, fore, back)
 	}
 }
 

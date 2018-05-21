@@ -41,7 +41,7 @@ func (tv TileView) Render() {
 
 //Resets the TileView
 func (tv *TileView) Reset() {
-	for i, _ := range tv.grid {
+	for i := range tv.grid {
 		tv.grid[i].Clear()
 	}
 }

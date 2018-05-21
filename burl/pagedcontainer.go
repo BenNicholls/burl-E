@@ -8,9 +8,9 @@ import (
 //like you'd expect. Cool, right?
 type PagedContainer struct {
 	UIElement
-	titleBorder  UIElement
-	curPage      int
-	pages        []*Page
+	titleBorder UIElement
+	curPage     int
+	pages       []*Page
 }
 
 //Page is a single page in the PagedContainer. Might need to think of a better name for this.
@@ -115,10 +115,10 @@ func (p *PagedContainer) Render() {
 				//draw over page title area
 				console.Clear(p.width, 2, p.x, p.y, p.z)
 				p.titleBorder.Render()
-				
+
 				//draw titles
 				for _, page := range p.pages {
-					page.title.Render()					
+					page.title.Render()
 				}
 				p.dirty = false
 			}

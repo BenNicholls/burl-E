@@ -12,7 +12,6 @@ type Button struct {
 }
 
 //Creates a new button. Defaults to non-focused state.
-//TODO: some kind of ID system so we can include an ID with pressed events??
 func NewButton(w, h, x, y, z int, bord, cent bool, txt string) *Button {
 	p := NewPulseAnimation(0, 0, z, w, h, 20, 1, false)
 	return &Button{*NewTextbox(w, h, x, y, z, bord, cent, txt), nil, p}

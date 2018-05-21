@@ -156,7 +156,7 @@ func FindIntersectionRect(r1, r2 Bounded) Rect {
 
 	//check for intersection
 	if b1.X >= b2.X+b2.W || b2.X >= b1.X+b1.W || b1.Y >= b2.Y+b2.H || b2.Y >= b1.Y+b1.H {
-		return Rect{0,0,0,0}
+		return Rect{0, 0, 0, 0}
 	}
 
 	x = Max(b1.X, b2.X)

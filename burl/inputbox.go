@@ -75,8 +75,8 @@ func (ib *Inputbox) Render() {
 	if ib.visible {
 		ib.Textbox.Render()
 		ib.cursorAnimation.Tick()
-		ib.cursorAnimation.x = len(ib.text)/2
-		ib.cursorAnimation.SetCharNum(len(ib.text)%2)
+		ib.cursorAnimation.x = len(ib.text) / 2
+		ib.cursorAnimation.SetCharNum(len(ib.text) % 2)
 		ib.cursorAnimation.Render(ib.x, ib.y, ib.z)
 	}
 }

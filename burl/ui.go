@@ -34,7 +34,7 @@ type UIElement struct {
 	hint          string
 	visible       bool
 	focused       bool
-	tabID         int //for to tab between elements in a container
+	tabID         int  //for to tab between elements in a container
 	dirty         bool //only used for some elements. could be used all around probably??
 
 	anims []Animator
