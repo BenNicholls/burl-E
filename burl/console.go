@@ -150,7 +150,7 @@ func (c *Console) ChangeFonts(glyphPath, fontPath string) (err error) {
 		return
 	}
 	c.Clear()
-	LogInfo("CONSOLE: Loaded fonts! Glyph: " + glyphPath + ", Text:" + fontPath)
+	LogInfo("CONSOLE: Loaded fonts! Glyph: " + glyphPath + ", Text: " + fontPath)
 
 	_, _, gw, _, _ := c.glyphs.Query()
 

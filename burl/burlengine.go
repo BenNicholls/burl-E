@@ -32,16 +32,23 @@ func InitConsole(w, h int, glyphPath, fontPath, title string) (*Console, error) 
 	console = new(Console)
 	err := console.Setup(w, h, glyphPath, fontPath, title)
 	if err == nil {
+		initDebugger()
 		return console, err
 	} else {
 		return nil, err
 	}
 }
 
+//Activate debugging capabilities. F10 will bring up the debug menu.
+func Debug() {
+	debug = true
+}
+
 //The Big Enchelada! This is the gameloop that runs everything. Make sure to run
 //burl.InitState() and burl.InitConsole before beginning the game!
 func GameLoop() error {
 	runtime.LockOSThread() //sdl is inherently single-threaded.
+	defer outputLogToDisk()
 
 	if !console.Ready {
 		return errors.New("Console not set up. Run burl.InitConsole() before starting game loop!")
@@ -67,13 +74,23 @@ func GameLoop() error {
 				}
 			case *sdl.KeyboardEvent:
 				if t.Type == sdl.KEYDOWN {
-					if d := gameState.GetDialog(); d == nil {
-						gameState.HandleKeypress(t.Keysym.Sym)
+					if debug && debugger.IsVisible() {
+						debugger.HandleKeypress(t.Keysym.Sym)
+					} else if t.Keysym.Sym == sdl.K_F10 {
+						debugger.ToggleVisible()
 					} else {
-						d.HandleKeypress(t.Keysym.Sym)
+						if d := gameState.GetDialog(); d == nil {
+							gameState.HandleKeypress(t.Keysym.Sym)
+						} else {
+							d.HandleKeypress(t.Keysym.Sym)
+						}
 					}
 				}
 			}
+		}
+
+		if debug && debugger.IsVisible() {
+			debugger.Update()
 		}
 
 		if d := gameState.GetDialog(); d == nil {
@@ -106,6 +123,10 @@ func GameLoop() error {
 			w.Render()
 		}
 
+		if debug {
+			debugger.Render()
+		}
+
 		console.Render() //should this come after the burl events are processed??
 
 		//process burl-handled events
@@ -122,8 +143,6 @@ func GameLoop() error {
 			}
 		}
 	}
-
-	log.Close()
 
 	return nil
 }

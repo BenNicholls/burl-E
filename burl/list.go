@@ -186,9 +186,21 @@ func (l *List) ToggleHighlight() {
 func (l *List) HandleKeypress(key sdl.Keycode) {
 	switch key {
 	case sdl.K_UP, sdl.K_PAGEUP:
-		l.Prev()
+		if l.Highlight {
+			l.Prev()
+		} else {
+			l.ScrollUp()
+		}
 	case sdl.K_DOWN, sdl.K_PAGEDOWN:
-		l.Next()
+		if l.Highlight {
+			l.Next()
+		} else {
+			l.ScrollDown()
+		}
+	default:
+		if l.Highlight {
+			l.Elements[l.selected].HandleKeypress(key)
+		}
 	}
 }
 

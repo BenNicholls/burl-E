@@ -71,6 +71,7 @@ func (p PagedContainer) CurrentPage() *Container {
 }
 
 func (p *PagedContainer) NextPage() {
+	p.Redraw()
 	p.pages[p.curPage].page.ToggleVisible()
 	p.curPage, _ = ModularClamp(p.curPage+1, 0, len(p.pages)-1)
 	p.pages[p.curPage].page.ToggleVisible()
@@ -78,6 +79,7 @@ func (p *PagedContainer) NextPage() {
 }
 
 func (p *PagedContainer) PrevPage() {
+	p.Redraw()
 	p.pages[p.curPage].page.ToggleVisible()
 	p.curPage, _ = ModularClamp(p.curPage-1, 0, len(p.pages)-1)
 	p.pages[p.curPage].page.ToggleVisible()

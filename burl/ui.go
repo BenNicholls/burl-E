@@ -128,6 +128,9 @@ func (u *UIElement) ToggleVisible() {
 
 		//redraw elements underneath this one
 		if gameState != nil && gameState.GetWindow() != nil {
+			if gameState.GetDialog() != nil {
+				gameState.GetDialog().GetWindow().Redraw()
+			}			
 			for _, elem := range gameState.GetWindow().Elements {
 				eX, eY, _ := elem.Pos()
 				eW, eH := elem.Dims()
