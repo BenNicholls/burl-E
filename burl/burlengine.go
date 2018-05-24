@@ -104,9 +104,8 @@ func GameLoop() error {
 
 		//serve events to application for handling
 		for e := PopEvent(); e != nil; e = PopEvent() {
-			if d := gameState.GetDialog(); d == nil {
-				gameState.HandleEvent(e)
-			} else {
+			gameState.HandleEvent(e)
+			if d := gameState.GetDialog(); d != nil {
 				d.HandleEvent(e)
 			}
 		}
