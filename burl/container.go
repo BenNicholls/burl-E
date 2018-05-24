@@ -39,8 +39,10 @@ func (c *Container) MoveTo(x, y, z int) {
 
 //Deletes all UIElem from the container.
 func (c *Container) ClearElements() {
-	c.Elements = make([]UIElem, 0, 20)
-	c.redraw = true
+	if len(c.Elements) > 0 {
+		c.Elements = make([]UIElem, 0, 20)
+		c.redraw = true
+	}
 }
 
 //Finds the next element in the tabbing order (if one is defined) among elements
