@@ -198,7 +198,7 @@ func (l *List) HandleKeypress(key sdl.Keycode) {
 			l.ScrollDown()
 		}
 	default:
-		if l.Highlight {
+		if l.Highlight && len(l.Elements) > 0 {
 			l.Elements[l.selected].HandleKeypress(key)
 		}
 	}

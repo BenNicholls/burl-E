@@ -8,7 +8,6 @@ import (
 //like you'd expect. Cool, right?
 type PagedContainer struct {
 	UIElement
-	titleBorder UIElement
 	curPage     int
 	pages       []*Page
 }
@@ -22,7 +21,6 @@ type Page struct {
 func NewPagedContainer(w, h, x, y, z int, bord bool) *PagedContainer {
 	p := new(PagedContainer)
 	p.UIElement = NewUIElement(w, h, x, y, z, bord)
-	p.titleBorder = NewUIElement(w, 2, x, y, z, true)
 	p.curPage = 0
 	p.pages = make([]*Page, 0, 0)
 
@@ -51,7 +49,7 @@ func (p *PagedContainer) AddPage(title string) *Container {
 
 	newPage := new(Page)
 	newPage.title = titleBox
-	newPage.page = NewContainer(p.width, p.height-3, p.x, p.y+3, p.z, false)
+	newPage.page = NewContainer(p.width, p.height-3, p.x, p.y+3, p.z, true)
 	p.pages = append(p.pages, newPage)
 	p.setActivePage()
 
@@ -59,7 +57,7 @@ func (p *PagedContainer) AddPage(title string) *Container {
 }
 
 func (p PagedContainer) GetPageDims() (int, int) {
-	return p.width - 2, p.height - 4
+	return p.width, p.height - 3
 }
 
 func (p PagedContainer) CurrentIndex() int {
@@ -116,7 +114,6 @@ func (p *PagedContainer) Render() {
 			if p.dirty {
 				//draw over page title area
 				console.Clear(p.width, 2, p.x, p.y, p.z)
-				p.titleBorder.Render()
 
 				//draw titles
 				for _, page := range p.pages {
