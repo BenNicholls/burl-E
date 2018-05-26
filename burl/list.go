@@ -215,21 +215,17 @@ func (l *List) Render() {
 		if len(l.Elements) <= 0 {
 			l.emptyElem.Render()
 		} else {
-			for _, e := range l.Elements {
+			for i, e := range l.Elements {
 				_, y, _ := e.Pos()
-				_, h := e.Dims()
+				w, h := e.Dims()
 				if y < l.y+l.height && y+h > l.y {
 					e.Render()
-				}
-			}
-
-			//TODO: implement highlight by inverting BACK and FORE when UIElement Colour Scheming goes in
-			if l.Highlight {
-				w, h := l.Elements[l.selected].Dims()
-				_, y, _ := l.Elements[l.selected].Pos()
-				for j := 0; j < h; j++ {
-					for i := 0; i < w; i++ {
-						console.Invert(l.x+i, j+y, l.z)
+					if l.Highlight && i == l.selected {
+						for j := 0; j < h; j++ {
+							for i := 0; i < w; i++ {
+								console.Invert(l.x+i, j+y, l.z)
+							}
+						}
 					}
 				}
 			}
