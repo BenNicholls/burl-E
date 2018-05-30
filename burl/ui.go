@@ -80,7 +80,6 @@ func (u *UIElement) Redraw() {
 			console.Fill(u.x, u.y, u.z, u.width, u.height, GLYPH_NONE, COL_BLACK, COL_BLACK)
 		}
 		u.dirty = true
-		u.dirty = true
 	}
 }
 

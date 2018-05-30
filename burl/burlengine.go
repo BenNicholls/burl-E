@@ -39,6 +39,22 @@ func InitConsole(w, h int, glyphPath, fontPath, title string) (*Console, error) 
 	}
 }
 
+//OpenDialog function so anything can add a dialog to the gamestate.
+//NOTE: if you call this while setting up a state change, the dialog will
+//be added to the CURRENT state, not the one you are building. use the
+//state.OpenDialog() function to add to a new state before switching.
+//THINK: is this the best way to do this??? Maybe dialogs should be like
+//states, individually managed by the engine first-class style. Hmm.
+func OpenDialog(d Dialog) {
+	gameState.OpenDialog(d)
+}
+
+//Should not have to call this generally, dialogs close themselves when
+//designed right. Here just in case.
+func CloseDialog() {
+	gameState.CloseDialog()
+}
+
 //Activate debugging capabilities. F10 will bring up the debug menu.
 func Debug() {
 	debug = true
@@ -155,6 +171,7 @@ type State interface {
 	GetTick() int
 	GetWindow() *Container
 	GetDialog() Dialog
+	OpenDialog(d Dialog) //should use OpenDialog() to set dialogs.
 	CloseDialog()
 	Shutdown() //called on program exit
 }
@@ -172,55 +189,56 @@ type StatePrototype struct {
 	dialog Dialog
 }
 
-func (b StatePrototype) GetTick() int {
-	return b.Tick
+func (sp StatePrototype) GetTick() int {
+	return sp.Tick
 }
 
-func (b StatePrototype) HandleKeypress(key sdl.Keycode) {
-
-}
-
-func (b *StatePrototype) Update() {
-	b.Tick++
-}
-
-func (b StatePrototype) Render() {
+func (sp StatePrototype) HandleKeypress(key sdl.Keycode) {
 
 }
 
-func (b StatePrototype) Shutdown() {
+func (sp *StatePrototype) Update() {
+	sp.Tick++
+}
+
+func (sp StatePrototype) Render() {
 
 }
 
-func (b StatePrototype) HandleEvent(e *Event) {
+func (sp StatePrototype) Shutdown() {
 
 }
 
-func (b *StatePrototype) InitWindow(bord bool) {
+func (sp StatePrototype) HandleEvent(e *Event) {
+
+}
+
+func (sp *StatePrototype) InitWindow(bord bool) {
 	w, h := console.Dims()
 	x, y := 0, 0
 	if bord {
 		w, h, x, y = w-2, h-2, 1, 1
 	}
-	b.Window = NewContainer(w, h, x, y, 0, true)
+	sp.Window = NewContainer(w, h, x, y, 0, true)
 }
 
-func (b StatePrototype) GetWindow() *Container {
-	return b.Window
+func (sp StatePrototype) GetWindow() *Container {
+	return sp.Window
 }
 
-func (b *StatePrototype) OpenDialog(d Dialog) {
-	if b.dialog != nil {
-		b.CloseDialog()
+func (sp *StatePrototype) OpenDialog(d Dialog) {
+	if sp.dialog != nil {
+		sp.CloseDialog()
 	}
-	b.dialog = d
+	
+	sp.dialog = d
 }
 
-func (b StatePrototype) GetDialog() Dialog {
-	return b.dialog
+func (sp StatePrototype) GetDialog() Dialog {
+	return sp.dialog
 }
 
-func (b *StatePrototype) CloseDialog() {
-	b.dialog.GetWindow().ToggleVisible()
-	b.dialog = nil
+func (sp *StatePrototype) CloseDialog() {
+	sp.dialog.GetWindow().ToggleVisible()
+	sp.dialog = nil
 }

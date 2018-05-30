@@ -8,8 +8,8 @@ import (
 //like you'd expect. Cool, right?
 type PagedContainer struct {
 	UIElement
-	curPage     int
-	pages       []*Page
+	curPage int
+	pages   []*Page
 }
 
 //Page is a single page in the PagedContainer. Might need to think of a better name for this.
@@ -45,7 +45,7 @@ func (p *PagedContainer) AddPage(title string) *Container {
 	if len(title)%2 == 1 {
 		paddedTitle = paddedTitle + " "
 	}
-	titleBox := NewTextbox(len(paddedTitle)/2, 1, p.x+offX, p.y+1, p.z+2, false, false, paddedTitle)
+	titleBox := NewTextbox(len(paddedTitle)/2, 1, p.x+offX, p.y+1, p.z+1, false, false, paddedTitle)
 
 	newPage := new(Page)
 	newPage.title = titleBox
@@ -124,14 +124,12 @@ func (p *PagedContainer) Render() {
 
 			//remove border below title of selected page
 			curTitle := p.pages[p.curPage].title
-
-			console.Clear(curTitle.width+2, 1, curTitle.x-1, curTitle.y+1, p.z)
+			console.Fill(curTitle.x-1, curTitle.y+1, p.z+1, curTitle.width+2, 1, GLYPH_NONE, COL_BLACK, COL_BLACK)
 			if p.curPage == 0 {
-				console.Clear(1, 1, curTitle.x-2, curTitle.y+1, p.z)
 				console.ChangeCell(curTitle.x-2, curTitle.y+1, p.z+1, GLYPH_BORDER_UDR, console.BorderColour(p.IsFocused()), COL_BLACK)
 			}
-			console.ChangeCell(curTitle.x-1, curTitle.y+1, p.z, GLYPH_BORDER_UL, console.BorderColour(p.IsFocused()), COL_BLACK)
-			console.ChangeCell(curTitle.x+curTitle.width, curTitle.y+1, p.z, GLYPH_BORDER_UR, console.BorderColour(p.IsFocused()), COL_BLACK)
+			console.ChangeCell(curTitle.x-1, curTitle.y+1, p.z+1, GLYPH_BORDER_UL, console.BorderColour(p.IsFocused()), COL_BLACK)
+			console.ChangeCell(curTitle.x+curTitle.width, curTitle.y+1, p.z+1, GLYPH_BORDER_UR, console.BorderColour(p.IsFocused()), COL_BLACK)
 		}
 	}
 }

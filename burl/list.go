@@ -212,7 +212,7 @@ func (l *List) Render() {
 			l.redraw = false
 		}
 
-		if len(l.Elements) <= 0 {
+		if len(l.Elements) == 0 {
 			l.emptyElem.Render()
 		} else {
 			for i, e := range l.Elements {
