@@ -9,50 +9,19 @@ import (
 var debugger debugWindow
 var debug bool
 var debugWatches []watch
+var debugCommands map[string]func ()
 
-//A watch is a variable that we're going to keep an eye on. The debug menu will display
-//the current value of the variable as it changes.
-type watch struct {
-	label string
-	value interface{}
-}
-
-func (w *watch) String() string {
-	if w.value != nil {
-		switch v := w.value.(type) {
-		case *int:
-			return fmt.Sprint(w.label, ": ", *v)
-		case *float64:
-			return fmt.Sprint(w.label, ": ", *v)
-		case *string:
-			return fmt.Sprint(w.label, ": ", *v)
-		case fmt.Stringer:
-			return fmt.Sprint(w.label, ": ", v.String())
-		}
-	}
-
-	return fmt.Sprint(w.label, ": No value.")
-}
-
-//Register a watched variable. If debug mode is on, the value passed here will be
-//available to display in the debug menu (F10). REMEMBER: the value MUST be a
-//pointer!! Valid types that can be watched are int, float32/64, string, and
-//anything with a String() method. ALSO REMEMBER: watches contain references,
-//so anything with a watch won't be garbage collected.
-func RegisterWatch(label string, val interface{}) {
-	if debug {
-		if val != nil {
-			debugWatches = append(debugWatches, watch{label, val})
-			debugger.watchList.Append(debugWatches[len(debugWatches)-1].String())
-			LogInfo("Registered watch: ", label)
-		} else {
-			LogError("Bad Watch Register: ", label)
-		}
-	}
-}
-
-func init() {
+//Activate debugging capabilities. F10 will bring up the debug menu.
+func Debug() {
+	debug = true
 	debugWatches = make([]watch, 0, 20)
+	debugCommands = make(map[string]func ())
+
+	if console != nil {
+		initDebugger()
+	}
+
+	RegisterDebugCommand("fullscreen", console.SetFullscreen)
 }
 
 func initDebugger() {
@@ -134,6 +103,9 @@ func (dw *debugWindow) HandleKeypress(key sdl.Keycode) {
 		case 0: //logs
 			if key == sdl.K_PAGEUP || key == sdl.K_PAGEDOWN {
 				dw.logList.HandleKeypress(key)
+			} else if key == sdl.K_RETURN {
+				executeDebugCommand(dw.logInput.GetText())
+				dw.logInput.Reset()
 			} else {
 				dw.logInput.HandleKeypress(key)
 			}
@@ -147,6 +119,68 @@ func (dw *debugWindow) HandleKeypress(key sdl.Keycode) {
 					console.ToggleChanges()
 				}
 			}
+		}
+	}
+}
+
+//A watch is a variable that we're going to keep an eye on. The debug menu will display
+//the current value of the variable as it changes.
+type watch struct {
+	label string
+	value interface{}
+}
+
+func (w *watch) String() string {
+	if w.value != nil {
+		switch v := w.value.(type) {
+		case *int:
+			return fmt.Sprint(w.label, ": ", *v)
+		case *float64:
+			return fmt.Sprint(w.label, ": ", *v)
+		case *string:
+			return fmt.Sprint(w.label, ": ", *v)
+		case fmt.Stringer:
+			return fmt.Sprint(w.label, ": ", v.String())
+		}
+	}
+
+	return fmt.Sprint(w.label, ": No value.")
+}
+
+//Register a watched variable. If debug mode is on, the value passed here will be
+//available to display in the debug menu (F10). REMEMBER: the value MUST be a
+//pointer!! Valid types that can be watched are int, float32/64, string, and
+//anything with a String() method. ALSO REMEMBER: watches contain references,
+//so anything with a watch won't be garbage collected.
+func RegisterWatch(label string, val interface{}) {
+	if debug {
+		if val != nil {
+			debugWatches = append(debugWatches, watch{label, val})
+			debugger.watchList.Append(debugWatches[len(debugWatches)-1].String())
+			LogInfo("Registered watch: ", label)
+		} else {
+			LogError("Bad Watch Register: ", label)
+		}
+	}
+}
+
+//Register a function to be called when you invoke the command
+//in the debugger. The function must have no arguments and return
+//no value.
+func RegisterDebugCommand(command string, action func () ) {
+	if debug {
+		debugCommands[command] = action
+		LogInfo("Added debug command: ", command)
+	}
+}
+
+func executeDebugCommand(command string) {
+	if debug {
+		if action, ok := debugCommands[command]; ok {
+			LogInfo("Execute debug command: ", command)
+			action()
+		} else {
+			LogError("Bad command: ", command)
 		}
 	}
 }

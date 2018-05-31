@@ -32,7 +32,9 @@ func InitConsole(w, h int, glyphPath, fontPath, title string) (*Console, error) 
 	console = new(Console)
 	err := console.Setup(w, h, glyphPath, fontPath, title)
 	if err == nil {
-		initDebugger()
+		if debug {
+			initDebugger()
+		}
 		return console, err
 	} else {
 		return nil, err
@@ -53,11 +55,6 @@ func OpenDialog(d Dialog) {
 //designed right. Here just in case.
 func CloseDialog() {
 	gameState.CloseDialog()
-}
-
-//Activate debugging capabilities. F10 will bring up the debug menu.
-func Debug() {
-	debug = true
 }
 
 //The Big Enchelada! This is the gameloop that runs everything. Make sure to run
