@@ -17,9 +17,8 @@ func NewButton(w, h, x, y, z int, bord, cent bool, txt string) *Button {
 	return &Button{*NewTextbox(w, h, x, y, z, bord, cent, txt), nil, p}
 }
 
-//register an event to fire when the button is pressed. can be anything. use
-//registerPressEvent() to register a normal press event. If no event is regsitered,
-//a default press event is sent on press.
+//register an event to fire when the button is pressed. can be anything. use registerPressEvent()
+//to register a normal press event. If no event is regsitered, a default press event is sent on press.
 func (b *Button) Register(e *Event) {
 	b.press = e
 }

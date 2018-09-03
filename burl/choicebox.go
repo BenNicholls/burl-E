@@ -11,11 +11,10 @@ const (
 	CHOICE_HORIZONTAL
 )
 
-//Choicebox is a textbox wherein once can cycle through some predefined choices.
-//Only one choice is shown at a time. When focused, arrows appear to indicate
-//which direction on the keyboard cycles the choices (vertical/horizontal).
-//NOTE: This is very similar to a text-only list. Someday maybe these should be
-//combined?
+//Choicebox is a textbox wherein once can cycle through some predefined choices. Only one choice
+//is shown at a time. When focused, arrows appear to indicate which direction on the keyboard 
+//cycles the choices (vertical/horizontal).
+//NOTE: This is very similar to a text-only list. Someday maybe these should be combined?
 type ChoiceBox struct {
 	Textbox
 

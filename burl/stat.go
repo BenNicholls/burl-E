@@ -4,9 +4,8 @@ import "strconv"
 import "bytes"
 import "fmt"
 
-//Stat struct holds the value of a modifiable statistic, always an int.
-//Enforces a max and min value, other nice things. Eventually will support
-//temporary modifiers and the like (I think????).
+//Stat struct holds the value of a modifiable statistic, always an int. Enforces a max and min
+//value, other nice things. Eventually will support temporary modifiers and the like (I think????).
 type Stat struct {
 	val int
 	max int
@@ -27,8 +26,8 @@ func (s *Stat) Set(v int) {
 	s.val = Clamp(v, s.min, s.max)
 }
 
-//Modifies the stat value. Takes a delta (which can of course be negative).
-//Calling this with d = 0 effectively re-ensures min <= val <= max
+//Modifies the stat value. Takes a delta (which can of course be negative). Calling this with d = 0
+//effectively re-ensures min <= val <= max
 func (s *Stat) Mod(d int) {
 	s.Set(s.val + d)
 }
@@ -88,6 +87,7 @@ func (s Stat) String() string {
 	return strconv.Itoa(s.val) + "/" + strconv.Itoa(s.max)
 }
 
+//NOTE: are these necessary? i forget if we need these, i don't think we do.
 func (s Stat) GobEncode() ([]byte, error) {
 	var b bytes.Buffer
 	fmt.Fprintln(&b, s.min, s.max, s.val)

@@ -120,9 +120,8 @@ func (m *TileMap) ClearLights() {
 	}
 }
 
-//Basic unit for the world. Holds a type (grass, wall, etc), a list of contained items
-//(dropped weapons), and a pointer to an Entity if one is standing there
-//Eventually will hold pathfinding information too.
+//Basic unit for the world. Holds a type (grass, wall, etc), a list of contained items (dropped weapons),
+//and a pointer to an Entity if one is standing there. Eventually will hold pathfinding information too.
 type Tile struct {
 	TileType, Variant int //
 	entity            Entity

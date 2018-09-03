@@ -95,9 +95,9 @@ func Clamp(val, min, max int) int {
 	}
 }
 
-//ModularClamp is like clamp but instead of clamping at the endpoints, it overflows/underflows back to the other side of the range.
-//The second argument is the number of overflow cycles. negative for underflow, 0 for none, positive for overflow.
-//This kind of function probably has an actual name but hell if I know what it is.
+//ModularClamp is like clamp but instead of clamping at the endpoints, it overflows/underflows back to the
+//other side of the range. The second argument is the number of overflow cycles. negative for underflow,
+//0 for none, positive for overflow. This kind of function probably has an actual name but hell if I know what it is.
 func ModularClamp(val, min, max int) (int, int) {
 	if min > max {
 		//if someone foolishly puts their min higher than max, swap
@@ -117,7 +117,7 @@ func ModularClamp(val, min, max int) (int, int) {
 	}
 }
 
-//RoundFLoatToInt rounds a float to an int in the way you'd expect. It's the way I expect anyways.
+//RoundFloatToInt rounds a float to an int in the way you'd expect. It's the way I expect anyways.
 func RoundFloatToInt(f float64) int {
 	return int(f + math.Copysign(0.5, f))
 }
@@ -135,8 +135,8 @@ func Lerp(min, max, val, steps int) int {
 	return int(float64(min) + stepVal*float64(val))
 }
 
-//WrapText wraps the provided string at WIDTH characters. optionally takes another int, used to determine the maximum number of lines.
-//returns a slice of strings, each element a wrapped line.
+//WrapText wraps the provided string at WIDTH characters. optionally takes another int, used to determine the
+//maximum number of lines. returns a slice of strings, each element a wrapped line.
 //for words longer than width it just brutally cuts them off. no mercy.
 func WrapText(str string, width int, maxlines ...int) (lines []string) {
 	capped := false
@@ -190,8 +190,8 @@ func WrapText(str string, width int, maxlines ...int) (lines []string) {
 	return
 }
 
-// GetFileList returns a list of all files in the provided directory.
-// If ext is provided, it only includes files with that extension.
+//GetFileList returns a list of all files in the provided directory. If ext is provided, it only includes
+//files with that extension.
 func GetFileList(dirPath, ext string) (files []string, err error) {
 	files = make([]string, 0)
 

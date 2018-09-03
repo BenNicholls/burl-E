@@ -12,12 +12,17 @@ var nextState State
 func InitState(m State) {
 	if gameState == nil {
 		gameState = m
-	}
+	} 
 }
 
 //Tell burl to change from one state to another. This is done at the end of frame. Only the first
 //call to this function will succeed per frame, subsequent calls evoke an error and are ignored.
 func ChangeState(m State) {
+	if m == nil {
+		LogError("Cannot change, new state uninitialized.")
+		return
+	}
+
 	if nextState == nil {
 		nextState = m
 		PushEvent(NewEvent(EV_CHANGE_STATE, ""))
@@ -26,8 +31,8 @@ func ChangeState(m State) {
 	}
 }
 
-//Initializes the console. Returns a pointer to the console so the user can
-//manipulate it manually if they prefer. Returns nil if there was an error.
+//Initializes the console. Returns a pointer to the console so the user can manipulate it manually
+//if they prefer. Returns nil if there was an error.
 func InitConsole(w, h int, glyphPath, fontPath, title string) (*Console, error) {
 	console = new(Console)
 	err := console.Setup(w, h, glyphPath, fontPath, title)
@@ -42,23 +47,22 @@ func InitConsole(w, h int, glyphPath, fontPath, title string) (*Console, error) 
 }
 
 //OpenDialog function so anything can add a dialog to the gamestate.
-//NOTE: if you call this while setting up a state change, the dialog will
-//be added to the CURRENT state, not the one you are building. use the
-//state.OpenDialog() function to add to a new state before switching.
-//THINK: is this the best way to do this??? Maybe dialogs should be like
-//states, individually managed by the engine first-class style. Hmm.
+//NOTE: if you call this while setting up a state change, the dialog will be added to the CURRENT 
+//state, not the one you are building. use the state.OpenDialog() function to add to a new state 
+//before switching.
+//THINK: is this the best way to do this??? Maybe dialogs should be like states, individually managed
+//by the engine first-class style. Hmm.
 func OpenDialog(d Dialog) {
 	gameState.OpenDialog(d)
 }
 
-//Should not have to call this generally, dialogs close themselves when
-//designed right. Here just in case.
+//Should not have to call this generally, dialogs close themselves when designed right. Here just in case.
 func CloseDialog() {
 	gameState.CloseDialog()
 }
 
-//The Big Enchelada! This is the gameloop that runs everything. Make sure to run
-//burl.InitState() and burl.InitConsole before beginning the game!
+//The Big Enchelada! This is the gameloop that runs everything. Make sure to run burl.InitState() and 
+//burl.InitConsole before beginning the game!
 func GameLoop() error {
 	runtime.LockOSThread() //sdl is inherently single-threaded.
 	defer outputLogToDisk()
@@ -227,7 +231,7 @@ func (sp *StatePrototype) OpenDialog(d Dialog) {
 	if sp.dialog != nil {
 		sp.CloseDialog()
 	}
-	
+
 	sp.dialog = d
 }
 

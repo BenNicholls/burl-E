@@ -1,11 +1,11 @@
 package burl
 
-//Shadowcatser runs 8 times over different quadrants. rMatrix supplies
-//rotation coefficients. Linear algebra to the rescue.
+//Shadowcatser runs 8 times over different quadrants. rMatrix supplies rotation coefficients.
+//Linear algebra to the rescue.
 var rMatrix = [8][4]int{{1, 0, 0, 1}, {-1, 0, 0, 1}, {0, -1, 1, 0}, {0, -1, -1, 0}, {-1, 0, 0, -1}, {1, 0, 0, -1}, {0, 1, -1, 0}, {0, 1, 1, 0}}
 
-//THE BIG CHEESE - The one and only Shadowcaster! For all of your FOV needs.
-// fn is a function for the shadowcaster to apply to open spaces it finds.
+//THE BIG CHEESE - The one and only Shadowcaster! For all of your FOV needs. fn is a function 
+//for the shadowcaster to apply to open spaces it finds.
 func (m *TileMap) ShadowCast(x, y, radius int, fn Cast) {
 	if radius <= 0 {
 		return
@@ -17,10 +17,10 @@ func (m *TileMap) ShadowCast(x, y, radius int, fn Cast) {
 }
 
 //TODO: General cleanup. Direct port from python, not exactly golangish.
-//NOTE: The 'cull' bool controls the logic for ensuring the 8 passes don't overlap at
-//the edges. It is set to true for the odd-numbered scans. The shadowcaster still visits
-//these squares twice, but the function fn is not run twice. Trust me Ben, this was the
-//best way you could think of and your other solutions created crazy behaviour. Leave it alone!
+//NOTE: The 'cull' bool controls the logic for ensuring the 8 passes don't overlap at the edges.
+//It is set to true for the odd-numbered scans. The shadowcaster still visits these squares twice,
+//but the function fn is not run twice. Trust me Ben, this was the best way you could think of and
+//your other solutions created crazy behaviour. Leave it alone!
 func (m *TileMap) scan(x, y, row int, slope1, slope2 float32, radius int, r [4]int, cull bool, fn Cast) {
 	if slope1 < slope2 {
 		return
@@ -69,12 +69,11 @@ func (m *TileMap) scan(x, y, row int, slope1, slope2 float32, radius int, r [4]i
 	}
 }
 
-//type specifying precisely what you can pass to the shadowcaster.
-//parameters here are the info that the shadowcaster will deliver
+//type specifying precisely what you can pass to the shadowcaster. parameters here are the info
+//that the shadowcaster will deliver
 type Cast func(m *TileMap, x, y, d, r int)
 
-//Run this over the levelmap to light squares. Linearly interpolates
-//from max (255) at center to 0 at radius.
+//Run this over a tilemap to light squares. Linearly interpolates from max (255) at center to 0 at r
 func Lighten(m *TileMap, x, y, d, r int) {
 	m.Tiles[x+y*m.Width].Light.Bright += (255 - int(255*float32(d)/float32(r*r)))
 }

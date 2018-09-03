@@ -45,9 +45,9 @@ func (c *Container) ClearElements() {
 	}
 }
 
-//Finds the next element in the tabbing order (if one is defined) among elements
-//in the container. Cycles back to the top of the order once the bottom is reached.
-//Returns the original element if no next element is found.
+//Finds the next element in the tabbing order (if one is defined) among elements in the container.
+//Cycles back to the top of the order once the bottom is reached. Returns the original element if
+//no next element is found.
 func (c *Container) FindNextTab(e UIElem) UIElem {
 	var next UIElem
 	var top UIElem
@@ -77,9 +77,9 @@ func (c *Container) FindNextTab(e UIElem) UIElem {
 	return next
 }
 
-//Finds the previous element in the tabbing order (if one is defined) among elements
-//in the container. Cycles back to the bottom of the order once the top is reached.
-//Returns the original element if no previous element is found.
+//Finds the previous element in the tabbing order (if one is defined) among elements in the container.
+//Cycles back to the bottom of the order once the top is reached. Returns the original element if no
+//previous element is found.
 func (c *Container) FindPrevTab(e UIElem) UIElem {
 	var prev UIElem
 	var bottom UIElem

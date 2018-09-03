@@ -123,8 +123,8 @@ func (dw *debugWindow) HandleKeypress(key sdl.Keycode) {
 	}
 }
 
-//A watch is a variable that we're going to keep an eye on. The debug menu will display
-//the current value of the variable as it changes.
+//A watch is a variable that we're going to keep an eye on. The debug menu will display the current
+//value of the variable as it changes.
 type watch struct {
 	label string
 	value interface{}
@@ -147,10 +147,9 @@ func (w *watch) String() string {
 	return fmt.Sprint(w.label, ": No value.")
 }
 
-//Register a watched variable. If debug mode is on, the value passed here will be
-//available to display in the debug menu (F10). REMEMBER: the value MUST be a
-//pointer!! Valid types that can be watched are int, float32/64, string, and
-//anything with a String() method. ALSO REMEMBER: watches contain references,
+//Register a watched variable. If debug mode is on, the value passed here will be available to display
+//in the debug menu (F10). REMEMBER: the value MUST be a pointer!! Valid types that can be watched are
+//int, float32/64, string, and anything with a String() method. ALSO REMEMBER: watches contain references,
 //so anything with a watch won't be garbage collected.
 func RegisterWatch(label string, val interface{}) {
 	if debug {
@@ -164,9 +163,8 @@ func RegisterWatch(label string, val interface{}) {
 	}
 }
 
-//Register a function to be called when you invoke the command
-//in the debugger. The function must have no arguments and return
-//no value.
+//Register a function to be called when you invoke the command in the debugger. The function must have no
+//arguments and return no value.
 func RegisterDebugCommand(command string, action func () ) {
 	if debug {
 		debugCommands[command] = action

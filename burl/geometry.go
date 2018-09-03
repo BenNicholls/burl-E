@@ -6,7 +6,8 @@ var (
 	ZERO_COORD Coord = Coord{0, 0}
 )
 
-//Coord is an (X, Y) pair that represents a spot on some 2d grid. Effectively just an implenetation of util.Vec2 using ints.
+//Coord is an (X, Y) pair that represents a spot on some 2d grid. Effectively just an implenetation of
+//util.Vec2 using ints.
 type Coord struct {
 	X, Y int
 }
@@ -117,8 +118,8 @@ func (v *Vec2Polar) Pos() {
 	}
 }
 
-//Returns the shortest anglular distance from v1 to v2. positive for counterclockwise, negative for clockwise
-//NOTE: Do these need to be Pos()'d?? Hmm.
+//Returns the shortest anglular distance from v1 to v2. positive for counterclockwise, negative for
+//clockwise. NOTE: Do these need to be Pos()'d?? Hmm.
 func (v1 Vec2Polar) AngularDistance(v2 Vec2Polar) float64 {
 	d := v2.Phi - v1.Phi
 
@@ -146,8 +147,8 @@ func (r Rect) Bounds() Rect {
 	return r
 }
 
-//FindIntersectionRect calculates the intersection of two rectangularly-bound objects as a rect
-//if no intersection, returns Rect{0,0,0,0}
+//FindIntersectionRect calculates the intersection of two rectangularly-bound objects as a rect if 
+//no intersection, returns Rect{0,0,0,0}
 func FindIntersectionRect(r1, r2 Bounded) Rect {
 	b1 := r1.Bounds()
 	b2 := r2.Bounds()

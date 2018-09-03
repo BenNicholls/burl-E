@@ -204,9 +204,8 @@ func (u *UIElement) CenterY(h, y int) {
 	u.MoveTo(u.x, (h-y-u.height)/2+y, u.z)
 }
 
-//Sets a Tab number for the element. Elements in the same container can be
-//tabbed back and forth across the TabIDs, starting with 1. Default is 0, which
-//is ignored by the tabbing function.
+//Sets a Tab number for the element. Elements in the same container can be tabbed back and forth across
+//the TabIDs, starting with 1. Default is 0, which is ignored by the tabbing function.
 func (u *UIElement) SetTabID(id int) {
 	u.tabID = id
 }

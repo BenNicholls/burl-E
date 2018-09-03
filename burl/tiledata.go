@@ -9,8 +9,7 @@ type tileTypeData struct {
 	vis         Visuals
 }
 
-//Inits the tile data repository, which for now is just a slice of datas.
-//Also loads a NOTHING entry,
+//Inits the tile data repository, which for now is just a slice of datas. Also loads a NOTHING entry.
 func init() {
 	//tiledata[TILETYPE]
 	tiledata = make([]tileTypeData, 1)

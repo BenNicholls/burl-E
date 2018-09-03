@@ -535,9 +535,8 @@ func (c *Console) CalcBorderGlyph(x, y int) {
 	}
 }
 
-//Clears the canvas. Optionally takes args in form (w, h, x, y, z), with z optional,
-//so you can clear specific areas of the console. If z if provided, it will leave
-//the area at the specified z-level.
+//Clears the canvas. Optionally takes args in form (w, h, x, y, z), with z optional, so you can clear
+//specific areas of the console. If z if provided, it will leave the area at the specified z-level.
 func (c *Console) Clear(area ...int) {
 	w, h, x, y, z := c.width, c.height, 0, 0, 0
 
@@ -559,8 +558,7 @@ func (c *Console) Clear(area ...int) {
 	}
 }
 
-//Fill fills a rect of the console with the provided glyph visuals, at the
-//provided z level.
+//Fill fills a rect of the console with the provided glyph visuals, at the provided z level.
 func (c *Console) Fill(x, y, z, w, h, g int, fore, back uint32) {
 	for i := 0; i < w*h; i++ {
 		ix := x + i%w
