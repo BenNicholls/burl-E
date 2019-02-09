@@ -30,6 +30,16 @@ func (tv *TileView) DrawCircle(x, y, r, glyph int, f, b uint32) {
 		})
 }
 
+//draws a palette to the tileview, one colour per tile. stops when it hits the edge of the view object.
+func (tv *TileView) DrawPalette(x, y int, p Palette) {
+	for i, c := range p {
+		if x + i >= tv.width {
+			break
+		}
+		tv.grid[y*tv.width+x+i].SetGlyph(GLYPH_FILL, c, COL_BLACK, 0)
+	}
+}
+
 func (tv TileView) Render() {
 	if tv.visible {
 		for i, p := range tv.grid {
@@ -62,3 +72,4 @@ func (tv *TileView) LoadImageFromXP(filename string) {
 	}
 
 }
+

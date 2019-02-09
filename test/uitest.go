@@ -26,14 +26,14 @@ func main() {
 
 type TestUI struct {
 	burl.StatePrototype
-	tiles     *burl.TileView
+	tiles   *burl.TileView
+	palette *burl.TileView
 
 	yes bool
 }
 
 func (t *TestUI) SetupUI() {
-	t.Window = burl.NewContainer(50, 20, 2, 2, 0, true)
-	t.Window.SetTitle("")
+	t.InitWindow(false)
 
 	textbox := burl.NewTextbox(30, 20, 2, 2, 0, true, false, "")
 	textbox.ChangeText("Loremipsumdolorsitamet,consecteturadipiscingelit.Donecvitaenibhrisus. Quisque consectetur lacus eu velit viverra convallis. In at mattis orci. Suspendisse rhoncus lacinia elit ac ullamcorper. Donec id mattis velit, in condimentum massa. Nam non dui eu urna lacinia varius ut nec justo. Suspendisse consequat ornare neque, sit amet cursus enim volutpat in. Proin nibh ante, tempus in laoreet luctus, tempus in eros.")
@@ -44,6 +44,15 @@ func (t *TestUI) SetupUI() {
 	t.tiles.CenterInConsole()
 	t.tiles.SetTitle("Whatever")
 	t.tiles.LoadImageFromXP("res/anomaly.xp")
+
+	p := burl.GeneratePalette(20, burl.COL_LIME, burl.COL_BLUE)
+	p.Add(burl.GeneratePalette(20, burl.COL_BLUE, burl.COL_RED))
+	burl.LogInfo(len(p))
+
+	t.palette = burl.NewTileView(40, 1, 4, 36, 3, true)
+	t.palette.DrawPalette(0, 0, p)
+
+	t.Window.Add(t.palette)
 
 	t.yes = false
 }

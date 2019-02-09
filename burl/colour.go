@@ -43,3 +43,32 @@ const (
 	COL_NAVY      uint32 = 0xFF000080
 	COL_PURPLE    uint32 = 0xFF800080
 )
+
+type Palette []uint32 
+
+//Generate a palette with num items, passing from colour c1 to c2. The colours are
+//lineraly interpolated evenly from one to the next. Palette is NOT circular.
+//TODO: Circular palette function?
+func GeneratePalette(num int, c1, c2 uint32) (p Palette) {
+	p = make(Palette, num)
+
+	r1, g1, b1, _ := GetRGBA(c1)
+	r2, g2, b2, _ := GetRGBA(c2)
+
+	for i := range p {
+		p[i] = MakeOpaqueColour(Lerp(int(r1), int(r2), i, len(p)), Lerp(int(g1), int(g2), i, len(p)), Lerp(int(b1), int(b2), i, len(p)))
+	}
+
+	p[num-1] = c2 //fix end of palette rounding lerp stuff.
+
+	return
+}
+
+//Adds the palette p2 to the end of p.
+func (p *Palette) Add(p2 Palette) {
+	if (*p)[len(*p) - 1] == p2[0] {
+		*p = append(*p, p2[1:]...)
+	} else {
+		*p = append(*p, p2...)
+	}
+}
