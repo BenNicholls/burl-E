@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	CHOICE_VERTICAL int = iota
-	CHOICE_HORIZONTAL
+	VERTICAL int = iota
+	HORIZONTAL
 )
 
 //Choicebox is a textbox wherein once can cycle through some predefined choices. Only one choice
@@ -30,10 +30,10 @@ func NewChoiceBox(w, h, x, y, z int, bord bool, dir int, choices ...string) (cb 
 	cb.Textbox = *NewTextbox(w, h, x, y, z, bord, true, "")
 	cb.choices = choices
 
-	if dir == CHOICE_VERTICAL {
-		cb.direction = CHOICE_VERTICAL
+	if dir == VERTICAL {
+		cb.direction = VERTICAL
 	} else {
-		cb.direction = CHOICE_HORIZONTAL
+		cb.direction = HORIZONTAL
 	}
 
 	if len(cb.choices) == 0 {
@@ -71,7 +71,7 @@ func (cb *ChoiceBox) RandomizeChoice() {
 }
 
 func (cb *ChoiceBox) HandleKeypress(key sdl.Keycode) {
-	if cb.direction == CHOICE_HORIZONTAL {
+	if cb.direction == HORIZONTAL {
 		switch key {
 		case sdl.K_LEFT:
 			cb.Prev()
@@ -93,7 +93,7 @@ func (cb ChoiceBox) Render() {
 		cb.Textbox.Render()
 
 		//draw choice cycling triangles
-		if cb.direction == CHOICE_HORIZONTAL {
+		if cb.direction == HORIZONTAL {
 			console.ChangeCell(cb.x, cb.y+cb.height/2, cb.z, GLYPH_TRIANGLE_LEFT, COL_WHITE, COL_BLACK)
 			console.ChangeCell(cb.x+cb.width-1, cb.y+cb.height/2, cb.z, GLYPH_TRIANGLE_RIGHT, COL_WHITE, COL_BLACK)
 		} else {

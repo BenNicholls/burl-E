@@ -30,13 +30,20 @@ func (tv *TileView) DrawCircle(x, y, r, glyph int, f, b uint32) {
 		})
 }
 
-//draws a palette to the tileview, one colour per tile. stops when it hits the edge of the view object.
-func (tv *TileView) DrawPalette(x, y int, p Palette) {
+//draws a palette to the tileview, one colour per tile. stops when it hits the edge of the view object. dir is HORIZONTAL or VERTICAL.
+func (tv *TileView) DrawPalette(x, y int, p Palette, dir int) {
 	for i, c := range p {
-		if x + i >= tv.width {
-			break
+		if dir == HORIZONTAL {
+			if x + i >= tv.width {
+				break
+			}
+			tv.grid[y*tv.width+x+i].SetGlyph(GLYPH_FILL, c, COL_BLACK, 0)
+		} else {
+			if y + i >= tv.height {
+				break
+			}
+			tv.grid[(y+i)*tv.width+x].SetGlyph(GLYPH_FILL, c, COL_BLACK, 0)
 		}
-		tv.grid[y*tv.width+x+i].SetGlyph(GLYPH_FILL, c, COL_BLACK, 0)
 	}
 }
 

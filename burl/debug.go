@@ -58,8 +58,8 @@ func initDebugger() {
 	debugger.flagsPage = debugger.AddPage("Flags")
 	debugger.flagsList = NewList(pw, ph, 10, 0, 0, false, "No flags")
 
-	debugger.fpsChoice = NewChoiceBox(4, 1, 0, 0, 0, false, CHOICE_HORIZONTAL, "OFF", "ON")
-	debugger.changesChoice = NewChoiceBox(4, 1, 0, 0, 0, false, CHOICE_HORIZONTAL, "OFF", "ON")
+	debugger.fpsChoice = NewChoiceBox(4, 1, 0, 0, 0, false, HORIZONTAL, "OFF", "ON")
+	debugger.changesChoice = NewChoiceBox(4, 1, 0, 0, 0, false, HORIZONTAL, "OFF", "ON")
 
 	debugger.flagsPage.Add(NewTextbox(10, 1, 0, 0, 0, false, false, "FPS Counter"))
 	debugger.flagsPage.Add(NewTextbox(10, 1, 0, 1, 0, false, false, "Show Renders"))

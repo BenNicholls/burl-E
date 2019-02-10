@@ -50,7 +50,7 @@ func (t *TestUI) SetupUI() {
 	burl.LogInfo(len(p))
 
 	t.palette = burl.NewTileView(40, 1, 4, 36, 3, true)
-	t.palette.DrawPalette(0, 0, p)
+	t.palette.DrawPalette(0, 0, p, burl.HORIZONTAL)
 
 	t.Window.Add(t.palette)
 
