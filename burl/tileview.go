@@ -16,9 +16,15 @@ func NewTileView(w, h, x, y, z int, bord bool) *TileView {
 	return tv
 }
 
-//Draws a glyph to the TileView.
+//Draws a glyph to the TileView. if COL_NONE is passed as a parameter, uses the colour that was previously there.
 func (tv *TileView) Draw(x, y, glyph int, f, b uint32) {
 	if CheckBounds(x, y, tv.width, tv.height) {
+		if f == COL_NONE {
+			f = tv.grid[y*tv.width+x].ForeColour
+		}
+		if b == COL_NONE {
+			b = tv.grid[y*tv.width+x].BackColour
+		}
 		tv.grid[y*tv.width+x].SetGlyph(glyph, f, b, tv.z)
 	}
 }
