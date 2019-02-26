@@ -23,8 +23,8 @@ type ChoiceBox struct {
 	direction int //see direction consts above
 }
 
-//NewChoiceBox. Textbox parameters as normal. dir parameter is either CHOICE_HORIZONTAL or
-//CHOICE_VERTICAL. Defaults to horizontal. Then accepts any number of strings as choices.
+//NewChoiceBox. Textbox parameters as normal. dir parameter is either HORIZONTAL or
+//VERTICAL. Defaults to horizontal. Then accepts any number of strings as choices.
 func NewChoiceBox(w, h, x, y, z int, bord bool, dir int, choices ...string) (cb *ChoiceBox) {
 	cb = new(ChoiceBox)
 	cb.Textbox = *NewTextbox(w, h, x, y, z, bord, true, "")
@@ -100,6 +100,5 @@ func (cb ChoiceBox) Render() {
 			console.ChangeCell(cb.x+cb.width/2, cb.y-1, cb.z, GLYPH_TRIANGLE_UP, COL_WHITE, COL_BLACK)
 			console.ChangeCell(cb.x+cb.width/2, cb.y+cb.height, cb.z, GLYPH_TRIANGLE_DOWN, COL_WHITE, COL_BLACK)
 		}
-
 	}
 }
