@@ -28,26 +28,6 @@ func GenerateCoord(x, y, w, h int) (int, int) {
 	return rand.Intn(w) + x, rand.Intn(h) + y
 }
 
-//Distance calculates the distance squared (sqrt unnecessary usually)
-func Distance(x1, y1, x2, y2 int) int {
-	return (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)
-}
-
-//ManhattanDistance calculates the manhattan (or taxicab) distance on a square grid.
-func ManhattanDistance(x1, y1, x2, y2 int) int {
-	return Abs(x2-x1) + Abs(y2-y1)
-}
-
-//CheckBounds ensures (x,y) is inside (0, 0, w, h)
-func CheckBounds(x, y, w, h int) bool {
-	return x >= 0 && x < w && y >= 0 && y < h
-}
-
-//IsInside checks if the point (px, py) is within the rect (x, y, w h).
-func IsInside(px, py, x, y, w, h int) bool {
-	return px >= x && px < x+w && py >= y && py < y+h
-}
-
 //Pow is an integer power function. Doesn't ~~do~~ negative exponents. Totally does 0 though.
 func Pow(val, exp int) int {
 	v := 1

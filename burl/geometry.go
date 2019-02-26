@@ -147,6 +147,27 @@ func (r Rect) Bounds() Rect {
 	return r
 }
 
+//Distance calculates the distance squared (sqrt unnecessary usually)
+func Distance(x1, y1, x2, y2 int) int {
+	return (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2)
+}
+
+//ManhattanDistance calculates the manhattan (or taxicab) distance on a square grid.
+func ManhattanDistance(x1, y1, x2, y2 int) int {
+	return Abs(x2-x1) + Abs(y2-y1)
+}
+
+//CheckBounds ensures (x,y) is inside (0, 0, w, h)
+func CheckBounds(x, y, w, h int) bool {
+	return x >= 0 && x < w && y >= 0 && y < h
+}
+
+//IsInside checks if the point (x, y) is within the object b.
+func IsInside(x, y int, b Bounded) bool {
+	r := b.Bounds()
+	return x >= r.X && x < r.X+r.W && y >= r.Y && y < r.Y+r.H
+}
+
 //FindIntersectionRect calculates the intersection of two rectangularly-bound objects as a rect if 
 //no intersection, returns Rect{0,0,0,0}
 func FindIntersectionRect(r1, r2 Bounded) Rect {
