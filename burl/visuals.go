@@ -1,5 +1,10 @@
 package burl
 
+//Defines anything with the ability to be drawn.
+type Drawable interface {
+	GetVisuals() Visuals
+}
+
 type Visuals struct {
 	Glyph      int
 	ForeColour uint32
@@ -16,6 +21,10 @@ func (v *Visuals) ChangeForeColour(f uint32) {
 
 func (v *Visuals) ChangeBackColour(b uint32) {
 	v.BackColour = b
+}
+
+func (v Visuals) GetVisuals() Visuals {
+	return v
 }
 
 //code page 437 glyphs

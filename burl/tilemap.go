@@ -144,7 +144,7 @@ func (t Tile) Empty() bool {
 }
 
 func (t Tile) GetVisuals() Visuals {
-	return tiledata[t.TileType].vis
+	return GetTileVisuals(t.TileType)
 }
 
 //Light characteristics for each tile.

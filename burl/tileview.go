@@ -29,6 +29,11 @@ func (tv *TileView) Draw(x, y, glyph int, f, b uint32) {
 	}
 }
 
+//Draws a drawable object on the tileview at coord (x, y). If (x, y) not in bounds, does nothing.
+func (tv *TileView) DrawObject(x, y int, d Drawable) {
+	tv.Draw(x, y, d.GetVisuals().Glyph, d.GetVisuals().ForeColour, d.GetVisuals().BackColour)
+}
+
 func (tv *TileView) DrawCircle(x, y, r, glyph int, f, b uint32) {
 	DrawCircle(Coord{x, y}, r,
 		func(x, y int) {

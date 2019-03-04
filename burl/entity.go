@@ -5,21 +5,22 @@ package burl
 type Entity interface {
 	Move(dx, dy int)
 	MoveTo(x, y int)
-	GetVisuals() Visuals
 	GetLight() EntityLight
+	Drawable
 }
 
 //Basic entity definition. Entities position and visual information. Anything that occupies space on
 //a TileMap is an entity. Players and enemies, furniture, doors, whatever. More specific things can be
 //added to this class to give all possible entites these features.
 type EntityPrototype struct {
+	Visuals //Visual information for rendering to the TileMap
+	
 	X, Y  int     //Position on a TileMap
-	Vis   Visuals //Visual information for rendering to the TileMap
 	Light EntityLight
 }
 
 func NewBurlEntity(x, y int, v Visuals) *EntityPrototype {
-	return &EntityPrototype{x, y, v, EntityLight{}}
+	return &EntityPrototype{v, x, y, EntityLight{}}
 }
 
 func (e *EntityPrototype) Move(dx, dy int) {
@@ -30,10 +31,6 @@ func (e *EntityPrototype) Move(dx, dy int) {
 func (e *EntityPrototype) MoveTo(x, y int) {
 	e.X = x
 	e.Y = y
-}
-
-func (e EntityPrototype) GetVisuals() Visuals {
-	return e.Vis
 }
 
 func (e EntityPrototype) GetLight() EntityLight {
