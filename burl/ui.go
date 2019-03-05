@@ -83,15 +83,15 @@ func (u *UIElement) Redraw() {
 	}
 }
 
-func (u UIElement) Dims() (int, int) {
+func (u *UIElement) Dims() (int, int) {
 	return u.width, u.height
 }
 
-func (u UIElement) Pos() (int, int, int) {
+func (u*UIElement) Pos() (int, int, int) {
 	return u.x, u.y, u.z
 }
 
-func (u UIElement) Bounds() Rect {
+func (u *UIElement) Bounds() Rect {
 	return Rect{u.width, u.height, u.x, u.y}
 }
 
@@ -154,7 +154,7 @@ func (u *UIElement) SetVisibility(v bool) {
 	}
 }
 
-func (u UIElement) IsVisible() bool {
+func (u *UIElement) IsVisible() bool {
 	return u.visible
 }
 
@@ -162,7 +162,7 @@ func (u *UIElement) ToggleFocus() {
 	u.focused = !u.focused
 }
 
-func (u UIElement) IsFocused() bool {
+func (u *UIElement) IsFocused() bool {
 	return u.focused
 }
 
@@ -210,7 +210,7 @@ func (u *UIElement) SetTabID(id int) {
 	u.tabID = id
 }
 
-func (u UIElement) TabID() int {
+func (u *UIElement) TabID() int {
 	return u.tabID
 }
 

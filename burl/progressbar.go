@@ -20,7 +20,7 @@ func (pb *ProgressBar) ChangeProgress(d int) {
 	pb.SetProgress(pb.progress + d)
 }
 
-func (pb ProgressBar) GetProgress() int {
+func (pb *ProgressBar) GetProgress() int {
 	return pb.progress
 }
 
@@ -28,7 +28,7 @@ func (pb *ProgressBar) SetProgressColour(c uint32) {
 	pb.progresscolour = c
 }
 
-func (pb ProgressBar) Render() {
+func (pb *ProgressBar) Render() {
 	if pb.visible {
 		pb.Textbox.Render()
 

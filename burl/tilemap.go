@@ -9,7 +9,7 @@ func NewMap(w, h int) *TileMap {
 	return &TileMap{Width: w, Height: h, Tiles: make([]Tile, w*h)}
 }
 
-func (m TileMap) Dims() (int, int) {
+func (m *TileMap) Dims() (int, int) {
 	return m.Width, m.Height
 }
 
@@ -19,7 +19,7 @@ func (m *TileMap) ChangeTileType(x, y, tile int) {
 	}
 }
 
-func (m TileMap) GetTileType(x, y int) int {
+func (m *TileMap) GetTileType(x, y int) int {
 	if CheckBounds(x, y, m.Width, m.Height) {
 		return m.Tiles[y*m.Width+x].TileType
 	} else {
@@ -27,7 +27,7 @@ func (m TileMap) GetTileType(x, y int) int {
 	}
 }
 
-func (m TileMap) GetTile(x, y int) Tile {
+func (m *TileMap) GetTile(x, y int) Tile {
 	if CheckBounds(x, y, m.Width, m.Height) {
 		return m.Tiles[y*m.Width+x]
 	} else {
@@ -64,7 +64,7 @@ func (m *TileMap) MoveEntity(x, y, dx, dy int) {
 	}
 }
 
-func (m TileMap) GetEntity(x, y int) Entity {
+func (m *TileMap) GetEntity(x, y int) Entity {
 	if CheckBounds(x, y, m.Width, m.Height) {
 		return m.Tiles[x+y*m.Width].entity
 	} else {
@@ -99,7 +99,7 @@ func (m *TileMap) ChangeTileColour(x, y int, c uint32) {
 	}
 }
 
-func (m TileMap) LastVisible(x, y int) int {
+func (m *TileMap) LastVisible(x, y int) int {
 	if CheckBounds(x, y, m.Width, m.Height) {
 		return m.Tiles[x+y*m.Width].LastVisible
 	} else {

@@ -58,7 +58,7 @@ func (tv *TileView) DrawPalette(x, y int, p Palette, dir int) {
 	}
 }
 
-func (tv TileView) Render() {
+func (tv *TileView) Render() {
 	if tv.visible {
 		for i, p := range tv.grid {
 			console.ChangeCell(tv.x+i%tv.width, tv.y+i/tv.width, tv.z, p.Glyph, p.ForeColour, p.BackColour)

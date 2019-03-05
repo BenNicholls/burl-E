@@ -56,15 +56,15 @@ func (p *PagedContainer) AddPage(title string) *Container {
 	return newPage.page
 }
 
-func (p PagedContainer) GetPageDims() (int, int) {
+func (p *PagedContainer) GetPageDims() (int, int) {
 	return p.width, p.height - 3
 }
 
-func (p PagedContainer) CurrentIndex() int {
+func (p *PagedContainer) CurrentIndex() int {
 	return p.curPage
 }
 
-func (p PagedContainer) CurrentPage() *Container {
+func (p *PagedContainer) CurrentPage() *Container {
 	return p.pages[p.curPage].page
 }
 

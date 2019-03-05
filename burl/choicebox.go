@@ -61,7 +61,7 @@ func (cb *ChoiceBox) Prev() {
 	PushEvent(NewUIEvent(EV_LIST_CYCLE, "-", cb))
 }
 
-func (cb ChoiceBox) GetChoice() int {
+func (cb *ChoiceBox) GetChoice() int {
 	return cb.curChoice
 }
 
@@ -88,7 +88,7 @@ func (cb *ChoiceBox) HandleKeypress(key sdl.Keycode) {
 	}
 }
 
-func (cb ChoiceBox) Render() {
+func (cb *ChoiceBox) Render() {
 	if cb.visible {
 		cb.Textbox.Render()
 

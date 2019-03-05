@@ -461,7 +461,7 @@ func (c *Console) DrawBorder(x, y, z, w, h int, title, hint string, focused bool
 	}
 }
 
-func (c Console) BorderColour(focused bool) uint32 {
+func (c *Console) BorderColour(focused bool) uint32 {
 	if focused {
 		return COL_PURPLE
 	}
@@ -568,7 +568,7 @@ func (c *Console) Fill(x, y, z, w, h, g int, fore, back uint32) {
 }
 
 //Returns the dimensions of the canvas.
-func (c Console) Dims() (w, h int) {
+func (c *Console) Dims() (w, h int) {
 	return c.width, c.height
 }
 

@@ -37,7 +37,7 @@ func (l *List) Select(s int) {
 	}
 }
 
-func (l List) GetSelection() int {
+func (l *List) GetSelection() int {
 	return l.selected
 }
 
