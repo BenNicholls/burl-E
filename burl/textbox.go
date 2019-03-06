@@ -50,7 +50,7 @@ func (t *Textbox) Render() {
 			}
 
 			if line != "" {
-				console.DrawText(t.x+lineOffset/2, t.y+l, t.z, line, COL_WHITE, COL_BLACK, lineOffset%2)
+				console.DrawText(t.x+lineOffset/2, t.y+l, t.z, line, COL_WHITE, t.backColour, lineOffset%2)
 			}
 
 			//blank out area after text

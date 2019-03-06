@@ -51,6 +51,12 @@ type Cell struct {
 
 //Sets the properties of a cell all at once for Glyph Mode.
 func (c *Cell) SetGlyph(gl int, fore, back uint32, z int) {
+	if fore == COL_NONE {
+		fore = c.ForeColour
+	}
+	if back == COL_NONE {
+		back = c.BackColour
+	}
 	if c.Glyph != gl || c.ForeColour != fore || c.BackColour != back || c.Z != z || c.Mode == DRAW_TEXT {
 		c.Mode = DRAW_GLYPH
 		c.Glyph = gl
@@ -66,6 +72,12 @@ func (c *Cell) SetGlyph(gl int, fore, back uint32, z int) {
 
 //Sets the properties of a cell all at once for Text Mode.
 func (c *Cell) SetText(char1, char2 int, fore, back uint32, z int) {
+	if fore == COL_NONE {
+		fore = c.ForeColour
+	}
+	if back == COL_NONE {
+		back = c.BackColour
+	}
 	if c.Chars[0] != char1 || c.Chars[1] != char2 || c.ForeColour != fore || c.BackColour != back || c.Z != z || c.Mode == DRAW_GLYPH {
 		c.Mode = DRAW_TEXT
 		c.Chars[0] = char1
@@ -476,6 +488,7 @@ func (c *Console) SetCellBorder(x, y, z int, fore uint32) {
 			c.canvas[s].Border = true
 			c.canvas[s].Z = z
 			c.canvas[s].ForeColour = fore
+			c.canvas[s].BackColour = COL_BLACK
 			c.canvas[s].Mode = DRAW_GLYPH
 			c.canvas[s].Dirty = true
 		}

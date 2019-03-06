@@ -18,6 +18,7 @@ type UIElem interface {
 	ToggleVisible()
 	SetVisibility(v bool)
 	IsVisible() bool
+	SetBackColour(colour uint32)
 	ToggleFocus()
 	IsFocused() bool
 	CenterInConsole()
@@ -34,8 +35,9 @@ type UIElement struct {
 	hint          string
 	visible       bool
 	focused       bool
-	tabID         int  //for to tab between elements in a container
-	dirty         bool //only used for some elements. could be used all around probably??
+	tabID         int    //for to tab between elements in a container
+	dirty         bool   //only used for some elements. could be used all around probably??
+	backColour    uint32 //defaults to COL_BLACK. forecolour is controlled by the specific element type.
 
 	anims []Animator
 }
@@ -51,6 +53,7 @@ func NewUIElement(w, h, x, y, z int, bord bool) UIElement {
 		visible:  true,
 		anims:    make([]Animator, 0, 20),
 		dirty:    true,
+		backColour: COL_BLACK,
 	}
 }
 
@@ -75,9 +78,9 @@ func (u *UIElement) Render() {
 func (u *UIElement) Redraw() {
 	if u.visible {
 		if u.bordered {
-			console.Fill(u.x-1, u.y-1, u.z, u.width+2, u.height+2, GLYPH_NONE, COL_BLACK, COL_BLACK)
+			console.Fill(u.x-1, u.y-1, u.z, u.width+2, u.height+2, GLYPH_NONE, COL_BLACK, u.backColour)
 		} else {
-			console.Fill(u.x, u.y, u.z, u.width, u.height, GLYPH_NONE, COL_BLACK, COL_BLACK)
+			console.Fill(u.x, u.y, u.z, u.width, u.height, GLYPH_NONE, COL_BLACK, u.backColour)
 		}
 		u.dirty = true
 	}
@@ -113,6 +116,10 @@ func (u *UIElement) SetTitle(txt string) {
 
 func (u *UIElement) SetHint(txt string) {
 	u.hint = txt
+}
+
+func (u *UIElement) SetBackColour(c uint32) {
+	u.backColour = c
 }
 
 func (u *UIElement) ToggleVisible() {

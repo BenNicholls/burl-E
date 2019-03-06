@@ -48,12 +48,12 @@ func (tv *TileView) DrawPalette(x, y int, p Palette, dir int) {
 			if x + i >= tv.width {
 				break
 			}
-			tv.grid[y*tv.width+x+i].SetGlyph(GLYPH_FILL, c, COL_BLACK, 0)
+			tv.grid[y*tv.width+x+i].SetGlyph(GLYPH_NONE, COL_NONE, c, 0)
 		} else {
 			if y + i >= tv.height {
 				break
 			}
-			tv.grid[(y+i)*tv.width+x].SetGlyph(GLYPH_FILL, c, COL_BLACK, 0)
+			tv.grid[(y+i)*tv.width+x].SetGlyph(GLYPH_NONE, COL_NONE, c, 0)
 		}
 	}
 }
