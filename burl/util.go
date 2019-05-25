@@ -54,8 +54,24 @@ func Max(i, j int) int {
 	}
 }
 
+func MaxF(i, j float64) float64 {
+	if i < j {
+		return j
+	} else {
+		return i
+	}
+}
+
 //Min is the opposite of max.
 func Min(i, j int) int {
+	if i > j {
+		return j
+	} else {
+		return i
+	}
+}
+
+func MinF(i, j float64) float64 {
 	if i > j {
 		return j
 	} else {
