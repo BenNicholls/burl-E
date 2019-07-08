@@ -99,7 +99,6 @@ func (ba *BlinkCharAnimation) SetCharNum(num int) {
 func (ba *BlinkCharAnimation) Render(offX, offY, offZ int) {
 	if ba.enabled {
 		if ba.state {
-			console.ChangeForeColour(ba.x+offX, ba.y+offY, ba.z+offZ, COL_WHITE)
 			console.ChangeChar(ba.x+offX, ba.y+offY, ba.z+offZ, 31, ba.startCharNum)
 		} else {
 			console.ChangeChar(ba.x+offX, ba.y+offY, ba.z+offZ, 32, ba.startCharNum)

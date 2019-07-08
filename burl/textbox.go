@@ -46,16 +46,18 @@ func (t *Textbox) Render() {
 				//blank out area before text
 				for i := 0; i < lineOffset; i++ {
 					console.ChangeChar(t.x+i/2, t.y+l, t.z, int(' '), i%2)
+					console.ChangeColours(t.x+i/2, t.y+l, t.z, t.foreColour, t.backColour)
 				}
 			}
 
 			if line != "" {
-				console.DrawText(t.x+lineOffset/2, t.y+l, t.z, line, COL_WHITE, t.backColour, lineOffset%2)
+				console.DrawText(t.x+lineOffset/2, t.y+l, t.z, line, t.foreColour, t.backColour, lineOffset%2)
 			}
 
 			//blank out area after text
 			for i := lineOffset + len(line); i < t.width*2; i++ {
 				console.ChangeChar(t.x+i/2, t.y+l, t.z, int(' '), i%2)
+				console.ChangeColours(t.x+i/2, t.y+l, t.z, t.foreColour, t.backColour)
 			}
 		}
 
@@ -63,6 +65,7 @@ func (t *Textbox) Render() {
 		for y := len(t.lines); y < t.height; y++ {
 			for x := 0; x < t.width; x++ {
 				console.ChangeText(t.x+x, t.y+y, t.z, int(' '), int(' '))
+				console.ChangeColours(t.x+x, t.y+y, t.z, t.foreColour, t.backColour)
 			}
 		}
 

@@ -92,9 +92,9 @@ func (c *Cell) SetText(char1, char2 int, fore, back uint32, z int) {
 //Re-inits a cell back to default blankness.
 func (c *Cell) Clear() {
 	if c.Mode == DRAW_TEXT {
-		c.SetText(32, 32, COL_BLACK, COL_BLACK, 0)
+		c.SetText(32, 32, COL_WHITE, COL_BLACK, 0)
 	} else {
-		c.SetGlyph(GLYPH_NONE, COL_BLACK, COL_BLACK, 0)
+		c.SetGlyph(GLYPH_NONE, COL_WHITE, COL_BLACK, 0)
 	}
 }
 

@@ -217,15 +217,17 @@ func (l *List) Render() {
 		} else {
 			for i, e := range l.Elements {
 				_, y, _ := e.Pos()
-				w, h := e.Dims()
+				_, h := e.Dims()
 				if y < l.y+l.height && y+h > l.y {
-					e.Render()
 					if l.Highlight && i == l.selected {
-						for j := 0; j < h; j++ {
-							for i := 0; i < w; i++ {
-								console.Invert(l.x+i, j+y, l.z)
-							}
-						}
+						f, b := e.Colours()
+						e.SetForeColour(b)
+						e.SetBackColour(f)
+						e.Render()
+						e.SetForeColour(f)
+						e.SetBackColour(b)
+					} else {
+						e.Render()
 					}
 				}
 			}

@@ -94,11 +94,11 @@ func (cb *ChoiceBox) Render() {
 
 		//draw choice cycling triangles
 		if cb.direction == HORIZONTAL {
-			console.ChangeCell(cb.x, cb.y+cb.height/2, cb.z, GLYPH_TRIANGLE_LEFT, COL_WHITE, COL_BLACK)
-			console.ChangeCell(cb.x+cb.width-1, cb.y+cb.height/2, cb.z, GLYPH_TRIANGLE_RIGHT, COL_WHITE, COL_BLACK)
+			console.ChangeCell(cb.x, cb.y+cb.height/2, cb.z, GLYPH_TRIANGLE_LEFT, cb.foreColour, cb.backColour)
+			console.ChangeCell(cb.x+cb.width-1, cb.y+cb.height/2, cb.z, GLYPH_TRIANGLE_RIGHT, cb.foreColour, cb.backColour)
 		} else {
-			console.ChangeCell(cb.x+cb.width/2, cb.y-1, cb.z, GLYPH_TRIANGLE_UP, COL_WHITE, COL_BLACK)
-			console.ChangeCell(cb.x+cb.width/2, cb.y+cb.height, cb.z, GLYPH_TRIANGLE_DOWN, COL_WHITE, COL_BLACK)
+			console.ChangeCell(cb.x+cb.width/2, cb.y-1, cb.z, GLYPH_TRIANGLE_UP, cb.foreColour, cb.backColour)
+			console.ChangeCell(cb.x+cb.width/2, cb.y+cb.height, cb.z, GLYPH_TRIANGLE_DOWN, cb.foreColour, cb.backColour)
 		}
 	}
 }

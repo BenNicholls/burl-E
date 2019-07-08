@@ -11,6 +11,7 @@ type UIElem interface {
 	Dims() (w int, h int)
 	Pos() (x int, y int, z int)
 	Bounds() Rect
+	Colours() (fore, back uint32)
 	MoveTo(x, y, z int)
 	Move(dx, dy, dz int)
 	SetTitle(title string)
@@ -18,6 +19,7 @@ type UIElem interface {
 	ToggleVisible()
 	SetVisibility(v bool)
 	IsVisible() bool
+	SetForeColour(colour uint32)
 	SetBackColour(colour uint32)
 	ToggleFocus()
 	IsFocused() bool
@@ -37,7 +39,8 @@ type UIElement struct {
 	focused       bool
 	tabID         int    //for to tab between elements in a container
 	dirty         bool   //only used for some elements. could be used all around probably??
-	backColour    uint32 //defaults to COL_BLACK. forecolour is controlled by the specific element type.
+	foreColour    uint32 //defaults to COL_WHITE
+	backColour    uint32 //defaults to COL_BLACK
 
 	anims []Animator
 }
@@ -53,6 +56,7 @@ func NewUIElement(w, h, x, y, z int, bord bool) UIElement {
 		visible:  true,
 		anims:    make([]Animator, 0, 20),
 		dirty:    true,
+		foreColour: COL_WHITE,
 		backColour: COL_BLACK,
 	}
 }
@@ -78,9 +82,9 @@ func (u *UIElement) Render() {
 func (u *UIElement) Redraw() {
 	if u.visible {
 		if u.bordered {
-			console.Fill(u.x-1, u.y-1, u.z, u.width+2, u.height+2, GLYPH_NONE, COL_BLACK, u.backColour)
+			console.Fill(u.x-1, u.y-1, u.z, u.width+2, u.height+2, GLYPH_NONE, u.foreColour, u.backColour)
 		} else {
-			console.Fill(u.x, u.y, u.z, u.width, u.height, GLYPH_NONE, COL_BLACK, u.backColour)
+			console.Fill(u.x, u.y, u.z, u.width, u.height, GLYPH_NONE, u.foreColour, u.backColour)
 		}
 		u.dirty = true
 	}
@@ -96,6 +100,10 @@ func (u*UIElement) Pos() (int, int, int) {
 
 func (u *UIElement) Bounds() Rect {
 	return Rect{u.width, u.height, u.x, u.y}
+}
+
+func (u *UIElement) Colours() (uint32, uint32) {
+	return u.foreColour, u.backColour
 }
 
 func (u *UIElement) Move(dx, dy, dz int) {
@@ -116,6 +124,10 @@ func (u *UIElement) SetTitle(txt string) {
 
 func (u *UIElement) SetHint(txt string) {
 	u.hint = txt
+}
+
+func (u *UIElement) SetForeColour(c uint32) {
+	u.foreColour = c
 }
 
 func (u *UIElement) SetBackColour(c uint32) {
