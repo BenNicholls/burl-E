@@ -21,7 +21,7 @@ func Debug() {
 		initDebugger()
 	}
 
-	RegisterDebugCommand("fullscreen", console.SetFullscreen)
+	RegisterDebugCommand("fullscreen", console.ToggleFullscreen)
 }
 
 func initDebugger() {

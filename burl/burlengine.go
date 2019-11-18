@@ -32,7 +32,7 @@ func ChangeState(m State) {
 }
 
 //Initializes the console. Returns a pointer to the console so the user can manipulate it manually
-//if they prefer. Returns nil if there was an error.
+//if they prefer. *Console will be nil if there was an error.
 func InitConsole(w, h int, glyphPath, fontPath, title string) (*Console, error) {
 	console = new(Console)
 	err := console.Setup(w, h, glyphPath, fontPath, title)

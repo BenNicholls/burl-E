@@ -137,10 +137,26 @@ func (c *Console) Setup(w, h int, glyphPath, fontPath, title string) (err error)
 	return nil
 }
 
-//Enables fullscreen.
-//TODO: the opposite??? do this later when resolution/window mode polish goes in.
-func (c *Console) SetFullscreen() {
-	c.window.SetFullscreen(sdl.WINDOW_FULLSCREEN)
+//Enables or disables fullscreen. All burl consoles use borderless fullscreen instead of native
+//and the output is scaled to the monitor size.
+func (c *Console) SetFullscreen(enable bool) {
+	if enable {
+		c.window.SetFullscreen(sdl.WINDOW_FULLSCREEN_DESKTOP)
+		c.window.SetBordered(false)
+	} else {
+		c.window.SetFullscreen(0)
+		c.window.SetBordered(true)
+	}
+}
+
+//Toggles between fullscreen modes.
+func (c *Console) ToggleFullscreen() {	
+	if (c.window.GetFlags() & sdl.WINDOW_FULLSCREEN_DESKTOP) != 0 {
+		c.SetFullscreen(false)
+	} else {
+		c.SetFullscreen(true)
+	}
+
 }
 
 //Loads new fonts to the renderer and changes the tilesize (and by entension, the window size)
@@ -244,8 +260,7 @@ func (c *Console) Render() {
 	}
 
 	c.renderer.SetRenderTarget(t) //point renderer at window again
-	r := makeRect(0, 0, c.width*c.tileSize, c.height*c.tileSize)
-	c.renderer.Copy(c.canvasBuffer, &r, &r)
+	c.renderer.Copy(c.canvasBuffer, nil, nil)
 	c.renderer.Present()
 	c.renderer.Clear()
 	c.forceRedraw = false
