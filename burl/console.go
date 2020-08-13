@@ -1,32 +1,13 @@
 package burl
 
-import "github.com/veandco/go-sdl2/sdl"
-import "fmt"
-import "errors"
-import "time"
+import (
+	"github.com/veandco/go-sdl2/sdl"
+)
 
 type Console struct {
-	window       *sdl.Window
-	renderer     *sdl.Renderer
-	glyphs       *sdl.Texture
-	font         *sdl.Texture
-	canvasBuffer *sdl.Texture
+	width, height int
 
-	width, height, tileSize int
-
-	canvas       []Cell
-	forceRedraw  bool
-	frameTime    time.Time
-	fps, elapsed time.Duration
-	frames       int
-	showFPS      bool
-	showChanges  bool
-	Ready        bool //true when console is ready for drawing and stuff!
-
-	//store render colours so we don't have to set them for every renderer.Copy()
-	backDrawColour      uint32
-	foreDrawColourText  uint32
-	foreDrawColourGlyph uint32
+	canvas       []Cell	
 }
 
 type drawmode int
@@ -99,249 +80,14 @@ func (c *Cell) Clear() {
 }
 
 //Setup the game window, renderer, etc
-func (c *Console) Setup(w, h int, glyphPath, fontPath, title string) (err error) {
+func (c *Console) Setup(w, h int) (err error) {
 	c.width = w
 	c.height = h
-	c.tileSize = 24
-
-	c.window, err = sdl.CreateWindow(title, sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, int32(c.width*c.tileSize), int32(c.height*c.tileSize), sdl.WINDOW_OPENGL)
-	if err != nil {
-		LogError("CONSOLE: Failed to create window. sdl:" + fmt.Sprint(sdl.GetError()))
-		return errors.New("Failed to create window.")
-	}
-
-	c.renderer, err = sdl.CreateRenderer(c.window, -1, sdl.RENDERER_ACCELERATED)
-	if err != nil {
-		LogError("CONSOLE: Failed to create renderer. sdl:" + fmt.Sprint(sdl.GetError()))
-		return errors.New("Failed to create renderer.")
-	}
-	c.renderer.Clear()
-
-	err = c.CreateCanvasBuffer()
-	if err != nil {
-		return errors.New("Failed to create canvas buffer.")
-	}
 
 	c.canvas = make([]Cell, c.width*c.height)
 	c.Clear()
 
-	//init drawing fonts
-	err = c.ChangeFonts(glyphPath, fontPath)
-	if err != nil {
-		return errors.New("Could not load fonts.")
-	}
-
-	c.SetFramerate(60)
-	c.Ready = true
-
 	return nil
-}
-
-//Enables or disables fullscreen. All burl consoles use borderless fullscreen instead of native
-//and the output is scaled to the monitor size.
-func (c *Console) SetFullscreen(enable bool) {
-	if enable {
-		c.window.SetFullscreen(sdl.WINDOW_FULLSCREEN_DESKTOP)
-		c.window.SetBordered(false)
-	} else {
-		c.window.SetFullscreen(0)
-		c.window.SetBordered(true)
-	}
-}
-
-//Toggles between fullscreen modes.
-func (c *Console) ToggleFullscreen() {	
-	if (c.window.GetFlags() & sdl.WINDOW_FULLSCREEN_DESKTOP) != 0 {
-		c.SetFullscreen(false)
-	} else {
-		c.SetFullscreen(true)
-	}
-
-}
-
-//Loads new fonts to the renderer and changes the tilesize (and by entension, the window size)
-func (c *Console) ChangeFonts(glyphPath, fontPath string) (err error) {
-	if c.glyphs != nil {
-		c.glyphs.Destroy()
-	}
-	c.glyphs, err = c.LoadTexture(glyphPath)
-	if err != nil {
-		LogError("CONSOLE: Could not load font at " + glyphPath)
-		return
-	}
-	if c.font != nil {
-		c.font.Destroy()
-	}
-	c.font, err = c.LoadTexture(fontPath)
-	if err != nil {
-		LogError("CONSOLE: Could not load font at " + fontPath)
-		return
-	}
-	c.Clear()
-	LogInfo("CONSOLE: Loaded fonts! Glyph: " + glyphPath + ", Text: " + fontPath)
-
-	_, _, gw, _, _ := c.glyphs.Query()
-
-	//reset window size if fontsize changed
-	if int(gw/16) != c.tileSize {
-		c.tileSize = int(gw / 16)
-		c.window.SetSize(int32(c.tileSize*c.width), int32(c.tileSize*c.height))
-		_ = c.CreateCanvasBuffer() //TODO: handle this error?
-		LogInfo("CONSOLE: resized window.")
-	}
-
-	return
-}
-
-func (c *Console) CreateCanvasBuffer() (err error) {
-	if c.canvasBuffer != nil {
-		c.canvasBuffer.Destroy()
-	}
-	c.canvasBuffer, err = c.renderer.CreateTexture(sdl.PIXELFORMAT_ARGB8888, sdl.TEXTUREACCESS_TARGET, int32(c.width*c.tileSize), int32(c.height*c.tileSize))
-	if err != nil {
-		LogError("CONSOLE: Failed to create buffer texture. sdl:" + fmt.Sprint(sdl.GetError()))
-	}
-	return
-}
-
-//Loads a bmp font into the GPU using the current window renderer.
-//TODO: support more than bmps?
-func (c *Console) LoadTexture(path string) (*sdl.Texture, error) {
-	image, err := sdl.LoadBMP(path)
-	defer image.Free()
-	if err != nil {
-		return nil, errors.New("Failed to load image: " + fmt.Sprint(sdl.GetError()))
-	}
-	image.SetColorKey(true, COL_FUSCHIA)
-	texture, err := c.renderer.CreateTextureFromSurface(image)
-	if err != nil {
-		return nil, errors.New("Failed to create texture: " + fmt.Sprint(sdl.GetError()))
-	}
-	err = texture.SetBlendMode(sdl.BLENDMODE_BLEND)
-	if err != nil {
-		texture.Destroy()
-		return nil, errors.New("Failed to set blendmode: " + fmt.Sprint(sdl.GetError()))
-	}
-
-	return texture, nil
-}
-
-//Renders the canvas to the GPU and flips the buffer.
-func (c *Console) Render() {
-	//render fps counter
-	if c.showFPS && c.frames%(30) == 0 {
-		fpsString := fmt.Sprintf("%d fps", c.frames*1000/int(sdl.GetTicks()))
-		c.DrawText(0, 0, 100, fpsString, COL_WHITE, COL_BLACK, 0)
-	}
-
-	//render the scene!
-	var src, dst sdl.Rect
-	t := c.renderer.GetRenderTarget()          //store window texture, we'll switch back to it once we're done with the buffer.
-	c.renderer.SetRenderTarget(c.canvasBuffer) //point renderer at buffer texture, we'll draw there
-	for i, cell := range c.canvas {
-		if cell.Dirty || c.forceRedraw {
-			if cell.Mode == DRAW_TEXT {
-				for c_i, char := range cell.Chars {
-					dst = makeRect((i%c.width)*c.tileSize+c_i*c.tileSize/2, (i/c.width)*c.tileSize, c.tileSize/2, c.tileSize)
-					src = makeRect((char%32)*c.tileSize/2, (char/32)*c.tileSize, c.tileSize/2, c.tileSize)
-					c.CopyToRenderer(DRAW_TEXT, src, dst, cell.ForeColour, cell.BackColour, char)
-				}
-			} else {
-				if cell.Border {
-					c.CalcBorderGlyph(i%c.width, i/c.width)
-				}
-				dst = makeRect((i%c.width)*c.tileSize, (i/c.width)*c.tileSize, c.tileSize, c.tileSize)
-				src = makeRect((c.canvas[i].Glyph%16)*c.tileSize, (c.canvas[i].Glyph/16)*c.tileSize, c.tileSize, c.tileSize)
-				c.CopyToRenderer(DRAW_GLYPH, src, dst, cell.ForeColour, cell.BackColour, c.canvas[i].Glyph)
-			}
-
-			c.canvas[i].Dirty = false
-		}
-	}
-
-	c.renderer.SetRenderTarget(t) //point renderer at window again
-	c.renderer.Copy(c.canvasBuffer, nil, nil)
-	c.renderer.Present()
-	c.renderer.Clear()
-	c.forceRedraw = false
-
-	//framerate limiter, so the cpu doesn't implode
-	c.elapsed = time.Since(c.frameTime)
-	if c.elapsed < c.fps {
-		time.Sleep(c.fps - c.elapsed)
-	}
-	c.frameTime = time.Now()
-	c.frames++
-}
-
-//Copies a rect of pixeldata from a source texture to a rect on the renderer's target.
-func (c *Console) CopyToRenderer(mode drawmode, src, dst sdl.Rect, fore, back uint32, g int) {
-	//change backcolour if it is different from previous draw
-	if back != c.backDrawColour {
-		c.backDrawColour = back
-		c.renderer.SetDrawColor(GetRGBA(back))
-	}
-
-	if c.showChanges {
-		c.renderer.SetDrawColor(uint8((c.frames*10)%255), uint8(((c.frames+100)*10)%255), uint8(((c.frames+200)*10)%255), 0xFF) //Test Function
-	}
-
-	c.renderer.FillRect(&dst)
-
-	//if we're drawing a nothing character (space, whatever), skip next part.
-	if mode == DRAW_GLYPH && (g == GLYPH_NONE || g == GLYPH_SPACE) {
-		return
-	} else if mode == DRAW_TEXT && g == 32 {
-		return
-	}
-
-	//change texture color mod if it is different from previous draw, then draw glyph/text
-	if mode == DRAW_GLYPH {
-		if fore != c.foreDrawColourGlyph {
-			c.foreDrawColourGlyph = fore
-			c.SetTextureColour(c.glyphs, c.foreDrawColourGlyph)
-		}
-		c.renderer.Copy(c.glyphs, &src, &dst)
-	} else {
-		if fore != c.foreDrawColourText {
-			c.foreDrawColourText = fore
-			c.SetTextureColour(c.font, c.foreDrawColourText)
-		}
-		c.renderer.Copy(c.font, &src, &dst)
-	}
-}
-
-func (c *Console) SetTextureColour(tex *sdl.Texture, colour uint32) {
-	r, g, b, a := GetRGBA(colour)
-	tex.SetColorMod(r, g, b)
-	tex.SetAlphaMod(a)
-}
-
-//Sets maximum framerate as enforced by the framerate limiter. NOTE: cannot go higher than 1000 fps.
-func (c *Console) SetFramerate(f int) {
-	c.fps = time.Duration(1000/float64(f+1)) * time.Millisecond
-}
-
-//Toggles rendering of the FPS meter.
-func (c *Console) ToggleFPS() {
-	c.showFPS = !c.showFPS
-}
-
-func (c *Console) ToggleChanges() {
-	c.showChanges = !c.showChanges
-}
-
-func (c *Console) ForceRedraw() {
-	c.forceRedraw = true
-}
-
-//Deletes special graphics structures, closes files, etc. Defer this function!
-func (c *Console) Cleanup() {
-	c.glyphs.Destroy()
-	c.font.Destroy()
-	c.canvasBuffer.Destroy()
-	c.renderer.Destroy()
-	c.window.Destroy()
 }
 
 //Returns a reference to the cell at (x, y). Returns nil if (x, y) is bad.

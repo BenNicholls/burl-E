@@ -199,7 +199,7 @@ func (u *UIElement) RemoveAnimation(a Animator) {
 
 //Centers the element within the console as a whole. Requires the console to be initialized first.
 func (u *UIElement) CenterInConsole() {
-	if console.Ready {
+	if console != nil {
 		w, h := console.Dims()
 		u.MoveTo((w-u.width)/2, (h-u.height)/2, u.z)
 	} else {

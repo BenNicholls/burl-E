@@ -1,26 +1,31 @@
 package main
 
-import "github.com/bennicholls/burl-E/burl"
-import "math/rand"
-import "time"
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+	"time"
+
+	"github.com/bennicholls/burl-E/burl"
+)
 
 func main() {
 
 	rand.Seed(time.Now().UTC().UnixNano())
 
-	console, err := burl.InitConsole(80, 45, "res/curses.bmp", "res/DelveFont8x16.bmp", "UI Test")
+	_, err := burl.InitConsole(80, 45)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
+	//err = burl.InitRenderer("res/curses.bmp", "res/DelveFont8x16.bmp", "UI Test")
+
 	//console.ToggleChanges()
 
 	t := new(TestUI)
 	t.SetupUI()
-	console.ToggleFPS()
 	burl.InitState(t)
+	burl.Debug()
 	burl.GameLoop()
 }
 

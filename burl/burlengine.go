@@ -4,6 +4,7 @@ import "errors"
 import "runtime"
 import "github.com/veandco/go-sdl2/sdl"
 
+var renderer Renderer
 var console *Console
 var gameState State
 var nextState State
@@ -33,17 +34,25 @@ func ChangeState(m State) {
 
 //Initializes the console. Returns a pointer to the console so the user can manipulate it manually
 //if they prefer. *Console will be nil if there was an error.
-func InitConsole(w, h int, glyphPath, fontPath, title string) (*Console, error) {
+func InitConsole(w, h int) (*Console, error) {
 	console = new(Console)
-	err := console.Setup(w, h, glyphPath, fontPath, title)
+	err := console.Setup(w, h)
 	if err == nil {
 		if debug {
-			initDebugger()
+			initDebugWindow()
 		}
 		return console, err
 	} else {
 		return nil, err
 	}
+}
+
+//Initalizes the renderer. This must be done AFTER initializing the console. 
+//TODO: input variable so user can specify which renderer they want, once there are more renderers.
+func InitRenderer(glyphPath, fontPath, title string) (error) {
+	renderer = new(SDLRenderer)
+	err := renderer.Setup(glyphPath, fontPath, title)
+	return err
 }
 
 //OpenDialog function so anything can add a dialog to the gamestate.
@@ -67,10 +76,14 @@ func GameLoop() error {
 	runtime.LockOSThread() //sdl is inherently single-threaded.
 	defer outputLogToDisk()
 
-	if !console.Ready {
+	if console == nil {
 		return errors.New("Console not set up. Run burl.InitConsole() before starting game loop!")
 	}
-	defer console.Cleanup()
+
+	if renderer == nil || !renderer.Ready() {
+		return errors.New("Renderer not intialized. Run burl.InitRenderer() before starting game loop!")
+	}
+	defer renderer.Cleanup()
 
 	if gameState == nil {
 		return errors.New("No gameState initialized. Run burl.InitState() before starting game loop!")
@@ -87,7 +100,7 @@ func GameLoop() error {
 				running = false
 			case *sdl.WindowEvent:
 				if t.Event == sdl.WINDOWEVENT_RESTORED {
-					console.ForceRedraw()
+					renderer.ForceRedraw()
 				}
 			case *sdl.KeyboardEvent:
 				if t.Type == sdl.KEYDOWN {
@@ -143,7 +156,7 @@ func GameLoop() error {
 			debugger.Render()
 		}
 
-		console.Render() //should this come after the burl events are processed??
+		renderer.Render() //should this come after the burl events are processed??
 
 		//process burl-handled events
 		for e := popInternalEvent(); e != nil; e = popInternalEvent() {

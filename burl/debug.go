@@ -18,13 +18,13 @@ func Debug() {
 	debugCommands = make(map[string]func ())
 
 	if console != nil {
-		initDebugger()
+		initDebugWindow()
 	}
 
-	RegisterDebugCommand("fullscreen", console.ToggleFullscreen)
+	RegisterDebugCommand("fullscreen", renderer.ToggleFullscreen)
 }
 
-func initDebugger() {
+func initDebugWindow() {
 	cw, ch := console.Dims()
 	debugger = debugWindow{}
 	debugger.PagedContainer = *NewPagedContainer(cw/2, ch/2, cw/4, ch/4, 50000, true)
@@ -114,9 +114,9 @@ func (dw *debugWindow) HandleKeypress(key sdl.Keycode) {
 			if key == sdl.K_LEFT || key == sdl.K_RIGHT {
 				switch dw.flagsList.GetSelection() {
 				case 0: //fps
-					console.ToggleFPS()
+					renderer.ToggleDebugMode("fps")
 				case 1: //render changes
-					console.ToggleChanges()
+					renderer.ToggleDebugMode("changes")	
 				}
 			}
 		}
