@@ -191,7 +191,7 @@ func (sdlr *SDLRenderer) Render() {
 	var src, dst sdl.Rect
 	t := sdlr.renderer.GetRenderTarget()             //store window texture, we'll switch back to it once we're done with the buffer.
 	sdlr.renderer.SetRenderTarget(sdlr.canvasBuffer) //point renderer at buffer texture, we'll draw there
-	for i, cell := range console.canvas {
+	for i, cell := range console.Cells {
 		if cell.Dirty || sdlr.forceRedraw {
 			if cell.Mode == DRAW_TEXT {
 				for c_i, char := range cell.Chars {
@@ -203,13 +203,13 @@ func (sdlr *SDLRenderer) Render() {
 				if cell.Border {
 					console.CalcBorderGlyph(i%w, i/w)
 				}
-				g := console.canvas[i].Glyph
+				g := console.Cells[i].Glyph
 				dst = makeRect((i%w)*sdlr.tileSize, (i/w)*sdlr.tileSize, sdlr.tileSize, sdlr.tileSize)
 				src = makeRect((g%16)*sdlr.tileSize, (g/16)*sdlr.tileSize, sdlr.tileSize, sdlr.tileSize)
 				sdlr.copyToRenderer(DRAW_GLYPH, src, dst, cell.ForeColour, cell.BackColour, g)
 			}
 
-			console.canvas[i].Dirty = false
+			console.Cells[i].Dirty = false
 		}
 	}
 
@@ -290,4 +290,9 @@ func (sdlr *SDLRenderer) ToggleDebugMode(m string) {
 	default:
 		LogError("SDL Renderer: no debug mode called " + m)
 	}
+}
+
+//int32 for rect arguments. what a world.
+func makeRect(x, y, w, h int) sdl.Rect {
+	return sdl.Rect{X: int32(x), Y: int32(y), W: int32(w), H: int32(h)}
 }
