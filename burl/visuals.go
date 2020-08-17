@@ -290,8 +290,8 @@ const (
 
 //Special text characters. Add these to text strings, it'll just work!
 const (
-	TEXT_BORDER_LR         string = string(196)
-	TEXT_BORDER_UD         string = string(179)
-	TEXT_BORDER_DECO_LEFT  string = string(180)
-	TEXT_BORDER_DECO_RIGHT string = string(195)
+	TEXT_BORDER_LR         string = string(rune(196))
+	TEXT_BORDER_UD         string = string(rune(179))
+	TEXT_BORDER_DECO_LEFT  string = string(rune(180))
+	TEXT_BORDER_DECO_RIGHT string = string(rune(195))
 )
