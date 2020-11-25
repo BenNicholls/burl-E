@@ -9,13 +9,13 @@ import (
 var debugger debugWindow
 var debug bool
 var debugWatches []watch
-var debugCommands map[string]func ()
+var debugCommands map[string]func()
 
 //Activate debugging capabilities. F10 will bring up the debug menu.
 func Debug() {
 	debug = true
 	debugWatches = make([]watch, 0, 20)
-	debugCommands = make(map[string]func ())
+	debugCommands = make(map[string]func())
 
 	if console != nil {
 		initDebugWindow()
@@ -43,7 +43,7 @@ func initDebugWindow() {
 	debugger.logInput = NewInputbox(pw, 1, 0, ph-1, 0, false)
 	debugger.logInput.cursorAnimation.Toggle()
 
-	debugger.logPage.Add(debugger.logList, debugger.logInput)
+	debugger.logPage.AddChild(debugger.logList, debugger.logInput)
 
 	debugger.watchPage = debugger.AddPage("Watches")
 	debugger.watchList = NewList(pw, ph, 0, 0, 0, false, "No Watched Variables")
@@ -53,7 +53,7 @@ func initDebugWindow() {
 		debugger.watchList.Append(debugWatches[i].String())
 	}
 
-	debugger.watchPage.Add(debugger.watchList)
+	debugger.watchPage.AddChild(debugger.watchList)
 
 	debugger.flagsPage = debugger.AddPage("Flags")
 	debugger.flagsList = NewList(pw, ph, 10, 0, 0, false, "No flags")
@@ -61,11 +61,11 @@ func initDebugWindow() {
 	debugger.fpsChoice = NewChoiceBox(4, 1, 0, 0, 0, false, HORIZONTAL, "OFF", "ON")
 	debugger.changesChoice = NewChoiceBox(4, 1, 0, 0, 0, false, HORIZONTAL, "OFF", "ON")
 
-	debugger.flagsPage.Add(NewTextbox(10, 1, 0, 0, 0, false, false, "FPS Counter"))
-	debugger.flagsPage.Add(NewTextbox(10, 1, 0, 1, 0, false, false, "Show Renders"))
+	debugger.flagsPage.AddChild(NewTextbox(10, 1, 0, 0, 0, false, false, "FPS Counter"))
+	debugger.flagsPage.AddChild(NewTextbox(10, 1, 0, 1, 0, false, false, "Show Renders"))
 
-	debugger.flagsList.Add(debugger.fpsChoice, debugger.changesChoice)
-	debugger.flagsPage.Add(debugger.flagsList)
+	debugger.flagsList.AddChild(debugger.fpsChoice, debugger.changesChoice)
+	debugger.flagsPage.AddChild(debugger.flagsList)
 
 	return
 }
@@ -73,14 +73,14 @@ func initDebugWindow() {
 type debugWindow struct {
 	PagedContainer
 
-	logPage  *Container
+	logPage  *UIElement
 	logList  *List
 	logInput *Inputbox
 
-	watchPage *Container
+	watchPage *UIElement
 	watchList *List
 
-	flagsPage     *Container
+	flagsPage     *UIElement
 	flagsList     *List
 	fpsChoice     *ChoiceBox
 	changesChoice *ChoiceBox
@@ -94,8 +94,6 @@ func (dw *debugWindow) Update() {
 
 func (dw *debugWindow) HandleKeypress(key sdl.Keycode) {
 	switch key {
-	case sdl.K_F10:
-		dw.ToggleVisible()
 	case sdl.K_TAB:
 		dw.NextPage()
 	default:
@@ -116,7 +114,7 @@ func (dw *debugWindow) HandleKeypress(key sdl.Keycode) {
 				case 0: //fps
 					renderer.ToggleDebugMode("fps")
 				case 1: //render changes
-					renderer.ToggleDebugMode("changes")	
+					renderer.ToggleDebugMode("changes")
 				}
 			}
 		}
@@ -165,7 +163,7 @@ func RegisterWatch(label string, val interface{}) {
 
 //Register a function to be called when you invoke the command in the debugger. The function must have no
 //arguments and return no value.
-func RegisterDebugCommand(command string, action func () ) {
+func RegisterDebugCommand(command string, action func()) {
 	if debug {
 		debugCommands[command] = action
 		LogInfo("Added debug command: ", command)
@@ -180,5 +178,14 @@ func executeDebugCommand(command string) {
 		} else {
 			LogError("Bad command: ", command)
 		}
+	}
+}
+
+func ToggleDebugMode(mode string) {
+	switch mode {
+	case "fps":
+		renderer.ToggleDebugMode(mode)
+	case "changes":
+		renderer.ToggleDebugMode(mode)
 	}
 }

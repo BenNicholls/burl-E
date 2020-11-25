@@ -4,7 +4,7 @@ package burl
 //Linear algebra to the rescue.
 var rMatrix = [8][4]int{{1, 0, 0, 1}, {-1, 0, 0, 1}, {0, -1, 1, 0}, {0, -1, -1, 0}, {-1, 0, 0, -1}, {1, 0, 0, -1}, {0, 1, -1, 0}, {0, 1, 1, 0}}
 
-//THE BIG CHEESE - The one and only Shadowcaster! For all of your FOV needs. fn is a function 
+//THE BIG CHEESE - The one and only Shadowcaster! For all of your FOV needs. fn is a function
 //for the shadowcaster to apply to open spaces it finds.
 func (m *TileMap) ShadowCast(x, y, radius int, fn Cast) {
 	if radius <= 0 {

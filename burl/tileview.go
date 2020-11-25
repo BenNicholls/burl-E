@@ -5,27 +5,25 @@ import "github.com/bennicholls/burl-E/reximage"
 //View object for drawing tiles. (eg. maps). Effectively a buffer for drawing before the console grabs it.
 type TileView struct {
 	UIElement
-	grid []Cell
 }
 
 func NewTileView(w, h, x, y, z int, bord bool) *TileView {
 	tv := new(TileView)
 	tv.UIElement = NewUIElement(w, h, x, y, z, bord)
-	tv.grid = make([]Cell, w*h)
-	tv.Reset()
 	return tv
 }
 
 //Draws a glyph to the TileView. if COL_NONE is passed as a parameter, uses the colour that was previously there.
+//THINK: should this take a Z value? then you could draw in layers
 func (tv *TileView) Draw(x, y, glyph int, f, b uint32) {
-	if CheckBounds(x, y, tv.width, tv.height) {
+	if cell := tv.GetCell(x, y); cell != nil {
 		if f == COL_NONE {
-			f = tv.grid[y*tv.width+x].ForeColour
+			f = cell.ForeColour
 		}
 		if b == COL_NONE {
-			b = tv.grid[y*tv.width+x].BackColour
+			b = cell.BackColour
 		}
-		tv.grid[y*tv.width+x].SetGlyph(glyph, f, b, tv.z)
+		tv.ChangeCell(x, y, cell.Z, glyph, f, b)
 	}
 }
 
@@ -45,32 +43,16 @@ func (tv *TileView) DrawCircle(x, y, r, glyph int, f, b uint32) {
 func (tv *TileView) DrawPalette(x, y int, p Palette, dir int) {
 	for i, c := range p {
 		if dir == HORIZONTAL {
-			if x + i >= tv.width {
+			if x+i >= tv.width {
 				break
 			}
-			tv.grid[y*tv.width+x+i].SetGlyph(GLYPH_NONE, COL_NONE, c, 0)
+			tv.ChangeCell(x+i, y, 0, GLYPH_NONE, COL_NONE, c)
 		} else {
-			if y + i >= tv.height {
+			if y+i >= tv.height {
 				break
 			}
-			tv.grid[(y+i)*tv.width+x].SetGlyph(GLYPH_NONE, COL_NONE, c, 0)
+			tv.ChangeCell(x, y+i, 0, GLYPH_NONE, COL_NONE, c)
 		}
-	}
-}
-
-func (tv *TileView) Render() {
-	if tv.visible {
-		for i, p := range tv.grid {
-			console.ChangeCell(tv.x+i%tv.width, tv.y+i/tv.width, tv.z, p.Glyph, p.ForeColour, p.BackColour)
-		}
-		tv.UIElement.Render()
-	}
-}
-
-//Resets the TileView
-func (tv *TileView) Reset() {
-	for i := range tv.grid {
-		tv.grid[i].Clear()
 	}
 }
 
@@ -78,16 +60,16 @@ func (tv *TileView) LoadImageFromXP(filename string) {
 	imageData, err := reximage.Import(filename)
 	if err != nil {
 		LogError("Error loading image " + filename + ": " + err.Error())
+		return
 	}
 
-	for j := 0; j < imageData.Height; j++ {
-		for i := 0; i < imageData.Width; i++ {
-			cell, _ := imageData.GetCell(i, j) //cell from imagedata
+	for y := 0; y < imageData.Height; y++ {
+		for x := 0; x < imageData.Width; x++ {
+			cell, _ := imageData.GetCell(x, y) //cell from imagedata
 			g := int(cell.Glyph)
 			fore, back := cell.ARGB()
-			tv.grid[i+j*tv.width].SetGlyph(g, fore, back, tv.z)
+			tv.ChangeCell(x, y, 0, g, fore, back)
 		}
 	}
 
 }
-

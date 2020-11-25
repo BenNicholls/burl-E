@@ -13,7 +13,7 @@ var nextState State
 func InitState(m State) {
 	if gameState == nil {
 		gameState = m
-	} 
+	}
 }
 
 //Tell burl to change from one state to another. This is done at the end of frame. Only the first
@@ -47,17 +47,17 @@ func InitConsole(w, h int) (*Console, error) {
 	}
 }
 
-//Initalizes the renderer. This must be done AFTER initializing the console. 
+//Initalizes the renderer. This must be done AFTER initializing the console.
 //TODO: input variable so user can specify which renderer they want, once there are more renderers.
-func InitRenderer(glyphPath, fontPath, title string) (error) {
+func InitRenderer(glyphPath, fontPath, title string) error {
 	renderer = new(SDLRenderer)
 	err := renderer.Setup(glyphPath, fontPath, title)
 	return err
 }
 
 //OpenDialog function so anything can add a dialog to the gamestate.
-//NOTE: if you call this while setting up a state change, the dialog will be added to the CURRENT 
-//state, not the one you are building. use the state.OpenDialog() function to add to a new state 
+//NOTE: if you call this while setting up a state change, the dialog will be added to the CURRENT
+//state, not the one you are building. use the state.OpenDialog() function to add to a new state
 //before switching.
 //THINK: is this the best way to do this??? Maybe dialogs should be like states, individually managed
 //by the engine first-class style. Hmm.
@@ -70,7 +70,7 @@ func CloseDialog() {
 	gameState.CloseDialog()
 }
 
-//The Big Enchelada! This is the gameloop that runs everything. Make sure to run burl.InitState() and 
+//The Big Enchelada! This is the gameloop that runs everything. Make sure to run burl.InitState() and
 //burl.InitConsole before beginning the game!
 func GameLoop() error {
 	runtime.LockOSThread() //sdl is inherently single-threaded.
@@ -104,10 +104,11 @@ func GameLoop() error {
 				}
 			case *sdl.KeyboardEvent:
 				if t.Type == sdl.KEYDOWN {
-					if debug && debugger.IsVisible() {
-						debugger.HandleKeypress(t.Keysym.Sym)
-					} else if t.Keysym.Sym == sdl.K_F10 {
+					if debug && t.Keysym.Sym == sdl.K_F10 {
 						debugger.ToggleVisible()
+						console.redraw = true
+					} else if debug && debugger.IsVisible() {
+						debugger.HandleKeypress(t.Keysym.Sym)
 					} else {
 						if d := gameState.GetDialog(); d == nil {
 							gameState.HandleKeypress(t.Keysym.Sym)
@@ -140,7 +141,7 @@ func GameLoop() error {
 			}
 		}
 
-		//TODO: get console.Render() running in another thread (i think this is a good idea... maybe?)
+		//render dialog, state window, debugger window
 		if d := gameState.GetDialog(); d != nil {
 			d.Render()
 			if w := d.GetWindow(); w != nil {
@@ -151,10 +152,12 @@ func GameLoop() error {
 		if w := gameState.GetWindow(); w != nil {
 			w.Render()
 		}
-
 		if debug {
 			debugger.Render()
 		}
+
+		//build frame to console
+		console.BuildFrame()
 
 		renderer.Render() //should this come after the burl events are processed??
 
@@ -183,7 +186,7 @@ type State interface {
 	HandleEvent(*Event) //called for each event in the stream, every frame
 	Render()
 	GetTick() int
-	GetWindow() *Container
+	GetWindow() *UIElement
 	GetDialog() Dialog
 	OpenDialog(d Dialog) //should use OpenDialog() to set dialogs.
 	CloseDialog()
@@ -199,7 +202,7 @@ type Dialog interface {
 //base state object, compose states around this if you want
 type StatePrototype struct {
 	Tick   int //update ticks since init
-	Window *Container
+	Window UIElement
 	dialog Dialog
 }
 
@@ -233,11 +236,11 @@ func (sp *StatePrototype) InitWindow(bord bool) {
 	if bord {
 		w, h, x, y = w-2, h-2, 1, 1
 	}
-	sp.Window = NewContainer(w, h, x, y, 0, true)
+	sp.Window = NewUIElement(w, h, x, y, 0, true)
 }
 
-func (sp StatePrototype) GetWindow() *Container {
-	return sp.Window
+func (sp StatePrototype) GetWindow() *UIElement {
+	return &sp.Window
 }
 
 func (sp *StatePrototype) OpenDialog(d Dialog) {
@@ -255,4 +258,5 @@ func (sp StatePrototype) GetDialog() Dialog {
 func (sp *StatePrototype) CloseDialog() {
 	sp.dialog.GetWindow().ToggleVisible()
 	sp.dialog = nil
+	console.redraw = true
 }

@@ -60,14 +60,19 @@ func (c *Cell) SetText(char1, char2 int, fore, back uint32, z int) {
 	}
 }
 
-func (c *Cell) SetAsBorder(z int, fore uint32) {
-	if !c.Border || c.Z < z || c.ForeColour != fore {
-		c.Border = true
+func (c *Cell) SetBorder(border bool, z int) {
+	if c.Z <= z {
 		c.Z = z
-		c.ForeColour = fore
-		c.BackColour = COL_BLACK
-		c.Mode = DRAW_GLYPH
 		c.Dirty = true
+		c.Border = border
+	}
+}
+
+func (c *Cell) CopyCell(c2 *Cell) {
+	if c2.Mode == DRAW_GLYPH {
+		c.SetGlyph(c2.Glyph, c2.ForeColour, c2.BackColour, c2.Z)
+	} else {
+		c.SetText(c2.Chars[0], c2.Chars[1], c2.ForeColour, c2.BackColour, c2.Z)
 	}
 }
 
@@ -78,6 +83,7 @@ func (c *Cell) Clear() {
 	} else {
 		c.SetGlyph(GLYPH_NONE, COL_WHITE, COL_BLACK, 0)
 	}
+	c.Border = false
 }
 
 //Canvas is a z-depthed grid of Cell objects. Cells can have glyph OR text information.
@@ -190,57 +196,55 @@ func (c *Canvas) DrawText(x, y, z int, txt string, fore, back uint32, charNum in
 	}
 }
 
-//TODO: custom colouring, multiple styles.
-//NOTE: current border colouring thing is a bit of a hack. Need to add actual support for
-//border and ui styling.
+//TODO: multiple styles.
 //Borders work by setting a flag on the cells that need to be borders. At render time, any
 //borders with a dirty flag are assigned a border glyph based on the state of their neighbours:
 //if the neighbouring cells are on the same z level and also borders, they will connect.
-func (c *Canvas) DrawBorder(x, y, z, w, h int, title, hint string, focused bool) {
-	//set border colour.
-	bc := c.BorderColour(focused)
+func (c *Canvas) DrawBorder(x, y, z, w, h int, border *Border) {
+	if !border.redraw || !border.enabled {
+		return
+	}
 
 	//Top and bottom.
 	for i := -1; i <= w; i++ {
-		c.SetCellBorder(x+i, y-1, z, bc)
-		c.SetCellBorder(x+i, y+h, z, bc)
+		c.SetCellBorder(x+i, y-1, z, border)
+		c.SetCellBorder(x+i, y+h, z, border)
 	}
 	//Sides
 	for i := 0; i < h; i++ {
-		c.SetCellBorder(x-1, y+i, z, bc)
-		c.SetCellBorder(x+w, y+i, z, bc)
+		c.SetCellBorder(x-1, y+i, z, border)
+		c.SetCellBorder(x+w, y+i, z, border)
 	}
 
 	//Write centered title.
-	if len(title) < w && title != "" {
-		c.DrawText(x+(w/2-len(title)/4-1), y-1, z+1, title, COL_WHITE, COL_BLACK, 0)
+	if len(border.title) < w && border.title != "" {
+		c.DrawText(x+(w/2-len(border.title)/4-1), y-1, z, border.title, border.foreColour, COL_BLACK, 0)
 	}
 
 	//Write right-justified hint text
-	if len(hint) < 2*w && hint != "" {
-		decoratedHint := TEXT_BORDER_DECO_LEFT + hint + TEXT_BORDER_DECO_RIGHT
-		offset := w - len(hint)/2 - 1
-		if len(hint)%2 == 1 {
+	if border.hint != "" && len(border.hint) < 2*w {
+		decoratedHint := TEXT_BORDER_DECO_LEFT + border.hint + TEXT_BORDER_DECO_RIGHT
+		offset := w - len(border.hint)/2 - 1
+		if len(border.hint)%2 == 1 {
 			decoratedHint = TEXT_BORDER_LR + decoratedHint
 			offset -= 1
 		}
 
-		c.DrawText(x+offset, y+h, z, decoratedHint, bc, COL_BLACK, 0)
+		c.DrawText(x+offset, y+h, z, decoratedHint, border.foreColour, COL_BLACK, 0)
 	}
+
+	border.redraw = false
 }
 
-func (c *Canvas) SetCellBorder(x, y, z int, fore uint32) {
-	s := x + y*c.width
-	if CheckBounds(x, y, c.width, c.height) && z >= c.Cells[s].Z {
-		c.Cells[s].SetAsBorder(z, fore)
+func (c *Canvas) SetCellBorder(x, y, z int, border *Border) {
+	if cell := c.GetCell(x, y); cell != nil && z >= cell.Z {
+		cell.SetBorder(border.enabled, z)
+		if border.enabled {
+			cell.ForeColour = border.foreColour
+			cell.BackColour = border.backColour
+			cell.Mode = DRAW_GLYPH
+		}
 	}
-}
-
-func (c *Canvas) BorderColour(focused bool) uint32 {
-	if focused {
-		return COL_PURPLE
-	}
-	return COL_LIGHTGREY
 }
 
 //Chooses a border glyph for a cell at (x,y) based on the border state of it's neighbours.
@@ -251,7 +255,7 @@ func (c *Canvas) CalcBorderGlyph(x, y int) {
 	}
 
 	var g int
-	var u, d, l, r bool	
+	var u, d, l, r bool
 
 	if uCell := c.GetCell(x, y-1); uCell != nil && uCell.Z == cell.Z {
 		u = uCell.Border
@@ -326,5 +330,34 @@ func (c *Canvas) Fill(x, y, z, w, h, g int, fore, back uint32) {
 		ix := x + i%w
 		iy := y + i/w
 		c.ChangeCell(ix, iy, z, g, fore, back)
+	}
+}
+
+//Copies the contents of canvas c2 to canvas c at specified position x,y,z. Any dirty cells copied
+//are marked clean.
+func (c *Canvas) CopyFromCanvas(x, y, z int, c2 *Canvas) {
+	w, h := c2.Dims()
+	for i := 0; i < w*h; i++ {
+		ix := x + i%w
+		iy := y + i/w
+
+		cell2 := c2.GetCell(i%w, i/w)
+		if cell2.Border && cell2.Dirty {
+			c2.CalcBorderGlyph(i%w, i/w)
+		}
+
+		if cell2.Mode == DRAW_GLYPH {
+			c.ChangeCell(ix, iy, z+cell2.Z, cell2.Glyph, cell2.ForeColour, cell2.BackColour)
+		} else {
+			c.ChangeText(ix, iy, z+cell2.Z, cell2.Chars[0], cell2.Chars[1])
+			c.ChangeColours(ix, iy, z+cell2.Z, cell2.ForeColour, cell2.BackColour)
+		}
+
+		//copy border state
+		if cell := c.GetCell(ix, iy); cell != nil {
+			cell.SetBorder(cell2.Border, z+cell2.Z)
+		}
+
+		cell2.Dirty = false
 	}
 }

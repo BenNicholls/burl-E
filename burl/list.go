@@ -7,7 +7,7 @@ import (
 //List UI Elem is a special kind of container that arranges it's nested elements as a vertical list,
 //supporting scrollbars, scrolling, selection of list elements, etc.
 type List struct {
-	Container
+	UIElement
 	selected      int
 	Highlight     bool
 	scrollOffset  int
@@ -16,23 +16,18 @@ type List struct {
 }
 
 func NewList(w, h, x, y, z int, bord bool, empty string) *List {
-	c := NewContainer(w, h, x, y, z, bord)
-	return &List{*c, 0, true, 0, NewTextbox(w, CalcWrapHeight(empty, w), x, y+h/2-CalcWrapHeight(empty, w)/2, z, false, true, empty), 0}
-}
-
-func (l *List) Move(dx, dy, dz int) {
-	l.Container.Move(dx, dy, dz)
-	l.emptyElem.Move(dx, dy, dz)
+	c := NewUIElement(w, h, x, y, z, bord)
+	return &List{c, 0, true, 0, NewTextbox(w, CalcWrapHeight(empty, w), 0, h/2-CalcWrapHeight(empty, w)/2, z, false, true, empty), 0}
 }
 
 func (l *List) Add(elems ...UIElem) {
-	l.Container.Add(elems...)
+	l.AddChild(elems...)
 	l.dirty = true
 	l.Calibrate()
 }
 
 func (l *List) Select(s int) {
-	if s < len(l.Elements) && s >= 0 && l.selected != s {
+	if s < len(l.children) && s >= 0 && l.selected != s {
 		l.selected = s
 	}
 }
@@ -43,18 +38,18 @@ func (l *List) GetSelection() int {
 
 //Ensures Selected item is not out of bounds.
 func (l *List) CheckSelection() {
-	l.selected = Clamp(l.selected, 0, len(l.Elements)-1)
+	l.selected = Clamp(l.selected, 0, len(l.children)-1)
 }
 
 //Selects next item in the List, keeping selection in view.
 func (l *List) Next() {
 	//small list protection
-	if len(l.Elements) <= 1 {
+	if len(l.children) <= 1 {
 		l.selected = 0
 		return
 	}
 
-	l.selected, _ = ModularClamp(l.selected+1, 0, len(l.Elements)-1)
+	l.selected, _ = ModularClamp(l.selected+1, 0, len(l.children)-1)
 	l.ScrollToSelection()
 	PushEvent(NewUIEvent(EV_LIST_CYCLE, "+", l))
 }
@@ -62,12 +57,12 @@ func (l *List) Next() {
 //Selects previous item in the List, keeping selection in view.
 func (l *List) Prev() {
 	//small list protection
-	if len(l.Elements) <= 1 {
+	if len(l.children) <= 1 {
 		l.selected = 0
 		return
 	}
 
-	l.selected, _ = ModularClamp(l.selected-1, 0, len(l.Elements)-1)
+	l.selected, _ = ModularClamp(l.selected-1, 0, len(l.children)-1)
 	l.ScrollToSelection()
 	PushEvent(NewUIEvent(EV_LIST_CYCLE, "-", l))
 }
@@ -113,9 +108,9 @@ func (l *List) ScrollToSelection() {
 		return
 	}
 
-	_, y, _ := l.Elements[l.selected].Pos()
-	_, h := l.Elements[l.selected].Dims()
-	_, fy, _ := l.Elements[0].Pos()
+	_, y, _ := l.children[l.selected].Pos()
+	_, h := l.children[l.selected].Dims()
+	_, fy, _ := l.children[0].Pos()
 	if y < l.y {
 		l.scrollOffset = y - fy
 		l.Calibrate()
@@ -127,13 +122,13 @@ func (l *List) ScrollToSelection() {
 
 //appends an item (or items) to the internal list of items
 func (l *List) Append(items ...string) {
-	if len(l.Elements) == 0 {
+	if len(l.children) == 0 {
 		l.redraw = true
 	}
 
 	for _, i := range items {
 		h := CalcWrapHeight(i, l.width)
-		l.Add(NewTextbox(l.width, h, l.x, l.y, l.z, false, false, i))
+		l.Add(NewTextbox(l.width, h, 0, 0, 0, false, false, i))
 	}
 	l.Calibrate()
 	l.dirty = true
@@ -141,12 +136,12 @@ func (l *List) Append(items ...string) {
 
 //removes the ith item from the internal list of items
 func (l *List) Remove(i int) {
-	if i < len(l.Elements) && len(l.Elements) != 0 {
-		if len(l.Elements) == 1 {
-			l.ClearElements()
+	if i < len(l.children) && len(l.children) != 0 {
+		if len(l.children) == 1 {
+			l.ClearChildren()
 			l.contentHeight = 0
 		} else {
-			l.Elements = append(l.Elements[:i], l.Elements[i+1:]...)
+			l.children = append(l.children[:i], l.children[i+1:]...)
 			l.Calibrate()
 		}
 		l.redraw = true
@@ -160,22 +155,22 @@ func (l *List) Remove(i int) {
 func (l *List) Calibrate() {
 	l.contentHeight = 0
 	h := 0
-	for i := range l.Elements {
-		l.Elements[i].MoveTo(l.x, l.contentHeight+l.y-l.scrollOffset, l.z)
-		_, h = l.Elements[i].Dims()
+	for i := range l.children {
+		l.children[i].MoveTo(0, l.contentHeight-l.scrollOffset, 0)
+		_, h = l.children[i].Dims()
 		l.contentHeight += h
 	}
 }
 
 //Changes the text of the ith item in the internal list of items.
 //TODO: List elements do not necessarily need to be textboxes... this function may be deprecated.
-func (l *List) Change(i int, item string) {
-	l.Elements[i] = NewTextbox(l.width, CalcWrapHeight(item, l.width), 0, i, l.z, false, false, item)
+func (l *List) Change(i int, text string) {
+	l.children[i] = NewTextbox(l.width, CalcWrapHeight(text, l.width), 0, i, 0, false, false, text)
 	l.Calibrate()
 }
 
 func (l *List) ChangeEmptyText(text string) {
-	l.emptyElem = NewTextbox(l.width, CalcWrapHeight(text, l.width), 0, l.height/2-CalcWrapHeight(text, l.width)/2, l.z, false, true, text)
+	l.emptyElem = NewTextbox(l.width, CalcWrapHeight(text, l.width), 0, l.height/2-CalcWrapHeight(text, l.width)/2, 0, false, true, text)
 }
 
 //Toggles highlighting of selected element.
@@ -198,8 +193,8 @@ func (l *List) HandleKeypress(key sdl.Keycode) {
 			l.ScrollDown()
 		}
 	default:
-		if l.Highlight && len(l.Elements) > 0 {
-			l.Elements[l.selected].HandleKeypress(key)
+		if l.Highlight && len(l.children) > 0 {
+			l.children[l.selected].HandleKeypress(key)
 		}
 	}
 }
@@ -212,34 +207,18 @@ func (l *List) Render() {
 			l.redraw = false
 		}
 
-		if len(l.Elements) == 0 {
-			l.emptyElem.Render()
-		} else {
-			for i, e := range l.Elements {
-				_, y, _ := e.Pos()
-				_, h := e.Dims()
-				if y < l.y+l.height && y+h > l.y {
-					if l.Highlight && i == l.selected {
-						f, b := e.Colours()
-						e.SetForeColour(b)
-						e.SetBackColour(f)
-						e.Render()
-						e.SetForeColour(f)
-						e.SetBackColour(b)
-					} else {
-						e.Render()
-					}
-				}
-			}
+		if len(l.children) == 0 {
+			x, y, z := l.emptyElem.Pos()
+			l.CopyFromCanvas(x, y, z, l.emptyElem.GetCanvas())
 		}
 
-		l.Container.UIElement.Render() //must be done BEFORE scrollbar drawing
+		l.UIElement.Render() //must be done BEFORE scrollbar drawing
 
 		//draw scrollbar
 		//TODO: scrollbar could be useful for lots of other UI Elems (ex. textboxes with paragraphs of text). find way to make more general.
 		if l.contentHeight > l.height && l.dirty {
-			console.ChangeCell(l.x+l.width-1, l.y, l.z, GLYPH_TRIANGLE_UP, COL_WHITE, COL_BLACK)
-			console.ChangeCell(l.x+l.width-1, l.y+l.height-1, l.z, GLYPH_TRIANGLE_DOWN, COL_WHITE, COL_BLACK)
+			l.ChangeCell(l.width-1, 0, 0, GLYPH_TRIANGLE_UP, COL_WHITE, COL_BLACK)
+			l.ChangeCell(l.width-1, l.height-1, 0, GLYPH_TRIANGLE_DOWN, COL_WHITE, COL_BLACK)
 
 			sliderHeight := Max(int(float32(l.height-2)*(float32(l.height)/float32(l.contentHeight))), 1) //ensures sliderheight is at least 1
 			sliderPosition := int((float32(l.height - 2 - sliderHeight)) * (float32(l.scrollOffset) / float32(l.contentHeight-l.height)))
@@ -249,7 +228,7 @@ func (l *List) Render() {
 			}
 
 			for i := 0; i < sliderHeight; i++ {
-				console.ChangeCell(l.x+l.width-1, l.y+i+1+sliderPosition, l.z, GLYPH_FILL, COL_WHITE, COL_BLACK)
+				console.ChangeCell(l.width-1, i+1+sliderPosition, 0, GLYPH_FILL, COL_WHITE, COL_BLACK)
 			}
 
 			l.dirty = false

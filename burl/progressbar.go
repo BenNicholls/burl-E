@@ -14,7 +14,7 @@ func NewProgressBar(w, h, x, y, z int, bord, cent bool, txt string, c uint32) *P
 
 //Takes a percentage value, clamped to 0 <= i <= 100
 func (pb *ProgressBar) SetProgress(i int) {
-	if pb.progress != Clamp(i, 0, 100) { 
+	if pb.progress != Clamp(i, 0, 100) {
 		pb.progress = Clamp(i, 0, 100)
 		pb.calcBarWidth()
 	}

@@ -14,8 +14,8 @@ type Entity interface {
 //added to this class to give all possible entites these features.
 type EntityPrototype struct {
 	Visuals //Visual information for rendering to the TileMap
-	
-	X, Y  int     //Position on a TileMap
+
+	X, Y  int //Position on a TileMap
 	Light EntityLight
 }
 

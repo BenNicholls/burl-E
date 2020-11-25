@@ -12,7 +12,7 @@ const (
 )
 
 //Choicebox is a textbox wherein once can cycle through some predefined choices. Only one choice
-//is shown at a time. When focused, arrows appear to indicate which direction on the keyboard 
+//is shown at a time. When focused, arrows appear to indicate which direction on the keyboard
 //cycles the choices (vertical/horizontal).
 //NOTE: This is very similar to a text-only list. Someday maybe these should be combined?
 type ChoiceBox struct {
@@ -31,15 +31,16 @@ func NewChoiceBox(w, h, x, y, z int, bord bool, dir int, choices ...string) (cb 
 	cb.choices = choices
 
 	if dir == VERTICAL {
-		cb.direction = VERTICAL
+		//cb.direction = VERTICAL
+		cb.direction = HORIZONTAL
 	} else {
 		cb.direction = HORIZONTAL
 	}
 
 	if len(cb.choices) == 0 {
-		cb.ChangeText("---")
+		cb.ChangeString("---")
 	} else {
-		cb.ChangeText(cb.choices[cb.curChoice])
+		cb.ChangeString(cb.choices[cb.curChoice])
 	}
 
 	return
@@ -51,13 +52,13 @@ func (cb *ChoiceBox) AddChoice(c string) {
 
 func (cb *ChoiceBox) Next() {
 	cb.curChoice, _ = ModularClamp(cb.curChoice+1, 0, len(cb.choices)-1)
-	cb.ChangeText(cb.choices[cb.curChoice])
+	cb.ChangeString(cb.choices[cb.curChoice])
 	PushEvent(NewUIEvent(EV_LIST_CYCLE, "+", cb))
 }
 
 func (cb *ChoiceBox) Prev() {
 	cb.curChoice, _ = ModularClamp(cb.curChoice-1, 0, len(cb.choices)-1)
-	cb.ChangeText(cb.choices[cb.curChoice])
+	cb.ChangeString(cb.choices[cb.curChoice])
 	PushEvent(NewUIEvent(EV_LIST_CYCLE, "-", cb))
 }
 
@@ -67,7 +68,7 @@ func (cb *ChoiceBox) GetChoice() int {
 
 func (cb *ChoiceBox) RandomizeChoice() {
 	cb.curChoice = rand.Intn(len(cb.choices))
-	cb.ChangeText(cb.choices[cb.curChoice])
+	cb.ChangeString(cb.choices[cb.curChoice])
 }
 
 func (cb *ChoiceBox) HandleKeypress(key sdl.Keycode) {
@@ -94,11 +95,11 @@ func (cb *ChoiceBox) Render() {
 
 		//draw choice cycling triangles
 		if cb.direction == HORIZONTAL {
-			console.ChangeCell(cb.x, cb.y+cb.height/2, cb.z, GLYPH_TRIANGLE_LEFT, cb.foreColour, cb.backColour)
-			console.ChangeCell(cb.x+cb.width-1, cb.y+cb.height/2, cb.z, GLYPH_TRIANGLE_RIGHT, cb.foreColour, cb.backColour)
+			cb.ChangeCell(0, cb.height/2, 0, GLYPH_TRIANGLE_LEFT, cb.foreColour, cb.backColour)
+			cb.ChangeCell(cb.width-1, cb.height/2, 0, GLYPH_TRIANGLE_RIGHT, cb.foreColour, cb.backColour)
 		} else {
-			console.ChangeCell(cb.x+cb.width/2, cb.y-1, cb.z, GLYPH_TRIANGLE_UP, cb.foreColour, cb.backColour)
-			console.ChangeCell(cb.x+cb.width/2, cb.y+cb.height, cb.z, GLYPH_TRIANGLE_DOWN, cb.foreColour, cb.backColour)
+			cb.ChangeCell(cb.width/2, cb.y-1, cb.z, GLYPH_TRIANGLE_UP, cb.foreColour, cb.backColour)
+			cb.ChangeCell(cb.x+cb.width/2, cb.y+cb.height, cb.z, GLYPH_TRIANGLE_DOWN, cb.foreColour, cb.backColour)
 		}
 	}
 }

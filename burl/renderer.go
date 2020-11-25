@@ -200,9 +200,6 @@ func (sdlr *SDLRenderer) Render() {
 					sdlr.copyToRenderer(DRAW_TEXT, src, dst, cell.ForeColour, cell.BackColour, char)
 				}
 			} else {
-				if cell.Border {
-					console.CalcBorderGlyph(i%w, i/w)
-				}
 				g := console.Cells[i].Glyph
 				dst = makeRect((i%w)*sdlr.tileSize, (i/w)*sdlr.tileSize, sdlr.tileSize, sdlr.tileSize)
 				src = makeRect((g%16)*sdlr.tileSize, (g/16)*sdlr.tileSize, sdlr.tileSize, sdlr.tileSize)

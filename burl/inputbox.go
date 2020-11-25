@@ -23,7 +23,7 @@ func (ib *Inputbox) Insert(s string) {
 	if len(ib.text)+len(s) > ib.width*ib.height*2 {
 		return
 	}
-	ib.ChangeText(ib.text + s)
+	ib.ChangeString(ib.text + s)
 }
 
 //Actually more of a backspace action.
@@ -32,12 +32,12 @@ func (ib *Inputbox) Delete() {
 	case 0:
 		return
 	default:
-		ib.ChangeText(ib.text[:len(ib.text)-1])
+		ib.ChangeString(ib.text[:len(ib.text)-1])
 	}
 }
 
 func (ib *Inputbox) Reset() {
-	ib.ChangeText("")
+	ib.ChangeString("")
 }
 
 //takes a key representing a letter and inserts.
